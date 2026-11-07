@@ -6,7 +6,7 @@ function ellipse(ctx,x,y,rx,ry,fill,stroke){ctx.beginPath();ctx.ellipse(x,y,rx,r
 function rosette(ctx,x,y,r,petals=8){ctx.save();ctx.translate(x,y);for(let i=0;i<petals;i++){ctx.rotate(Math.PI*2/petals);ellipse(ctx,r*.58,0,r*.27,r*.11,'#e9bd70');}ellipse(ctx,0,0,r*.23,r*.23,'#223d34','#dbb66e');ctx.restore();}
 function cutHoles(ctx,x,y,count,spacing,r=3){ctx.save();ctx.globalCompositeOperation='destination-out';for(let i=0;i<count;i++)ellipse(ctx,x+i*spacing,y,r,r,'#000');ctx.restore();}
 function limb(ctx,x,y,angle,coat,back=false){ctx.save();ctx.translate(x,y);ctx.rotate(-angle*Math.PI/180);path(ctx,'M-22 0 Q-37 45 -25 119 L-15 145 L20 145 L29 116 Q36 45 22 0Z',coat);for(let k=0;k<5;k++){ctx.strokeStyle='#dcae59';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-18,28+k*19);ctx.quadraticCurveTo(0,40+k*19,21,25+k*19);ctx.stroke();}ellipse(ctx,0,137,12,12,'#253b2c','#cfad67');ctx.translate(0,137);ctx.rotate((back?-.4:-.55));path(ctx,'M-15 0 L-22 100 Q0 113 23 98 L17 0Z','#314a3b');path(ctx,'M-22 87 L24 86 L25 107 L-23 109Z','#c09a4d');path(ctx,'M-12 107 L-9 132 L-4 145 L1 141 L3 123 L9 139 L14 135 L12 115 L22 120 L27 115 L10 106Z','#c88d47','#efd094',2);cutHoles(ctx,-10,43,3,9,2);ctx.restore();}
-export function puppetCanvas(arm=30,variant=0,bodyOnly=false){const key=`${Math.round(arm)}-${variant}-${bodyOnly}`;if(cache.has(key))return cache.get(key);const c=document.createElement('canvas');c.width=W*2;c.height=H*2;const ctx=c.getContext('2d');ctx.scale(2,2);const coat=variant?'#305448':'#a4472d';const coatDark=variant?'#193c35':'#693321';
+export function puppetCanvas(arm=30,variant=0,bodyOnly=false){const key=`${Math.round(arm)}-${variant}-${bodyOnly}`;if(cache.has(key)){const hit=cache.get(key);cache.delete(key);cache.set(key,hit);return hit;}const c=document.createElement('canvas');c.width=W*2;c.height=H*2;const ctx=c.getContext('2d');ctx.scale(2,2);const coat=variant?'#305448':'#a4472d';const coatDark=variant?'#193c35':'#693321';
   // Two-piece legs and curled shoes.
   path(ctx,'M208 585 L259 591 L252 704 L242 739 L190 739 Q172 727 197 717 L211 699Z','#5d3022');path(ctx,'M280 590 L326 578 L329 693 L352 721 Q370 724 366 740 L303 744 L287 706Z',coatDark);path(ctx,'M187 725 Q215 737 246 720 L250 746 Q225 760 171 750 Q158 736 187 725Z','#263b2f');path(ctx,'M300 727 Q331 738 357 719 Q383 723 387 739 Q350 758 300 749Z','#263b2f');
   if(!bodyOnly)limb(ctx,214,285,10,coatDark,true);
@@ -21,7 +21,7 @@ export function puppetCanvas(arm=30,variant=0,bodyOnly=false){const key=`${Math.
   ctx.strokeStyle='#d9b575';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(237,62);ctx.bezierCurveTo(160,-14,65,10,103,85);ctx.stroke();ctx.beginPath();ctx.moveTo(229,65);ctx.bezierCurveTo(155,3,87,28,118,86);ctx.stroke();for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo(112+i*15,35-i*1.5);ctx.lineTo(100+i*14,15-i*1.4);ctx.stroke();}
   path(ctx,'M219 145 L212 241 L193 267 L207 278 L232 247 L236 187Z',coatDark);for(let i=0;i<3;i++){ctx.strokeStyle='#d1a059';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(218+i*5,185);ctx.lineTo(211+i*5,249);ctx.stroke();}
   leatherFinish(ctx,variant);
-  if(cache.size>150)cache.clear();cache.set(key,c);return c;
+  if(cache.size>=10)cache.delete(cache.keys().next().value);cache.set(key,c);return c;
 }
 function leatherFinish(ctx,variant){
   ctx.save();ctx.globalCompositeOperation='source-atop';

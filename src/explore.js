@@ -1,4 +1,5 @@
 import {puppetCanvas,drawPaper,gateCanvas,branchCanvas,bridgeCanvas} from './art.js';
+import {MUSEUM_STOPS, museumStop, clamp} from './route-state.js';
 import {ROOMS,CRAFT,STORY,SOURCES,COMPOSITION_KEY,DRAFT_KEY,defaultDraft,sanitizeDraft,readJSON,readCompositions} from './explore-data.js';
 
 const $=id=>document.getElementById(id);
@@ -17,39 +18,25 @@ export class Exploration {
     this.mount();this.bind();this.drawCraft();this.drawStory();this.drawLight();this.syncComposer();this.renderWorks();
   }
   mount(){
-    const headerButton=document.createElement('button');headerButton.id='explore-open';headerButton.className='nav-pill';headerButton.textContent='探索';headerButton.setAttribute('aria-haspopup','dialog');
-    document.querySelector('.header-actions').insertBefore(headerButton,$('collection-open'));
-    const launcher=document.createElement('aside');launcher.id='explore-discovery';launcher.className='ex-discovery';launcher.hidden=true;launcher.setAttribute('aria-label','沿途探索');
-    launcher.innerHTML='<span class="ex-discovery-note">在这里，停留片刻</span><button id="explore-scene-open"><span class="ex-discovery-symbol" aria-hidden="true">＋</span><span><small id="explore-scene-label">沿途探索</small><strong id="explore-scene-name">认识江汉皮影</strong></span><span aria-hidden="true">↗</span></button>';
-    document.body.append(launcher);
-    const dialog=document.createElement('dialog');dialog.id='explore-dialog';dialog.className='exploration';dialog.setAttribute('aria-labelledby','ex-title');
-    dialog.innerHTML=`
-      <aside class="ex-sidebar"><a class="ex-brand" href="#">借光 <span>沿途拾影</span></a><p class="ex-sidebar-intro">门廊之外，<br>还有一出戏的来处。</p>
-        <nav aria-label="探索空间">${ROOMS.map(r=>`<button data-room="${r.id}" aria-pressed="false"><span>${r.no}</span><strong>${r.name}</strong><i aria-hidden="true">↗</i></button>`).join('')}</nav>
-        <div class="ex-sidebar-bottom"><span id="ex-visited">已探访 0 / 5</span><p>随时离开，接着刚才的光走。</p></div>
-      </aside>
-      <div class="ex-main"><header class="ex-top"><span id="ex-room-caption">01 / 识影馆</span><button id="ex-close" aria-label="关闭探索，继续原来的旅程">继续旅程 <span aria-hidden="true">×</span></button></header>
-        <div class="ex-scroll" id="ex-scroll"><div class="ex-heading"><p class="ex-eyebrow" id="ex-eyebrow"></p><h2 id="ex-title" tabindex="-1"></h2><p id="ex-intro"></p></div>
-          ${this.heritageMarkup()}${this.craftMarkup()}${this.storyMarkup()}${this.lightMarkup()}${this.composeMarkup()}
-        </div>
-        <footer class="ex-bottom"><span>江汉皮影 · 珞珈新演</span><button id="ex-next">下一站 <span aria-hidden="true">→</span></button></footer>
-      </div>`;
-    document.body.append(dialog);this.dialog=dialog;
-    const collection=document.createElement('section');collection.className='ex-collection';collection.innerHTML='<div class="ex-collection-heading"><h3>我的自由小戏</h3><button id="collection-compose">去编一出 ↗</button></div><p id="ex-collection-empty">还没有自己的小戏。从一张幕开始吧。</p><div id="composition-works" class="works-grid"></div>';
+    const button=document.createElement('button');button.id='explore-open';button.className='nav-pill';button.textContent='历史馆';
+    document.querySelector('.header-actions').insertBefore(button,$('collection-open'));
+    const root=document.createElement('section');root.id='museum-ui';root.className='museum-route';root.hidden=true;
+    root.setAttribute('aria-label','历史馆连续参观');
+    root.innerHTML=`<header class="museum-heading"><p id="ex-eyebrow"></p><h2 id="ex-title"></h2><p id="ex-intro"></p></header>
+      <nav class="museum-stops" aria-label="展馆路标">${ROOMS.map(r=>`<button data-room="${r.id}" aria-pressed="false"><small>${r.no}</small><span>${r.name}</span></button>`).join('')}</nav>
+      <aside class="museum-tools" aria-label="当前展区互动与说明"><div class="museum-tool-heading"><span id="ex-room-caption"></span><span id="ex-visited"></span></div>
+      <section id="ex-heritage" class="ex-room"><p class="museum-evidence">史料 · 国家级非遗项目</p><h3>江汉平原，唱着一方乡音。</h3><p>沿展廊走过地域图、历史线索与影人藏品。幕布背后的唱、奏与操演，靠人的手与声音延续。</p><p>江汉平原皮影戏流传于湖北潜江、天门、沔阳等地。展廊里的两位影人为本站原创数字造型，不是历史实物复刻。</p><details><summary>停下来读 · 史料与传承</summary>${this.heritageMarkup().replace('id="ex-heritage"','id="heritage-reading"').replace(' hidden','')}</details></section>
+      ${this.craftMarkup()}${this.storyMarkup()}${this.lightMarkup()}${this.composeMarkup()}
+      </aside><footer class="museum-route-footer"><button id="ex-prev">← 上一展区</button><span>滚动参观 · 向上沿原路返回</span><button id="ex-next">下一展区 →</button></footer>
+      <div class="museum-exit" hidden><button id="museum-to-game">沿连接通道，前往戏台 ↗</button><button id="museum-to-hall">沿原路返回内厅 ↶</button></div>`;
+    document.body.append(root);this.dialog=root;
+    // Canvas output is a live texture on the physical screen, not a second stage.
+    for(const id of ['craft-canvas','story-canvas','light-canvas','compose-canvas'])$(id).tabIndex=-1;
+    const handles=document.createElement('div');handles.id='museum-handles';handles.hidden=true;
+    handles.innerHTML='<button class="scene-handle" id="handle-lamp" aria-label="拖动光源，左右移动灯；也可用方向键">灯 <span>↔</span></button><button class="scene-handle" id="handle-puppet" aria-label="拖动影人，上下调整离幕距离；也可用方向键">影人 <span>↕</span></button><button class="scene-handle" id="handle-arm" aria-label="拖动手杆，调整关节；也可用方向键">提手杆 ↗</button><button class="scene-handle actor-handle" id="handle-actor-0" aria-label="拖动朱红影人，或用方向键排布">朱红 · 移动</button><button class="scene-handle actor-handle" id="handle-actor-1" aria-label="拖动青绿影人，或用方向键排布">青绿 · 移动</button>';
+    document.body.append(handles);
+    const collection=document.createElement('section');collection.className='ex-collection';collection.innerHTML='<div class="ex-collection-heading"><h3>我的自由小戏</h3><button id="collection-compose">沿展廊去编一出 ↗</button></div><p id="ex-collection-empty">还没有自己的小戏。从一张幕开始吧。</p><div id="composition-works" class="works-grid"></div>';
     $('collection-dialog').append(collection);
-    // Chapter jumps skip the doorway/backstage intervals, so keep these exhibits
-    // reachable at the landing positions too, without changing the scroll route.
-    for(const [selector,id,label] of [
-      ['.passage-copy-door','heritage','01 · 打开识影馆 ↗'],
-      ['.passage-copy-gate','craft','02 · 打开影人工坊 ↗'],
-      ['.backstage-copy','light','04 · 打开光影实验 ↗'],
-      ['.ready-copy','light','04 · 打开光影实验 ↗'],
-    ]){
-      const button=document.createElement('button');button.className='ex-inline-entry';
-      button.dataset.explore=id;button.textContent=label;button.setAttribute('aria-haspopup','dialog');
-      document.querySelector(selector)?.append(button);
-    }
-    const outroButton=document.createElement('button');outroButton.className='ex-outro-button';outroButton.textContent='自由编一出戏 ↗';outroButton.dataset.explore='compose';document.querySelector('.outro-bottom').append(outroButton);
   }
   heritageMarkup(){return `<section class="ex-room" id="ex-heritage" aria-label="识影馆">
     <div class="ex-heritage-lead"><div class="ex-seal" aria-hidden="true">江<br>汉<br>有<br>戏</div><div><h3>幕布上的地方记忆</h3><p>江汉皮影以天门、潜江、沔阳一带为核心，雕镂与唱腔各有风格。它在2006年进入第一批国家级非遗名录。</p><div class="ex-tags"><span>湖北 · 江汉平原</span><span>传统戏剧</span><span>Ⅳ-91</span></div></div></div>
@@ -75,19 +62,17 @@ export class Exploration {
   composeMarkup(){return `<section class="ex-room" id="ex-compose" aria-label="自由编戏" hidden><div class="ex-composer"><div class="ex-composer-stage"><canvas id="compose-canvas" width="1200" height="840" tabindex="0" role="img" aria-label="自由编戏画布。拖动影人排布，也可使用右侧位置滑杆与方向键调整。"></canvas><p class="ex-canvas-caption">拖动影人排布 · 选中后用方向键微调 · 下方也可调整位置</p><span id="compose-status" class="ex-save-status" role="status">草稿自动保存在当前浏览器</span></div><div class="ex-compose-controls"><label class="ex-field" for="compose-title">给这出戏起个名字<input id="compose-title" maxlength="18" placeholder="最多18个字"></label><div class="ex-form-row"><label class="ex-field" for="compose-scene">布景<select id="compose-scene">${sceneOptions}</select></label><label class="ex-field" for="compose-count">影人<select id="compose-count"><option value="2">两位相逢</option><option value="1">一人独行</option></select></label></div><div class="ex-actor-select" aria-label="选择影人"><button data-actor="0" aria-pressed="true">朱红影人</button><button data-actor="1" aria-pressed="false">青绿影人</button></div>${range('compose-x','左右位置',16,84,36,'%')}${range('compose-y','上下位置',45,86,74,'%')}${range('compose-size','影人大小',65,135,100,'%')}${range('compose-pose','手杆角度',-30,120,40,'°')}<label class="ex-check"><input id="compose-flip" type="checkbox">转身，朝向另一侧</label><div class="ex-compose-actions"><button class="ex-primary" id="compose-save">收进留影册 ＋</button><button class="ex-secondary" id="compose-download">下载戏票 ↗</button></div><button class="ex-text-button" id="compose-reset">重新排一出</button></div></div><div class="ex-personal-heading"><h3>你留下的小戏</h3><span>仅保存在此浏览器 · 最近六出</span></div><p id="compose-empty" class="ex-muted">还没有留影。排好人物，收下今夜的第一张戏票。</p><div id="compose-gallery" class="ex-personal-grid"></div><p class="ex-note">此处使用本站原创角色与景片自由组合。可以下载保存；清理浏览器数据会移除本地草稿和留影。</p></section>`;}
   bind(){
     $('explore-open').addEventListener('click',()=>this.open('heritage'));
-    $('explore-scene-open').addEventListener('click',()=>this.open(this.discoveryRoom||'heritage'));
-    $('ex-close').addEventListener('click',()=>this.dialog.close());
-    this.dialog.querySelector('.ex-brand').addEventListener('click',e=>{e.preventDefault();this.selectRoom('heritage');});
-    this.dialog.querySelectorAll('[data-room]').forEach(b=>b.addEventListener('click',()=>this.selectRoom(b.dataset.room)));
-    document.querySelectorAll('[data-explore]').forEach(b=>b.addEventListener('click',()=>this.open(b.dataset.explore)));
+    this.dialog.querySelectorAll('[data-room]').forEach(button=>button.addEventListener('click',()=>this.selectRoom(button.dataset.room)));
+    document.querySelectorAll('[data-explore]').forEach(button=>button.addEventListener('click',()=>this.open(button.dataset.explore)));
     $('collection-compose').addEventListener('click',()=>{$('collection-dialog').close();this.open('compose');});
-    $('ex-next').addEventListener('click',()=>{const i=ROOMS.findIndex(r=>r.id===this.active);this.selectRoom(ROOMS[(i+1)%ROOMS.length].id);});
-    this.dialog.addEventListener('close',()=>this.resume());
-    this.dialog.addEventListener('click',e=>{if(e.target===this.dialog){const r=this.dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)this.dialog.close();}});
-    this.dialog.querySelectorAll('[data-craft]').forEach(b=>b.addEventListener('click',()=>{this.craftStep=Number(b.dataset.craft);this.drawCraft();}));
+    $('ex-next').addEventListener('click',()=>{const i=ROOMS.findIndex(r=>r.id===this.active);if(i===4)this.journey.choose('game');else this.selectRoom(ROOMS[i+1].id);});
+    $('ex-prev').addEventListener('click',()=>{const i=ROOMS.findIndex(r=>r.id===this.active);if(i===0)this.journey.returnHall();else this.selectRoom(ROOMS[i-1].id);});
+    $('museum-to-game').addEventListener('click',()=>this.journey.choose('game'));
+    $('museum-to-hall').addEventListener('click',()=>this.journey.returnHall());
+    this.dialog.querySelectorAll('[data-craft]').forEach(button=>button.addEventListener('click',()=>this.journey.goPosition(.23+Number(button.dataset.craft)*.052)));
     $('craft-color').addEventListener('click',()=>{this.craftVariant=1-this.craftVariant;this.drawCraft();});
     for(const id of ['craft-zoom','craft-arm'])$(id).addEventListener('input',()=>this.drawCraft());
-    this.dialog.querySelectorAll('[data-story]').forEach(b=>b.addEventListener('click',()=>{this.storyStep=Number(b.dataset.story);this.drawStory();}));
+    this.dialog.querySelectorAll('[data-story]').forEach(button=>button.addEventListener('click',()=>this.journey.goPosition(.46+Number(button.dataset.story)*.06)));
     $('story-play').addEventListener('click',()=>this.play(this.storyStep));$('light-play').addEventListener('click',()=>this.play(0));
     for(const id of ['light-position','light-depth','light-color'])$(id).addEventListener('input',()=>this.drawLight());
     $('light-reset').addEventListener('click',()=>{$('light-position').value=-25;$('light-depth').value=30;$('light-color').checked=false;this.drawLight();});
@@ -104,39 +89,95 @@ export class Exploration {
     canvas.addEventListener('pointermove',e=>{if(!drag||drag.pointer!==e.pointerId)return;const p=this.canvasPoint(canvas,e),a=this.draft.actors[this.draft.selected];a.x=Math.max(16,Math.min(84,drag.startX+(p.x-drag.x)/12));a.y=Math.max(45,Math.min(86,drag.startY+(p.y-drag.y)/8.4));this.syncComposer();this.updateComposer(false);});
     for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{if(drag){drag=null;this.updateComposer();}});
     canvas.addEventListener('keydown',e=>{const shifts={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]},delta=shifts[e.key];if(!delta)return;e.preventDefault();const a=this.draft.actors[this.draft.selected],step=e.shiftKey?4:1;a.x=Math.max(16,Math.min(84,a.x+delta[0]*step));a.y=Math.max(45,Math.min(86,a.y+delta[1]*step));this.syncComposer();this.updateComposer();});
-    this.syncDiscovery=()=>{if(this.discoveryFrame)return;this.discoveryFrame=requestAnimationFrame(()=>{this.discoveryFrame=null;this.updateDiscovery();});};
-    window.addEventListener('scroll',this.syncDiscovery,{passive:true});window.addEventListener('resize',this.syncDiscovery,{passive:true});this.updateDiscovery();
+    this.bindSceneHandles();
+    window.addEventListener('journey:frame',event=>this.updateRoute(event.detail));
   }
-  open(id){
-    if(this.dialog.open){this.selectRoom(id);return;}
-    if(this.onPause()===false)return;
-    this.returnFocus=document.activeElement;this.oldOverflow=document.body.style.overflow;
-    document.body.classList.add('is-exploring');document.body.style.overflow='hidden';this.journey.setExploring(true);
-    this.dialog.showModal();this.selectRoom(id);
+  open(id){this.journey.openMuseum(id);}
+  resume(){this.journey.returnHall();}
+  selectRoom(id){this.journey.openMuseum(id);}
+  updateDiscovery(){}
+  updateRoute({route,progress,transition}){
+    const visible=route==='museum'&&!this.journey.gameActive;
+    this.dialog.hidden=!visible;$('museum-handles').hidden=!visible||transition;
+    document.body.classList.toggle('in-museum',visible);
+    if(!visible)return;
+    const stop=museumStop(progress),room=ROOMS.find(r=>r.id===stop.id);
+    if(this.active!==room.id||!this.visited.size){
+      const focus=document.activeElement;
+      if(focus?.closest('.ex-room')&&focus.closest('.ex-room').id!=='ex-'+room.id)document.activeElement.blur();
+      this.active=room.id;this.visited.add(room.id);
+      $('ex-title').textContent=room.title;$('ex-intro').textContent=room.intro;$('ex-eyebrow').textContent=room.en;
+      $('ex-room-caption').textContent=`${room.no} / ${room.name}`;$('ex-visited').textContent=`已探访 ${this.visited.size} / 5`;
+      this.dialog.querySelectorAll('[data-room]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.room===room.id)));
+      ROOMS.forEach(r=>$('ex-'+r.id).hidden=r.id!==room.id);
+      const index=ROOMS.indexOf(room);$('ex-next').textContent=index===4?'前往戏台 ↗':`下一站 · ${ROOMS[index+1].name} →`;
+      $('ex-prev').textContent=index===0?'↶ 返回内厅':`← ${ROOMS[index-1].name}`;
+      this.dialog.querySelector('.museum-tools').scrollTop=0;
+    }
+    const craftStep=Math.min(3,Math.floor(clamp((progress-.22)/.20)*4));
+    if(room.id==='craft'&&craftStep!==this.craftStep){this.craftStep=craftStep;this.drawCraft();}
+    const storyStep=progress<.515?0:progress<.565?1:2;
+    if(room.id==='stories'&&storyStep!==this.storyStep){this.storyStep=storyStep;this.drawStory();}
+    this.dialog.querySelector('.museum-exit').hidden=progress<.965;
+    this.positionHandles(progress);
   }
-  resume(){
-    document.body.classList.remove('is-exploring');document.body.style.overflow=this.oldOverflow;
-    // No route navigation on close: preserve scroll offset, including after a viewport change.
-    this.journey.resizeProgress=undefined;const top=this.journey.opening.getBoundingClientRect().top+scrollY;
-    const position=top+this.journey.target*(this.journey.opening.offsetHeight-innerHeight);
-    scrollTo({top:position,behavior:'instant'});this.journey.setExploring(false);this.onResume();
-    if(this.journey.gameActive)$('stage').focus({preventScroll:true});else if(this.returnFocus?.isConnected&&this.returnFocus.getClientRects().length&&!this.returnFocus.closest('[inert]'))this.returnFocus.focus({preventScroll:true});else $('explore-open').focus({preventScroll:true});this.updateDiscovery();
+  play(index){this.journey.requestPlay(index);}
+  bindSceneHandles(){
+    const events=[['handle-lamp','lamp'],['handle-puppet','puppet'],['handle-arm','arm'],['handle-actor-0','actor-0'],['handle-actor-1','actor-1']];
+    for(const [id,kind] of events){
+      const handle=$(id);let drag=null;
+      handle.addEventListener('pointerdown',event=>{
+        if(event.button!==0||this.journey.state.transition)return;
+        event.preventDefault();handle.setPointerCapture(event.pointerId);handle.focus({preventScroll:true});
+        const actor=kind.startsWith('actor-')?Number(kind.at(-1)):null;
+        if(actor!==null){this.draft.selected=actor;this.syncComposer();}
+        drag={id:event.pointerId,x:event.clientX,y:event.clientY,lamp:Number($('light-position').value),depth:Number($('light-depth').value),arm:Number($('craft-arm').value),actor:actor===null?null:{...this.draft.actors[actor]}};
+        this.journey.state.interaction=kind;
+      });
+      handle.addEventListener('pointermove',event=>{
+        if(!drag||drag.id!==event.pointerId)return;
+        const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
+        if(kind==='lamp'){$('light-position').value=clamp(drag.lamp+dx*.5,-80,80);this.drawLight();}
+        else if(kind==='puppet'){$('light-depth').value=clamp(drag.depth-dy*.25,10,65);this.drawLight();}
+        else if(kind==='arm'){$('craft-arm').value=clamp(drag.arm-dy*.6+dx*.3,-30,120);this.drawCraft();}
+        else {const actor=this.draft.actors[this.draft.selected],bounds=this.screenBounds();actor.x=clamp(drag.actor.x+dx/bounds.width*100,16,84);actor.y=clamp(drag.actor.y+dy/bounds.height*100,45,86);this.syncComposer();this.updateComposer(false);}
+      });
+      const release=()=>{if(!drag)return;drag=null;this.journey.state.interaction=null;this.journey.goPosition(this.journey.progress,true);if(kind.startsWith('actor-'))this.updateComposer();};
+      for(const event of ['pointerup','pointercancel','lostpointercapture'])handle.addEventListener(event,release);
+      handle.addEventListener('keydown',event=>{
+        if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;
+        event.preventDefault();const delta=event.key==='ArrowRight'||event.key==='ArrowUp'?1:-1;
+        if(kind==='lamp'){$('light-position').value=clamp(Number($('light-position').value)+delta*4,-80,80);this.drawLight();}
+        else if(kind==='puppet'){$('light-depth').value=clamp(Number($('light-depth').value)+delta*2,10,65);this.drawLight();}
+        else if(kind==='arm'){$('craft-arm').value=clamp(Number($('craft-arm').value)+delta*4,-30,120);this.drawCraft();}
+        else {this.draft.selected=Number(kind.at(-1));const actor=this.draft.actors[this.draft.selected];const key=event.key==='ArrowLeft'||event.key==='ArrowRight'?'x':'y';actor[key]=clamp(actor[key]+(event.key==='ArrowLeft'||event.key==='ArrowUp'?-1:1),key==='x'?16:45,key==='x'?84:86);this.syncComposer();this.updateComposer();}
+      });
+    }
   }
-  selectRoom(id){
-    const room=ROOMS.find(r=>r.id===id)||ROOMS[0];this.active=room.id;this.visited.add(room.id);
-    $('ex-title').textContent=room.title;$('ex-intro').textContent=room.intro;$('ex-eyebrow').textContent=room.en;$('ex-room-caption').textContent=`${room.no} / ${room.name}`;
-    $('ex-visited').textContent=`已探访 ${this.visited.size} / 5`;
-    this.dialog.querySelectorAll('[data-room]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.room===room.id));if(b.dataset.room===room.id)b.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});});
-    ROOMS.forEach(r=>$('ex-'+r.id).hidden=r.id!==room.id);$('ex-scroll').scrollTop=0;
-    const next=ROOMS[(ROOMS.indexOf(room)+1)%ROOMS.length];$('ex-next').textContent=`${room.id==='compose'?'回到':'下一站 · '}${next.name} →`;
-    if(room.id==='compose')this.syncComposer();$('ex-title').focus({preventScroll:true});
+  project(point){
+    const canvas=this.journey.intro.canvas,rect=canvas.getBoundingClientRect();
+    const p=point.clone().project(this.journey.intro.cameraG);
+    return {x:rect.left+(p.x*.5+.5)*rect.width,y:rect.top+(-p.y*.5+.5)*rect.height,visible:p.z<1&&p.z>-1};
   }
-  updateDiscovery(){
-    const p=this.journey.target;let room=null;
-    if(p>.115&&p<.215)room=ROOMS[0];else if(p>=.215&&p<.325)room=ROOMS[1];else if(p>.405&&p<.615)room=ROOMS[2];else if(p>.73&&p<.82)room=ROOMS[3];else if(p>.905)room=ROOMS[4];
-    $('explore-discovery').hidden=!room;if(!room)return;this.discoveryRoom=room.id;$('explore-scene-label').textContent=`${room.no} / ${room.name}`;$('explore-scene-name').textContent=room.hint;
+  screenBounds(){
+    const world=this.journey.intro.world,screen=world.screen;
+    const a=this.project(screen.localToWorld(screen.position.clone().set(-5,3.05,0)));
+    const b=this.project(screen.localToWorld(screen.position.clone().set(5,-3.05,0)));
+    return {left:Math.min(a.x,b.x),top:Math.min(a.y,b.y),width:Math.max(1,Math.abs(b.x-a.x)),height:Math.max(1,Math.abs(b.y-a.y))};
   }
-  play(index){this.dialog.close();this.onPlay(index);}
+  positionHandles(progress){
+    const world=this.journey.intro.world;if(!world)return;
+    const position=(id,point,show)=>{const button=$(id);button.hidden=!show;if(!show)return;const p=this.project(point);button.style.left=p.x+'px';button.style.top=p.y+'px';button.hidden=!p.visible;};
+    position('handle-lamp',world.lamp.getWorldPosition(world.lamp.position.clone()),this.active==='light');
+    position('handle-puppet',world.hero.position.clone(),this.active==='light');
+    position('handle-arm',world.hero.position.clone().add(world.hero.position.clone().set(.6,-.8,.1)),this.active==='craft'&&this.craftStep===3);
+    const bounds=this.screenBounds();
+    for(let i=0;i<2;i++){
+      const button=$('handle-actor-'+i),actor=this.draft.actors[i];
+      button.hidden=this.active!=='compose'||i>=this.draft.count||progress<.87;
+      button.style.left=(bounds.left+bounds.width*actor.x/100)+'px';button.style.top=(bounds.top+bounds.height*(actor.y/100-.20*actor.size))+'px';
+    }
+  }
   canvasPoint(canvas,e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};}
   outputs(){this.dialog.querySelectorAll('input[type=range]').forEach(input=>{const out=$(input.id+'-value');if(out)out.textContent=Math.round(Number(input.value))+(input.dataset.unit||'');});}
   drawCraft(){
@@ -149,6 +190,7 @@ export class Exploration {
     ctx.restore();$('craft-number').textContent=`0${this.craftStep+1} / 04`;$('craft-title').textContent=step.title;$('craft-text').textContent=step.text;$('craft-note').textContent=step.note;
     this.dialog.querySelectorAll('[data-craft]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.craft)===this.craftStep)));
     $('craft-arm-control').hidden=step.mode!=='joint';$('craft-color').hidden=step.mode!=='color';$('craft-color').textContent=this.craftVariant?'换成朱红配色':'换成青绿配色';this.outputs();
+    this.journey.intro.world?.setCraft(Number($('craft-arm').value),this.craftVariant,$('craft-zoom').checked);this.journey.intro.interactionDirty=true;
   }
   drawStory(){
     const s=STORY[this.storyStep],canvas=$('story-canvas'),ctx=canvas.getContext('2d');this.drawBackdrop(ctx,1000,700,s.scene);
@@ -160,11 +202,12 @@ export class Exploration {
   }
   drawLight(){
     const canvas=$('light-canvas'),ctx=canvas.getContext('2d'),w=1000,h=760;drawPaper(ctx,w,h);
-    const lamp=Number($('light-position').value)/100,depth=Number($('light-depth').value)/100,scale=1/(1-depth*.7);
+    const lamp=Number($('light-position').value)/100,depth=Number($('light-depth').value)/100,scale=7/(7-depth*5);
     const x=.5-lamp*(scale-1)*.4;ctx.save();ctx.globalAlpha=.78;ctx.filter=$('light-color').checked?'none':'brightness(.35) sepia(1)';const height=340*scale;ctx.drawImage(puppetCanvas(38,0),w*x-height*.585/2,560-height,height*.585,height);ctx.restore();
     ctx.strokeStyle='#8c7048';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(100,655);ctx.lineTo(900,655);ctx.stroke();
     const lx=500+lamp*320,px=500;ctx.strokeStyle='#a78045';ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(lx,720);ctx.lineTo(px,688-depth*35);ctx.lineTo(w*x,655);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#885333';ctx.beginPath();ctx.arc(lx,720,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#29483a';ctx.beginPath();ctx.arc(px,688-depth*35,7,0,Math.PI*2);ctx.fill();ctx.font='16px sans-serif';ctx.fillStyle='#4e4532';ctx.fillText('幕',70,661);ctx.fillText('灯',lx-8,750);ctx.fillText('影人',px+14,692-depth*35);
     $('light-caption').textContent=`影子约放大到 ${scale.toFixed(2)} 倍。${lamp===0?'光源居中，影子也居中。':lamp<0?'灯向左移，影子向右偏。':'灯向右移，影子向左偏。'}`;this.outputs();
+    this.journey.intro.world?.setExperiment(lamp*3,depth*5,$('light-color').checked);this.journey.intro.interactionDirty=true;
   }
   drawBackdrop(ctx,w,h,scene){
     drawPaper(ctx,w,h);ctx.save();ctx.globalAlpha=.14;ctx.fillStyle='#687453';ctx.beginPath();ctx.moveTo(0,h*.83);ctx.bezierCurveTo(w*.2,h*.4,w*.37,h*.95,w*.56,h*.69);ctx.bezierCurveTo(w*.75,h*.48,w*.9,h*.65,w,h*.55);ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.fill();ctx.restore();
@@ -188,17 +231,24 @@ export class Exploration {
     const d=this.draft,a=d.actors[d.selected];$('compose-title').value=d.title;$('compose-scene').value=d.scene;$('compose-count').value=d.count;
     for(const [id,value] of [['compose-x',a.x],['compose-y',a.y],['compose-size',a.size*100],['compose-pose',a.pose]])$(id).value=value;
     $('compose-flip').checked=a.flip;this.dialog.querySelectorAll('[data-actor]').forEach(b=>{b.disabled=Number(b.dataset.actor)>=d.count;b.setAttribute('aria-pressed',String(Number(b.dataset.actor)===d.selected));});
-    this.drawComposition($('compose-canvas').getContext('2d'),1200,840,true);this.outputs();
+    this.drawComposition($('compose-canvas').getContext('2d'),1200,840,false);this.outputs();this.journey.intro.world?.setComposition($('compose-canvas'));this.journey.intro.interactionDirty=true;
   }
   updateComposer(persist=true){
-    this.drawComposition($('compose-canvas').getContext('2d'),1200,840,true);this.outputs();if(!persist)return;
+    this.drawComposition($('compose-canvas').getContext('2d'),1200,840,false);this.outputs();this.journey.intro.world?.setComposition($('compose-canvas'));this.journey.intro.interactionDirty=true;if(!persist)return;
     try{this.storage.setItem(DRAFT_KEY,JSON.stringify(this.draft));$('compose-status').textContent='草稿已保存 · 下次回来可以接着排';}catch{$('compose-status').textContent='草稿暂存于本页，请下载戏票保存';}
   }
   poster(){const c=document.createElement('canvas');c.width=1200;c.height=840;this.drawComposition(c.getContext('2d'),1200,840);return c.toDataURL('image/webp',.86);}
   saveComposition(){
     const image=this.poster(),title=this.draft.title.trim()||'无题小戏';this.works=[{image,title,date:new Date().toISOString()},...this.works].slice(0,6);
     try{this.storage.setItem(COMPOSITION_KEY,JSON.stringify(this.works));$('compose-status').textContent='已收进留影册，也可以下载戏票';}catch{$('compose-status').textContent='本次留影暂存在页面中，请下载保存';}
-    this.renderWorks();this.toast('小戏已收进留影册');
+    this.renderWorks();this.toast('小戏已收进留影册');this.animateTicket(image);
+  }
+  animateTicket(image){
+    const ticket=document.createElement('img');ticket.className='collected-ticket';ticket.src=image;ticket.alt='刚刚收下的小戏戏票';
+    document.body.append(ticket);const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const bounds=this.screenBounds();
+    const animation=ticket.animate([{left:bounds.left+'px',top:bounds.top+'px',width:bounds.width+'px',transform:'rotate(0deg)',opacity:1},{left:'78%',top:'12%',width:'120px',transform:reduced?'none':'rotate(-8deg)',opacity:1},{left:'86%',top:'6%',width:'40px',opacity:0}],{duration:reduced?350:1100,easing:'cubic-bezier(.2,.7,.3,1)'});
+    animation.finished.finally(()=>ticket.remove());
   }
   renderWorks(){
     const populate=(root,compact)=>{root.replaceChildren();for(const work of this.works){const figure=document.createElement('figure');figure.className=compact?'work-item':'ex-personal-work';const img=document.createElement('img');img.src=work.image;img.alt=work.title+'的自由编戏留影';img.loading='lazy';const caption=document.createElement('figcaption'),name=document.createElement('span'),button=document.createElement('button');name.textContent=work.title;button.textContent='下载 ↗';button.setAttribute('aria-label','下载戏票：'+work.title);button.addEventListener('click',()=>this.download(work.image,'借光-'+work.title));caption.append(name,button);figure.append(img,caption);root.append(figure);}};

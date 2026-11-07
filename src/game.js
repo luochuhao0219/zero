@@ -37,5 +37,5 @@ export function hintFor(level,state,score){
   if(Math.abs(state.spacing-2.15)>.2)return '两位影人的距离，还可以再调整。';return '轻提手杆，让两人的手势与轮廓相合。';
 }
 export function readProgress(storage){
-  try{const data=JSON.parse(storage.getItem('borrow-light-v1')||'{}');return {completed:Array.isArray(data.completed)?[...new Set(data.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<3))]:[],works:Array.isArray(data.works)?data.works.filter(w=>typeof w.image==='string'&&w.image.startsWith('data:image/')&&Number.isInteger(w.level)&&w.level>=0&&w.level<3).slice(0,6):[]};}catch{return {completed:[],works:[]};}
+  try{const data=JSON.parse(storage.getItem('borrow-light-v1')||'{}')||{};return {completed:Array.isArray(data.completed)?[...new Set(data.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<3))]:[],works:Array.isArray(data.works)?data.works.filter(w=>w&&typeof w.image==='string'&&w.image.startsWith('data:image/')&&Number.isInteger(w.level)&&w.level>=0&&w.level<3).slice(0,6):[]};}catch{return {completed:[],works:[]};}
 }

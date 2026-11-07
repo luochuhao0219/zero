@@ -1,3 +1,5 @@
+import {AdaptiveQuality,qualityPixelRatio} from './adaptive-quality.js';
+import {PauseState} from './pause-state.js';
 import * as THREE from '../vendor/three.module.js';
 import {puppetCanvas,puppetRigAssets,outlineCanvas,bridgeCanvas,gateCanvas,branchCanvas,drawPaper} from './art.js';
 import {LEVELS,projectPoint} from './game.js';
@@ -14,20 +16,20 @@ const damp=(a,b,speed,dt)=>mix(a,b,1-Math.exp(-speed*dt));
 
 export class ShadowStage{
   constructor(canvas){
-    this.canvas=canvas;this.signPainters=[];this.state={level:0,...LEVELS[0].initial};this.renderState={...this.state};this.playing=false;this.backstage=false;this.angle=.2;this.targetAngle=.2;this.dragOffset=0;this.time=0;this.lastDraw=-1;this.dirty=true;this.celebration=-1;this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;this.paused=false;
+    this.canvas=canvas;this.signPainters=[];this.state={level:0,...LEVELS[0].initial};this.renderState={...this.state};this.playing=false;this.backstage=false;this.angle=.2;this.targetAngle=.2;this.dragOffset=0;this.time=0;this.lastDraw=-1;this.dirty=true;this.celebration=-1;this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;this.pauseState=new PauseState();this.quality=new AdaptiveQuality();
     this.lastTime=performance.now()/1000;this.pointer={x:0,y:0};this.pointerSmooth={x:0,y:0};this.curtains=[];this.lanterns=[];this.rigTextures=[];this.projected=[];this.curtainOpen=0;this.transitionStart=-10;this.frameTimes=[];this.frames=0;this.textureUploads=0;this.drawCount=0;this.onStage=true;
     this.paper=document.createElement('canvas');this.paper.width=2048;this.paper.height=1120;this.ctx=this.paper.getContext('2d');this.bridge=bridgeCanvas();this.gate=gateCanvas();this.branch=branchCanvas();this.outlines=new Map();
     try{this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});}
     catch(error){this.fallback=true;this.fallbackCanvas=document.createElement('canvas');this.fallbackCanvas.width=1280;this.fallbackCanvas.height=850;this.fallbackCanvas.style.cssText='width:100%;height:100%;object-fit:contain;';canvas.replaceWith(this.fallbackCanvas);document.getElementById('stage-fallback').hidden=false;document.getElementById('back-view').disabled=true;document.getElementById('hero-view-toggle').disabled=true;this.drawScreen();this.drawFallback();this.finishLoading();this.tick();return;}
-    this.pixelRatio=Math.min(devicePixelRatio,2);this.renderer.setPixelRatio(this.pixelRatio);this.renderer.setClearColor(0x101a20,1);this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;this.renderer.localClippingEnabled=true;this.renderer.info.autoReset=false;
+    this.basePixelRatio=Math.min(devicePixelRatio,matchMedia("(max-width:700px)").matches?1.25:2);this.pixelRatio=this.basePixelRatio;this.renderer.setPixelRatio(this.pixelRatio);this.renderer.setClearColor(0x101a20,1);this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;this.renderer.localClippingEnabled=true;this.renderer.info.autoReset=false;
     this.clipPlanes=[new THREE.Plane(new THREE.Vector3(1,0,0),SW/2),new THREE.Plane(new THREE.Vector3(-1,0,0),SW/2),new THREE.Plane(new THREE.Vector3(0,1,0),SH/2-SY),new THREE.Plane(new THREE.Vector3(0,-1,0),SH/2+SY)];
     this.scene=new THREE.Scene();this.camera=new THREE.PerspectiveCamera(35,1,.1,100);this.lookAt=new THREE.Vector3(0,3.5,-.65);
     this.materials=createMaterials(this);this.wood=this.materials.wood;this.brass=this.materials.brass;this.darkWood=this.materials.darkWood;this.redWood=this.materials.redWood;createLighting(this);
     this.root=new THREE.Group();this.scene.add(this.root);this.buildTheater();this.buildActors();this.buildLamp();this.buildParticles();createCourtyard(this);this.neighborhood=createNeighborhood(this);this.post=createPostProcessing(this);this.resize();this.bindPointer();this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(canvas.parentElement);this.updateActors();this.tick();Promise.all([this.materials.ready,this.neighborhood.ready]).then(([results])=>{this.materialAssetsLoaded=results.filter(Boolean).length;this.finishLoading();});
     // Update the three sign textures once the local font arrives, without delaying play.
     document.fonts.load('96px "Zhi Mang Xing"','珞珈夜戏灯下有乾坤幕中见山河').then(()=>{this.signPainters.forEach(paint=>paint());}).catch(()=>{});
-    canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();this.paused=true;document.getElementById('stage-fallback').textContent='三维画面暂时中断，请刷新页面恢复；已保存的关卡进度不会丢失。';document.getElementById('stage-fallback').hidden=false;});
-    document.addEventListener('visibilitychange',()=>{this.paused=document.hidden;this.lastTime=performance.now()/1000;});
+    canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();this.setPaused('context',true);document.getElementById('stage-fallback').textContent='三维画面暂时中断，请刷新页面恢复；已保存的关卡进度不会丢失。';document.getElementById('stage-fallback').hidden=false;});
+    document.addEventListener('visibilitychange',()=>{this.setPaused('visibility',document.hidden);this.lastTime=performance.now()/1000;});
     this.visibilityObserver=new IntersectionObserver(entries=>{this.onStage=entries[0].isIntersecting;},{threshold:0});this.visibilityObserver.observe(canvas.parentElement);
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{this.reduced=e.matches;});
   }
@@ -150,7 +152,7 @@ export class ShadowStage{
     for(const {mesh,side,cols,rows} of this.curtains){const a=mesh.geometry.attributes.position;for(let y=0;y<=rows;y++){const v=y/rows,width=mix(5.38,.58+v*.65,opening);for(let x=0;x<=cols;x++){const u=x/cols,i=y*(cols+1)+x,wind=this.reduced?0:Math.sin(now*1.3+v*3+u*4+side)*.045*opening;a.setXYZ(i,side*(5.35-u*width)+wind*u,.58+v*5.85,.29+.10*Math.cos(u*9*Math.PI)+wind);}}a.needsUpdate=true;if(opening<.999&&this.frames%3===0)mesh.geometry.computeVertexNormals();}
   }
   tick(){
-    requestAnimationFrame(()=>this.tick());const realTime=performance.now()/1000,elapsed=realTime-this.lastTime;this.lastTime=realTime;if(this.paused||(!this.onStage&&!this.playing)||(this.storyVisible===false&&!this.playing))return;
+    requestAnimationFrame(()=>this.tick());const realTime=performance.now()/1000,elapsed=realTime-this.lastTime;this.lastTime=realTime;if(this.paused||(!this.onStage&&!this.playing)||(this.storyVisible===false&&!this.playing)){this.quality.resetClock();return;}
     if(this.reduced&&!this.playing&&this.storyProgress!==undefined&&!this.storyDirty&&!this.dirty&&!this.viewTween)return;
     this.storyDirty=false;const dt=Math.min(.05,elapsed);this.time+=dt;const now=this.time;this.frames++;
     if(now>4&&elapsed<.2){this.frameTimes.push(elapsed*1000);if(this.frameTimes.length>180)this.frameTimes.shift();}
@@ -171,10 +173,19 @@ export class ShadowStage{
     const radius=fitted+arc*2.1+(1-intro)*4;const cameraY=(this.playing?6.15:5.1)+arc*.6+(this.reduced||this.playing||this.inputActive?0:this.pointerSmooth.y*.12+Math.sin(now*.23)*.035);this.camera.position.set(Math.sin(this.angle+idle+(1-intro)*.16)*radius,cameraY,Math.cos(this.angle+idle+(1-intro)*.16)*radius-.7);this.camera.lookAt(this.lookAt);
     if(!this.playing&&this.storyProgress!==undefined&&!this.storyManual)this.storyCamera(fitted);
     this.camera.updateMatrixWorld();this.neighborhood.update(now,this.reduced);this.onFrame?.();this.renderer.info.reset();this.renderer.shadowMap.needsUpdate=this.frames===1||this.curtainOpen<.999||this.frames%15===0;this.post.finish.uniforms.time.value=this.reduced?0:now;this.post.composer.render(dt);
-    // Keep a sharp backing buffer; reduce reflection cost before lowering resolution.
-    if(this.frames%180===0&&this.frameTimes.length>=90){const sorted=[...this.frameTimes].sort((a,b)=>a-b);if(sorted[Math.floor(sorted.length*.5)]>28){if(this.groundReflection.visible)this.groundReflection.visible=false;else if(this.pixelRatio>1.5){this.pixelRatio=Math.max(1.5,this.pixelRatio-.25);this.renderer.setPixelRatio(this.pixelRatio);this.resize();}this.frameTimes=[];}}
+    // Degrade only after 150 sustained slow frames, never because of a hidden tab.
+    if(this.quality.observe(realTime*1000)){
+      const tier=this.quality.tier;
+      this.groundReflection.visible=false;
+      this.particles.geometry.setDrawRange(0,32);this.petals.count=8;
+      if(tier>=2){this.renderer.shadowMap.enabled=false;this.post.bloom.enabled=false;}
+      this.pixelRatio=qualityPixelRatio(this.basePixelRatio,tier);
+      this.renderer.setPixelRatio(this.pixelRatio);this.resize();
+    }
   }
   capturePoster(level){this.renderState={...this.state};this.drawScreen(false);const c=document.createElement('canvas');c.width=1000;c.height=760;const ctx=c.getContext('2d');ctx.fillStyle='#ddd0ad';ctx.fillRect(0,0,1000,760);ctx.fillStyle='#362f24';ctx.fillRect(34,34,932,535);ctx.drawImage(this.paper,44,44,912,515);ctx.fillStyle='#695333';ctx.font='50px "Zhi Mang Xing","Kaiti SC",serif';ctx.fillText(`借光 · ${LEVELS[level].name}`,58,638);ctx.font='15px "PingFang SC",sans-serif';ctx.fillStyle='#8d7954';ctx.fillText(`${LEVELS[level].numeral}  /  珞珈夜戏`,60,677);ctx.textAlign='right';ctx.font='12px Arial';ctx.fillText('BORROW THE LIGHT',940,643);ctx.fillText(new Date().toLocaleDateString('zh-CN'),940,676);return c.toDataURL('image/webp',.88);}
-  diagnostics(){const times=[...this.frameTimes].sort((a,b)=>a-b);return {frames:this.frames,storyProgress:this.storyProgress,storyVisible:this.storyVisible,storyManual:!!this.storyManual,cameraPosition:this.camera?{x:this.camera.position.x,y:this.camera.position.y,z:this.camera.position.z}:null,fallback:!!this.fallback,neighborhood:this.neighborhood?{assetsLoaded:this.neighborhood.assetsLoaded,standees:this.neighborhood.standees,spectators:this.neighborhood.spectators,lanterns:this.neighborhood.lanterns,steamPuffs:this.neighborhood.steamPuffs,phase:this.neighborhood.phase}:null,materialAssetsLoaded:this.materialAssetsLoaded||0,roofTiles:this.detailInstances||0,shadows:!!this.renderer?.shadowMap.enabled,reflection:!!this.groundReflection?.visible,playing:this.playing,level:this.state.level,backstage:this.backstage,drawCalls:this.renderer?.info.render.calls,triangles:this.renderer?.info.render.triangles,reducedMotion:this.reduced,time:this.time,curtainOpen:this.curtainOpen,cameraAngle:this.angle,viewTransition:!!this.viewTween,actorPose:this.actorLayout().map(a=>({x:a.x,y:a.y,pose:a.pose})),renderState:{...this.renderState},textureUploads:this.textureUploads,canvasRedraws:this.drawCount,pixelRatio:this.pixelRatio,frameMedianMs:times[Math.floor(times.length*.5)]||0,frameP95Ms:times[Math.floor(times.length*.95)]||0};}
+  setPaused(reason,active){this.pauseState.set(reason,active);}
+  get paused(){return this.pauseState.active;}
+  diagnostics(){const times=[...this.frameTimes].sort((a,b)=>a-b);return {qualityTier:this.quality.tier,frames:this.frames,storyProgress:this.storyProgress,storyVisible:this.storyVisible,storyManual:!!this.storyManual,cameraPosition:this.camera?{x:this.camera.position.x,y:this.camera.position.y,z:this.camera.position.z}:null,fallback:!!this.fallback,neighborhood:this.neighborhood?{assetsLoaded:this.neighborhood.assetsLoaded,standees:this.neighborhood.standees,spectators:this.neighborhood.spectators,lanterns:this.neighborhood.lanterns,steamPuffs:this.neighborhood.steamPuffs,phase:this.neighborhood.phase}:null,materialAssetsLoaded:this.materialAssetsLoaded||0,roofTiles:this.detailInstances||0,shadows:!!this.renderer?.shadowMap.enabled,reflection:!!this.groundReflection?.visible,playing:this.playing,level:this.state.level,backstage:this.backstage,drawCalls:this.renderer?.info.render.calls,triangles:this.renderer?.info.render.triangles,reducedMotion:this.reduced,time:this.time,curtainOpen:this.curtainOpen,cameraAngle:this.angle,viewTransition:!!this.viewTween,actorPose:this.actorLayout().map(a=>({x:a.x,y:a.y,pose:a.pose})),renderState:{...this.renderState},textureUploads:this.textureUploads,canvasRedraws:this.drawCount,pixelRatio:this.pixelRatio,frameMedianMs:times[Math.floor(times.length*.5)]||0,frameP95Ms:times[Math.floor(times.length*.95)]||0};}
 }
 const LIGHT_Z_FALLBACK=-4.8;

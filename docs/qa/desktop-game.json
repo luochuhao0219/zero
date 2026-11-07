@@ -1,0 +1,39 @@
+{
+  "assetErrors": [],
+  "avgFPS": 0.9,
+  "date": "2026-11-07T16:34:03.909Z",
+  "dpr": 1,
+  "draws": {
+    "passage": 0,
+    "stage": 12
+  },
+  "durationMs": 12232.9,
+  "frames": 11,
+  "maxMs": 1166.6,
+  "medianMs": 1116.6,
+  "mode": "idle",
+  "over25ms": 11,
+  "p95Ms": 1166.6,
+  "playing": true,
+  "quality": {
+    "passageDPR": 0.7,
+    "passageTier": 4,
+    "reflection": false,
+    "shadows": true,
+    "stageDPR": 1,
+    "stageDrawCalls": 227,
+    "stageTier": 1,
+    "stageTriangles": 554785
+  },
+  "qualityAtStart": {
+    "passageTier": 4,
+    "stageTier": 0
+  },
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "route": "game",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+  "viewport": [
+    1440,
+    900
+  ]
+}

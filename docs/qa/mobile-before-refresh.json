@@ -1,0 +1,38 @@
+{
+  "completed": [
+    0,
+    1,
+    2
+  ],
+  "draft": {
+    "actors": [
+      {
+        "flip": false,
+        "pose": 40,
+        "size": 1,
+        "variant": 0,
+        "x": 36,
+        "y": 74
+      },
+      {
+        "flip": true,
+        "pose": 65,
+        "size": 1,
+        "variant": 1,
+        "x": 66,
+        "y": 74
+      }
+    ],
+    "count": 2,
+    "scene": "bridge",
+    "selected": 0,
+    "title": "双路线回归草稿"
+  },
+  "reduced": true,
+  "viewport": [
+    393,
+    852
+  ],
+  "width": 378,
+  "works": 6
+}

@@ -1,4 +1,6 @@
+import {AdaptiveQuality,qualityPixelRatio} from './adaptive-quality.js';
 import * as THREE from '../vendor/three.module.js';
+import {MuseumWorld} from './museum-world.js';
 
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t);};
@@ -25,15 +27,15 @@ function uvPlane(texture,rect,height,x,y,z){
 // screen opens into the other world. Inactive worlds stop rendering.
 export class PassageScene {
   constructor(canvas){
-    this.canvas=canvas;this.progress=0;this.targetProgress=0;this.visible=true;this.frames=0;
+    this.canvas=canvas;this.quality=new AdaptiveQuality();this.progress=0;this.targetProgress=0;this.visible=true;this.frames=0;
     this.pointer={x:0,y:0};this.smoothPointer={x:0,y:0};this.assetsLoaded=0;this.assetErrors=[];
     this.lanterns=[];this.drifting=[];this.sparkTime={value:0};
     try{this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});}
     catch{this.fallback=true;return;}
-    this.pixelRatio=Math.min(devicePixelRatio,1.6);this.renderer.setPixelRatio(this.pixelRatio);
+    this.basePixelRatio=Math.min(devicePixelRatio,innerWidth<701?1:1.6);this.pixelRatio=this.basePixelRatio;this.renderer.setPixelRatio(this.pixelRatio);
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.campus=new THREE.Scene();this.campus.background=new THREE.Color('#112326');
-    this.gallery=new THREE.Scene();this.gallery.background=new THREE.Color('#28231d');
+    this.world=new MuseumWorld();this.gallery=this.world.scene;this.route='public';this.routeProgress=0;
     this.market=new THREE.Scene();this.market.background=new THREE.Color('#162324');
     this.cameraA=new THREE.PerspectiveCamera(50,1,.06,300);
     this.cameraG=new THREE.PerspectiveCamera(50,1,.06,300);
@@ -54,7 +56,12 @@ export class PassageScene {
     this.stoneMap=this.load('./assets/materials/stone/color.jpg');
     this.stoneMap.wrapS=this.stoneMap.wrapT=THREE.RepeatWrapping;
     this.makeCampus();this.makeMarket();this.makeComposite();
-    Promise.all(this.promises).then(()=>{this.loaded=true;document.body.classList.add('passage-ready');});
+    Promise.all(this.promises).then(async()=>{
+      // Prepare shader programs before allowing either threshold to open.
+      try{await this.renderer.compileAsync(this.gallery,this.cameraG);await this.renderer.compileAsync(this.market,this.cameraB);}catch(error){this.assetErrors.push('shader preparation: '+error.message);}
+      this.loaded=true;document.body.classList.add('passage-ready');
+      window.dispatchEvent(new Event('passage:ready'));
+    });
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(canvas.parentElement);this.resize();
   }
   load(url){
@@ -64,7 +71,7 @@ export class PassageScene {
   }
   makeCampus(){
     this.campusBackdrop=plane(this.campusMap,40,26.667,0,3,0,{transparent:false});this.campus.add(this.campusBackdrop);
-    this.galleryBackdrop=plane(this.galleryMap,40,26.667,0,2.8,0,{transparent:false});this.gallery.add(this.galleryBackdrop);
+    this.galleryBackdrop=plane(this.galleryMap,40,26.667,0,2.8,0,{transparent:false});
     for(const [z,width,y,flip] of [[16,19,3,1],[3,40,3.6,-1]]){
       const tree=plane(this.foliageMap,width,width*2/3,0,y,z,{alphaTest:.08,color:0xb6c3ba});
       tree.material.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n diffuseColor.a *= smoothstep(0.0,.13,vMapUv.y);');};
@@ -76,10 +83,10 @@ export class PassageScene {
       for(let i=0;i<26000;i++){c.fillStyle=r()>.5?'#5d3f1d0c':'#fff2bc0d';c.fillRect(r()*w,r()*h,1+r()*2,1+r()*4);}
     });
     this.paper=plane(paper,7.2,5.5,0,1.35,-.13,{transparent:false});
-    this.screenPuppet=plane(this.puppetMap,3.4,5.1,0,1.2,.06,{color:0x493221,opacity:.37,depthWrite:false});this.gallery.add(this.screenPuppet);
+    this.screenPuppet=plane(this.puppetMap,3.4,5.1,0,1.2,.06,{color:0x493221,opacity:.37,depthWrite:false});
     this.glowMap=painted(128,128,(c,w)=>{const g=c.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'#fff7d8');g.addColorStop(.08,'#ffd691bd');g.addColorStop(.3,'#efae4d4a');g.addColorStop(1,'#c4861900');c.fillStyle=g;c.fillRect(0,0,w,w);});
     this.addParticles(this.campus,35,22,30,0xadc4a0,29);
-    this.addParticles(this.gallery,32,15,26,0xd7b278,54);
+    this.addParticles(this.gallery,18,15,26,0xd7b278,54);
   }
   ground(scene,w,d,z,color){
     const material=new THREE.MeshBasicMaterial({map:this.stoneMap,color,transparent:true,toneMapped:false});
@@ -186,6 +193,8 @@ export class PassageScene {
     for(const camera of [this.cameraA,this.cameraG,this.cameraB]){camera.aspect=width/height;camera.fov=this.mobile?62:50;camera.updateProjectionMatrix();}
     for(const target of [this.targetA,this.targetG,this.targetB])target.setSize(Math.round(width*this.pixelRatio),Math.round(height*this.pixelRatio));
     this.uniforms.aspect.value=width/height;
+    // Keep both physical entrances in view in a portrait viewport.
+    this.world.hallDistanceOffset=Math.max(0,7.3/(Math.tan(THREE.MathUtils.degToRad(this.cameraG.fov/2))*this.cameraG.aspect)-12);
     const coverHeight=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*28;
     this.matteScale=Math.max(1,coverHeight/26.667*1.04,coverHeight*(width/height)/40*1.04);
     this.campusBackdrop.scale.setScalar(this.matteScale);this.galleryBackdrop.scale.setScalar(this.matteScale);
@@ -194,18 +203,28 @@ export class PassageScene {
     this.screenPuppet.position.y=this.portalPoint.y;this.screenPuppet.scale.setScalar(this.matteScale);this.resizeDirty=true;
   }
   setProgress(p){this.targetProgress=this.progress=clamp(p);}
+  setRoute(route, progress, transition=null){
+    this.route=route;this.routeProgress=progress;this.routeTransition=transition;
+    this.setProgress(route==='public'?progress*.23:route==='game'?.21+progress*.79:.23);
+  }
   setPointer(x,y){this.pointer.x=clamp(x,-1,1);this.pointer.y=clamp(y,-1,1);}
   update(time,dt,reduced){
-    if(this.fallback||!this.visible||!this.loaded)return;
+    if(this.fallback||!this.visible||!this.loaded){this.quality.resetClock();return;}
+    if(this.quality.observe(performance.now())){this.pixelRatio=qualityPixelRatio(this.basePixelRatio,this.quality.tier);this.renderer.setPixelRatio(this.pixelRatio);this.resize();}
     const p=this.progress;this.smoothPointer.x=damp(this.smoothPointer.x,this.pointer.x,dt,4);this.smoothPointer.y=damp(this.smoothPointer.y,this.pointer.y,dt,4);
     const px=reduced?0:this.smoothPointer.x,py=reduced?0:this.smoothPointer.y;
-    if(reduced&&this.lastRenderedProgress===p&&!this.resizeDirty&&this.frames>0)return;
-    this.lastRenderedProgress=p;this.resizeDirty=false;this.frames++;this.sparkTime.value=reduced?0:time;
+    if(reduced&&this.lastRenderedProgress===p&&this.lastRouteProgress===this.routeProgress&&!this.routeTransition&&!this.interactionDirty&&!this.resizeDirty&&this.frames>0)return;
+    this.lastRenderedProgress=p;this.lastRouteProgress=this.routeProgress;this.interactionDirty=false;this.resizeDirty=false;this.frames++;this.sparkTime.value=reduced?0:time;
+    const pose=this.world.update(this.route,this.route==='game'?smooth(0,.25,this.routeProgress):this.routeProgress,time,reduced,this.routeTransition);
+    this.cameraG.position.copy(pose.position);this.cameraG.lookAt(pose.look);this.cameraG.updateMatrixWorld();
+    if(this.route==='museum'){
+      this.renderer.setRenderTarget(null);this.renderer.render(this.gallery,this.cameraG);return;
+    }
     const approach=smooth(0,.22,p),az=mix(28,.35,approach),ax=this.doorPoint.x*approach;
     const ay=mix(2.8,this.doorPoint.y,smooth(.02,.18,p)),idle=reduced?0:Math.sin(time*.55)*.014;
     this.cameraA.position.set(ax+px*.2,ay-py*.08+idle,az);this.cameraA.lookAt(ax+px*.06,ay,-40);this.cameraA.updateMatrixWorld();
     const gz=mix(28,.35,smooth(.14,.4,p)),gy=mix(2.8,this.portalPoint.y,smooth(.14,.32,p));
-    this.cameraG.position.set(px*.15,gy-py*.07+idle,gz);this.cameraG.lookAt(px*.04,gy,-40);this.cameraG.updateMatrixWorld();
+
     const bz=mix(29,-46,smooth(.32,.63,p));
     this.cameraB.position.set(Math.sin(smooth(.42,.63,p)*Math.PI)*.4+px*.24,2.9-py*.1+idle,bz);this.cameraB.lookAt(0,3.4,-70);this.cameraB.updateMatrixWorld();
     this.screenPuppet.rotation.z=reduced?0:Math.sin(time*.65)*.03;this.screenPuppet.position.x=reduced?0:Math.sin(time*.5)*.1;
@@ -217,14 +236,17 @@ export class PassageScene {
     const doorFrustum=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*az;
     this.uniforms.doorHalf.value.set(2.59*this.matteScale/doorFrustum,3.71*this.matteScale/doorFrustum);
     this.uniforms.doorReveal.value=smooth(.10,.15,p);this.uniforms.doorFull.value=p>=.21?1:0;
+    if(this.route==='game')this.portalPoint.set(this.world.gameOrigin==='museum'?-9:4.4,3,this.world.gameOrigin==='museum'?-94:-5);
     this.projectedPoint.copy(this.portalPoint).project(this.cameraG);this.uniforms.center.value.set(this.projectedPoint.x*.5+.5,this.projectedPoint.y*.5+.5);
-    let radius=2.15*this.matteScale/(2*Math.tan(THREE.MathUtils.degToRad(this.cameraG.fov/2))*gz)*smooth(.27,.335,p);
-    if(p>.38)radius=mix(radius,3,smooth(.38,.4,p));
-    this.uniforms.radius.value=radius;this.uniforms.reveal.value=smooth(.27,.285,p);
+    const portalDistance=Math.max(.3,this.cameraG.position.distanceTo(this.portalPoint));
+    let radius=2.15/(2*Math.tan(THREE.MathUtils.degToRad(this.cameraG.fov/2))*portalDistance)*smooth(.12,.22,this.routeProgress);
+    if(this.routeProgress>.22)radius=mix(radius,3,smooth(.22,.25,this.routeProgress));
+    this.uniforms.radius.value=this.route==='game'?radius:0;
+    this.uniforms.reveal.value=this.route==='game'?smooth(.12,.14,this.routeProgress):0;
     if(p<.21){this.renderer.setRenderTarget(this.targetA);this.renderer.render(this.campus,this.cameraA);}
-    if(p>.10&&p<.4){this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);}
+    if(p>.10&&(this.route!=='game'||this.routeProgress<.27)){this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);}
     if(p>.27){this.renderer.setRenderTarget(this.targetB);this.renderer.render(this.market,this.cameraB);}
     this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);
   }
-  diagnostics(){return{fallback:!!this.fallback,loaded:!!this.loaded,assetErrors:[...this.assetErrors],assetsLoaded:this.assetsLoaded,visible:this.visible,frames:this.frames,progress:this.progress,targetProgress:this.targetProgress,campusZ:this.cameraA?.position.z,galleryZ:this.cameraG?.position.z,doorReveal:this.uniforms?.doorReveal.value,marketZ:this.cameraB?.position.z,pointer:{...this.smoothPointer},cameraX:this.cameraA?.position.x,portalRadius:this.uniforms?.radius.value,pixelRatio:this.pixelRatio};}
+  diagnostics(){return{qualityTier:this.quality.tier,fallback:!!this.fallback,loaded:!!this.loaded,assetErrors:[...this.assetErrors],assetsLoaded:this.assetsLoaded,visible:this.visible,frames:this.frames,progress:this.progress,route:this.route,routeProgress:this.routeProgress,targetProgress:this.targetProgress,worldReady:!!this.world?.prepared,campusZ:this.cameraA?.position.z,galleryZ:this.cameraG?.position.z,doorReveal:this.uniforms?.doorReveal.value,marketZ:this.cameraB?.position.z,pointer:{...this.smoothPointer},cameraX:this.cameraA?.position.x,portalRadius:this.uniforms?.radius.value,pixelRatio:this.pixelRatio};}
 }
