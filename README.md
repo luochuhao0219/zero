@@ -95,3 +95,9 @@ npm test
 可参考 `docs/REFERENCES.md` 中的文化与设计来源。优秀网站只用于观察视觉和交互原则，未复制其源码、页面或美术资产。
 
 测试范围与实际限制见 `docs/VERIFICATION.md`。全站连续滚动与游戏衔接验收使用 `tests/browser-continuous.cjs`；三关直接操控使用 `tests/browser-direct.cjs`，动效与连续拖动采样使用 `tests/browser-motion.cjs`。缩放与窄屏补充检查使用 `tests/browser-continuous-layout.cjs`。这些浏览器脚本要求运行环境可解析 Playwright 包，且已安装 Google Chrome；先启动本地服务器，再执行测试。测试通过真实鼠标、键盘与触摸事件操作，不调用状态修改捷径。当前浏览器实拍为 `screenshots/v8-*.png`。
+
+## 沿途拾影内容扩展
+
+在原有连续动画之上新增识影馆、影人工坊、戏摊故事、光影实验和自由编戏。点击顶部「探索」，或在门廊、影幕、灯市、幕后、留影处停留并打开沿途入口。关闭展板后继续原来的镜头。
+
+自由编戏可排布角色、换景、调整动作、写标题，保存最近六张原创戏票；草稿与作品保存在当前浏览器，也可下载。原三关、通关留影和反向滚动完整保留。功能、资料和保存说明见 [docs/EXPLORATION.md](docs/EXPLORATION.md)。

@@ -29,7 +29,7 @@ export class Journey {
     window.addEventListener('scroll',()=>{this.dirty=true;},{passive:true});
     window.addEventListener('resize',()=>{if(!this.gameActive)this.resizeProgress=this.target;this.dirty=true;this.lastPose=-1;},{passive:true});
     document.addEventListener('visibilitychange',()=>{this.lastTime=performance.now();this.dirty=true;});
-    window.addEventListener('pointermove',e=>{if(!this.gameActive&&e.pointerType!=='touch')this.intro.setPointer(e.clientX/innerWidth*2-1,e.clientY/innerHeight*2-1);},{passive:true});
+    window.addEventListener('pointermove',e=>{if(!this.gameActive&&!this.exploring&&e.pointerType!=='touch')this.intro.setPointer(e.clientX/innerWidth*2-1,e.clientY/innerHeight*2-1);},{passive:true});
     document.addEventListener('pointerleave',()=>this.intro.setPointer(0,0));
     document.querySelectorAll('[data-story-link]').forEach(link=>link.addEventListener('click',e=>{e.preventDefault();if(this.gameActive)onLeave();this.goTo(link.hash.slice(1));}));
     document.querySelectorAll('[data-enter-game]').forEach(button=>button.addEventListener('click',onEnter));
@@ -51,6 +51,8 @@ export class Journey {
     if(active){this.layer(this.play,1);this.layer(this.chapters,1);this.intro.visible=false;}
     this.lastPose=-1;this.dirty=true;
   }
+  // Exploration lives above the route. Keep its exact camera pose until returning.
+  setExploring(active){this.exploring=active;this.stage.paused=active;if(!active){this.lastTime=performance.now();this.dirty=true;}}
   returnToPlay(){this.setGameActive(false);this.goTo('play',true);this.syncCopy();}
   measure(){const r=this.opening.getBoundingClientRect();this.target=clamp(-r.top/Math.max(1,r.height-innerHeight));this.dirty=false;}
   layer(element,opacity){
@@ -84,7 +86,7 @@ export class Journey {
   }
   frame(){
     requestAnimationFrame(()=>this.frame());const now=performance.now(),dt=Math.min(.05,(now-this.lastTime)/1000);this.lastTime=now;
-    if(document.hidden||this.gameActive)return;
+    if(document.hidden||this.gameActive||this.exploring)return;
     if(this.resizeProgress!==undefined){
       const p=this.resizeProgress;this.resizeProgress=undefined;
       const top=this.opening.getBoundingClientRect().top+scrollY;
