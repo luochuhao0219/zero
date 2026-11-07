@@ -1,0 +1,66 @@
+/* Brush calligraphy for display text; compact instructions keep the reading face. */
+@font-face {
+  font-family: 'Zhi Mang Xing';
+  src: url('../assets/fonts/ZhiMangXing-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root { --brush: 'Zhi Mang Xing', 'Kaiti SC', 'STKaiti', 'KaiTi', serif; }
+
+.wordmark,
+.home-intro,
+.game-heading h2,
+.sheet h2,
+.result-copy h2,
+.entry-button > span,
+.chapter-nav button,
+.scene-note,
+.about-lead,
+.solid-button,
+.result-next {
+  font-family: var(--brush);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
+}
+
+.wordmark { font-size: 42px; line-height: 1; gap: 10px; }
+.wordmark small { font-family: var(--sans); margin-bottom: 4px; }
+.home-intro { font-size: clamp(30px, 2.85vw, 42px); line-height: 1.25; margin-top: -5px; }
+.home-intro span { color: #6d726e; }
+.entry-button > span { font-size: 25px; line-height: 1; }
+.chapter-nav button { font-size: 19px; }
+.chapter-nav button small { font-family: var(--sans); }
+.scene-note { font-size: 18px; line-height: 1.55; }
+.game-heading h2 { font-size: 54px; line-height: 1.12; margin-bottom: 12px; }
+.sheet h2 { font-size: 52px; line-height: 1.12; }
+.about-lead { font-size: 25px !important; }
+.result-copy h2 { font-size: 30px; }
+.solid-button, .result-next { font-size: 18px; }
+.is-playing .wordmark { font-size: 35px; }
+
+@media (max-width: 1100px) {
+  .wordmark { font-size: 36px; }
+  .home-intro { font-size: 31px; }
+  .game-heading h2 { font-size: 45px; }
+}
+
+@media (max-width: 700px) {
+  .wordmark, .is-playing .wordmark { font-size: 32px; gap: 7px; }
+  .home-intro { font-size: 31px; line-height: 1.28; letter-spacing: -.5px; padding-top: 4px; }
+  .entry-button > span { font-size: 22px; }
+  .chapter-nav button { font-size: 17px; }
+  .scene-note { font-size: 14px; }
+  .game-heading h2 { font-size: 43px; margin-bottom: 8px; }
+  .sheet h2 { font-size: 42px; }
+  .about-lead { font-size: 23px !important; }
+  .result-copy h2 { font-size: 25px; }
+  .solid-button, .result-next { font-size: 16px; }
+}
+
+@media (max-height: 650px) and (min-width: 701px) {
+  .home-intro { font-size: 30px; }
+  .game-heading h2 { font-size: 36px; }
+}

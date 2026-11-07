@@ -1,0 +1,230 @@
+{
+  "downloaded": "2026-11-06",
+  "provider": "Poly Haven",
+  "license": "CC0-1.0",
+  "license_url": "https://polyhaven.com/license",
+  "files": [
+    {
+      "asset": "wood_table_worn",
+      "folder": "wood",
+      "map": "color",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_worn/wood_table_worn_diff_2k.jpg",
+      "expected_md5": "44d2440f1581401e0ea65133c0e11d79",
+      "authors": {
+        "Dimitrios Savva": "Photography",
+        "Rico Cilliers": "Processing"
+      },
+      "physical_mm": [
+        549.9999523162842,
+        550.0000715255737
+      ],
+      "path": "wood/color.jpg",
+      "bytes": 3108339,
+      "sha256": "165cdba449d56ea8e9675116622b95d7af372b7d7c47b8a98a03fcc630f1d51c",
+      "pixels": [
+        2048,
+        2048
+      ],
+      "color_space": "sRGB",
+      "normal_convention": null
+    },
+    {
+      "asset": "wood_table_worn",
+      "folder": "wood",
+      "map": "normal",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_worn/wood_table_worn_nor_gl_2k.jpg",
+      "expected_md5": "855386aa1a252bfbf13116047e9e9915",
+      "authors": {
+        "Dimitrios Savva": "Photography",
+        "Rico Cilliers": "Processing"
+      },
+      "physical_mm": [
+        549.9999523162842,
+        550.0000715255737
+      ],
+      "path": "wood/normal.jpg",
+      "bytes": 3142587,
+      "sha256": "a90aaa321194fb41d6e44776c6ee88134e4be416051357a3c9e323cc447c4cf0",
+      "pixels": [
+        2048,
+        2048
+      ],
+      "color_space": "linear-data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "asset": "wood_table_worn",
+      "folder": "wood",
+      "map": "roughness",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_rough_1k.jpg",
+      "expected_md5": "1e068051a440933d9d054dc6614f950f",
+      "authors": {
+        "Dimitrios Savva": "Photography",
+        "Rico Cilliers": "Processing"
+      },
+      "physical_mm": [
+        549.9999523162842,
+        550.0000715255737
+      ],
+      "path": "wood/roughness.jpg",
+      "bytes": 655232,
+      "sha256": "ebc4a15d7d3495ee1b67ba18f67bffcefac3f93881d1394fa3e22a25f9fe5c72",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "color_space": "linear-data",
+      "normal_convention": null
+    },
+    {
+      "asset": "monastery_stone_floor",
+      "folder": "stone",
+      "map": "color",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/monastery_stone_floor/monastery_stone_floor_diff_2k.jpg",
+      "expected_md5": "35420aa52b8257920b1d7566fb80ab4d",
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        1799.9999523162842,
+        1799.9999523162842
+      ],
+      "path": "stone/color.jpg",
+      "bytes": 3021140,
+      "sha256": "aa12137fff1728bbbfe98b30480e33a34cba3b5c096575702c1d66939214e14a",
+      "pixels": [
+        2048,
+        2048
+      ],
+      "color_space": "sRGB",
+      "normal_convention": null
+    },
+    {
+      "asset": "monastery_stone_floor",
+      "folder": "stone",
+      "map": "normal",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/monastery_stone_floor/monastery_stone_floor_nor_gl_2k.jpg",
+      "expected_md5": "68fe9fe33ed384c0a0f45b57f642e0a9",
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        1799.9999523162842,
+        1799.9999523162842
+      ],
+      "path": "stone/normal.jpg",
+      "bytes": 4248820,
+      "sha256": "8f3e131a9d6d9c3a95c872173393830f7c1de389cd60d4878b2211058d706d2c",
+      "pixels": [
+        2048,
+        2048
+      ],
+      "color_space": "linear-data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "asset": "monastery_stone_floor",
+      "folder": "stone",
+      "map": "roughness",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/monastery_stone_floor/monastery_stone_floor_rough_2k.jpg",
+      "expected_md5": "ef1df6aacd1ca6ca404ac0b927662a65",
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        1799.9999523162842,
+        1799.9999523162842
+      ],
+      "path": "stone/roughness.jpg",
+      "bytes": 1744682,
+      "sha256": "61f87f8049b21153b6db25fdcd184c4297642ada2e31c07db03f6810c9f952c3",
+      "pixels": [
+        2048,
+        2048
+      ],
+      "color_space": "linear-data",
+      "normal_convention": null
+    },
+    {
+      "asset": "rough_linen",
+      "folder": "linen",
+      "map": "color",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rough_linen/rough_linen_diff_1k.jpg",
+      "expected_md5": "663db789fb075462b685c1f740e58930",
+      "authors": {
+        "colormass": "Photography",
+        "Rico Cilliers": "Processing"
+      },
+      "physical_mm": [
+        270.7081392676629,
+        271.29998803138733
+      ],
+      "path": "linen/color.jpg",
+      "bytes": 835801,
+      "sha256": "04897d7611d7390ddf5b2c6f7273f448dfc48341fdbd1f4f207fa30b331d7f57",
+      "pixels": [
+        1024,
+        1026
+      ],
+      "color_space": "sRGB",
+      "normal_convention": null
+    },
+    {
+      "asset": "rough_linen",
+      "folder": "linen",
+      "map": "normal",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rough_linen/rough_linen_nor_gl_1k.jpg",
+      "expected_md5": "3350269a2e9c472aa406bd3cc1eaf2c8",
+      "authors": {
+        "colormass": "Photography",
+        "Rico Cilliers": "Processing"
+      },
+      "physical_mm": [
+        270.7081392676629,
+        271.29998803138733
+      ],
+      "path": "linen/normal.jpg",
+      "bytes": 916843,
+      "sha256": "e2402166d1a489f7414814e69e1836ab672aa24e30bec2d41fea356f81687e53",
+      "pixels": [
+        1024,
+        1026
+      ],
+      "color_space": "linear-data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "asset": "rough_linen",
+      "folder": "linen",
+      "map": "roughness",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rough_linen/rough_linen_rough_1k.jpg",
+      "expected_md5": "a380b24cc43cff88c39510305ebf0020",
+      "authors": {
+        "colormass": "Photography",
+        "Rico Cilliers": "Processing"
+      },
+      "physical_mm": [
+        270.7081392676629,
+        271.29998803138733
+      ],
+      "path": "linen/roughness.jpg",
+      "bytes": 1083725,
+      "sha256": "734ad6718841a6e296aacaa6e9ee2e1686eed5f62bb8d71c915c5605e162bcb4",
+      "pixels": [
+        1024,
+        1026
+      ],
+      "color_space": "linear-data",
+      "normal_convention": null
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+/* One native scroll track owns every scene, including the stage and ending. */
+.has-continuous .passage{height:1180svh}
+.has-continuous #door{top:183.6svh}.has-continuous #gate{top:280.8svh}.has-continuous #market{top:507.6svh}
+.has-continuous .passage-fallback{background-image:url('../assets/passage/campus-entrance.png')}
+.passage-copy-door{left:6.4%;top:24%;max-width:39%}.passage-copy-door h2{font-size:clamp(62px,6.5vw,100px)}
+.has-continuous .passage-copy-gate{bottom:16%;width:29%}
+.has-continuous .passage-footer{position:fixed;z-index:24}
+.has-continuous .passage-track{position:fixed;z-index:24}
+.has-continuous .passage-directions{transition:opacity .3s}
+.has-continuous.at-journey-end .passage-directions{opacity:0}
+.has-continuous .play-section{position:fixed;inset:0;z-index:5;margin:0;padding:0;background:transparent;opacity:0;visibility:hidden;pointer-events:none}
+.has-continuous:not(.is-playing) .stage-container{position:absolute;inset:0;margin:0;width:100%;height:100%;min-height:0;border-radius:0;z-index:0}
+.has-continuous:not(.is-playing) #stage{pointer-events:none;touch-action:pan-y;cursor:default}
+.has-continuous:not(.is-playing) .stage-container::after{background:linear-gradient(90deg,#07171a99,transparent 57%),linear-gradient(0deg,#0b181a99,transparent 30%,transparent 75%,#0b181a66)}
+.has-continuous .play-section::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,#0b191be0,#0b191b80 58%,#0b191bd4);opacity:var(--stage-end-shade,0)}
+.has-continuous .play-intro,.has-continuous .continuous-copy{position:absolute;z-index:4;top:24%;left:6.4%;width:35%;max-width:510px;margin:0;display:block;pointer-events:none;text-shadow:0 3px 28px #061014bb}
+.has-continuous .play-intro .story-heading{font-size:clamp(68px,7vw,108px);line-height:1.05;margin:25px 0}
+.has-continuous .play-intro .story-heading span{color:#f0dfc1}
+.has-continuous .play-intro-copy{display:block;justify-self:start;max-width:280px;margin:25px auto 0 0;padding:0;font-size:12px;line-height:1.95;color:#c2c7b5}
+.has-continuous .play-intro-copy>span{margin-top:22px;font-size:9px;color:#a8b39f}
+.has-continuous .play-intro .reveal,.has-continuous .story-outro .reveal{opacity:1;translate:none;transition:none}
+.continuous-copy h2{font:400 clamp(65px,6.1vw,94px)/1.08 var(--brush);color:#f3e5ca;margin:0 0 26px}
+.has-continuous .backstage-copy{left:auto;right:6.4%;width:29%;top:24%}
+.has-continuous .backstage-copy h2{font-size:clamp(58px,5vw,76px)}
+.has-continuous .ready-copy{top:23%;width:31%}
+.has-continuous .home-stage-ui{animation:none;transition:none;opacity:0;visibility:hidden}
+.has-continuous:not(.is-playing) .home-stage-ui .scene-tag,.has-continuous:not(.is-playing) .scene-note,.has-continuous:not(.is-playing) .scene-index{display:none}
+.has-continuous:not(.is-playing) .home-stage-ui .entry{left:6.4%;bottom:16%}
+.has-continuous:not(.is-playing) .entry-button{background:#d6bf95;color:#27332a}
+.has-continuous:not(.is-playing) .entry-button i{background:#2b3730;color:#e7d3ae}
+.has-continuous:not(.is-playing) .home-tools{right:6.4%;bottom:16%}
+.has-continuous:not(.is-playing) .site-footer{position:absolute;z-index:6;left:6.4%;right:6.4%;bottom:73px;height:42px;padding:0;justify-content:flex-start;pointer-events:none}
+.has-continuous .site-footer button{pointer-events:auto}
+.has-continuous:not(.is-playing) .site-footer .footer-cross,.has-continuous:not(.is-playing) .footer-location{display:none}
+.has-continuous .story-outro{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:center;align-items:center;margin:0;padding:0 7% 12vh;background:transparent;border:0;opacity:0;visibility:hidden;text-align:center;pointer-events:none}
+.has-continuous .story-outro .story-heading{font-size:clamp(70px,9.4vw,144px);line-height:1.08;max-width:none;margin-top:28px;text-shadow:0 5px 40px #071719}
+.has-continuous .outro-phrase{display:inline-block;white-space:nowrap}
+.has-continuous .outro-bottom{display:block;margin-top:30px}.has-continuous .outro-bottom>p{font-size:12px;line-height:1.9;color:#c0c5b1}
+.has-continuous .outro-link{width:max-content;margin:35px auto 0;font-size:27px;pointer-events:auto;gap:42px;border-color:#c6b89766}
+.has-continuous .site-credits{position:fixed;z-index:10;left:6.4%;right:6.4%;bottom:78px;margin:0;padding:24px 0 0;border-color:#b9bea32a;color:#a1ad98;opacity:0;visibility:hidden}
+.has-continuous .site-credits>a:first-child{color:#d5d4b9}
+#scene-seam{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 50%,#e9c27d80,#c1a26c35 50%,transparent 78%);pointer-events:none;z-index:7;opacity:0}
+.has-continuous.is-playing .play-section{z-index:60;opacity:1!important;visibility:visible!important;pointer-events:auto}
+.has-continuous.is-playing .play-section::after{display:none}
+.has-continuous.is-playing .home-stage-ui{opacity:0!important;visibility:hidden!important;pointer-events:none}
+.has-continuous.is-playing .site-footer{opacity:1!important;visibility:visible!important}
+.has-continuous.is-playing .site-footer button{pointer-events:auto}
+@media(max-width:1100px){
+  .has-continuous .story-nav{gap:16px}.has-continuous .play-intro{width:37%}.has-continuous .play-intro .story-heading{font-size:70px}.continuous-copy h2{font-size:69px}.has-continuous .backstage-copy{width:32%}
+}
+@media(max-width:700px){
+  .has-continuous .passage{height:1200svh}
+  .has-continuous #door{top:187svh}.has-continuous #gate{top:286svh}.has-continuous #market{top:517svh}
+  .passage-copy-door{left:25px;right:25px;top:21%;max-width:none}.passage-copy-door h2{font-size:58px}
+  .has-continuous .passage-copy-gate{width:auto;bottom:16%}
+  .has-continuous .play-intro,.has-continuous .continuous-copy{left:25px;right:25px;top:16%;width:auto;max-width:none}
+  .has-continuous .play-intro .eyebrow{font-size:7px}.has-continuous .play-intro .story-heading{font-size:62px;margin:18px 0}.has-continuous .play-intro-copy{font-size:10px;margin-top:20px;max-width:240px}.has-continuous .play-intro-copy>span{font-size:8px;margin-top:15px}
+  .continuous-copy h2{font-size:57px;margin-bottom:19px}.has-continuous .backstage-copy{top:17%;left:25px;right:25px;width:auto}.has-continuous .ready-copy{top:17%}
+  .has-continuous:not(.is-playing) .home-stage-ui .entry{left:25px;bottom:18%}.has-continuous:not(.is-playing) .entry p{font-size:9px;max-width:180px}.has-continuous:not(.is-playing) .home-tools{right:25px;bottom:18%;max-width:118px}
+  .has-continuous:not(.is-playing) .site-footer{left:25px;right:25px;bottom:72px;height:33px}.has-continuous:not(.is-playing) .chapter-nav{margin:0;gap:30px}
+  .has-continuous .story-outro{padding:0 24px 18vh}.has-continuous .story-outro .eyebrow{font-size:7px;letter-spacing:1px}.has-continuous .story-outro .story-heading{font-size:68px;max-width:330px;margin-top:25px;line-height:1.14}.has-continuous .outro-bottom{margin-top:25px}.has-continuous .outro-bottom>p{font-size:10px}.has-continuous .outro-link{font-size:24px;margin-top:26px;gap:32px;justify-content:center;width:max-content}.has-continuous .site-credits{left:25px;right:25px;bottom:77px;padding-top:16px;gap:11px;font-size:8px}.has-continuous .site-credits>a:first-child{font-size:11px}.has-continuous .site-credits p{max-width:280px}
+}
+@media(max-height:650px) and (min-width:701px){
+  .has-continuous .play-intro,.has-continuous .continuous-copy{top:23%}.has-continuous .play-intro .story-heading,.continuous-copy h2{font-size:50px;margin:14px 0}.has-continuous .play-intro-copy{font-size:10px;margin-top:15px}.has-continuous .play-intro-copy>span{display:none}.has-continuous .continuous-copy .passage-eyebrow{margin-bottom:16px}.has-continuous .home-tools{bottom:18%}.has-continuous .story-outro{padding-bottom:17vh}.has-continuous .story-outro .story-heading{font-size:67px;margin-top:14px}.has-continuous .outro-bottom{margin-top:15px}.has-continuous .outro-link{margin-top:18px;font-size:21px;padding-bottom:8px}.has-continuous .outro-link>span{width:36px;height:36px;font-size:22px}.has-continuous .site-credits{bottom:63px;padding-top:13px;font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){.has-continuous #scene-seam{display:none}.has-continuous [data-passage-copy]{transform:none!important;will-change:auto}}
+
+@media(max-height:650px) and (min-width:701px){
+  .has-continuous .continuous-copy h2{font-size:44px}
+  .has-continuous .ready-copy{width:42%;top:23%}
+  .has-continuous .ready-copy .passage-description{display:none}
+  .has-continuous:not(.is-playing) .home-stage-ui .entry{left:auto;right:6.4%;bottom:30%}
+  .has-continuous:not(.is-playing) .home-tools{bottom:18%}
+  .has-continuous:not(.is-playing) .site-footer{width:47%;right:auto;bottom:73px}
+  .has-continuous:not(.is-playing) .chapter-nav{margin:0;gap:24px}
+}

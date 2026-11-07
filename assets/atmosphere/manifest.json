@@ -1,0 +1,33 @@
+{
+  "created": "2026-11-06",
+  "source": "Built-in imagegen",
+  "prompts": "../../docs/ATMOSPHERE-ASSETS.md",
+  "assets": [
+    {
+      "file": "night-market-panorama.png",
+      "bytes": 2520935,
+      "width": 2172,
+      "height": 724,
+      "mode": "RGB",
+      "sha256": "e0a19c6df81e41e544cbcc432711bf2ce669346617c6de96ba88bd30e6999d7e"
+    },
+    {
+      "file": "spectators-atlas.png",
+      "bytes": 1892974,
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "sha256": "506a9cd9353020bdb09b322ded4c33a41a7c7dbc7991274595933f06e0e56076",
+      "fullyTransparentPixels": 883863
+    },
+    {
+      "file": "stall-neighbors-atlas.png",
+      "bytes": 2353315,
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "sha256": "e0f02f5e778e8d12b9815980179af03a93ebc34b7b4835e56ec936cd30246177",
+      "fullyTransparentPixels": 759359
+    }
+  ]
+}

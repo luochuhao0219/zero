@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#eeefeb">
+  <meta name="description" content="借光 · 珞珈夜戏。从影人的刻制到幕后的光影，一段可以触摸、探索与亲手开演的非遗数字之旅。">
+  <title>借光 — 穿过珞珈此夜，走进一出皮影戏</title><link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="preload" href="./assets/fonts/ZhiMangXing-Regular.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="./src/playground.css"><link rel="stylesheet" href="./src/typography.css"><link rel="stylesheet" href="./src/journey.css"><link rel="stylesheet" href="./src/passage.css">
+</head>
+<body>
+  <a class="skip-link" href="#play">跳到互动游戏</a>
+  <header class="site-header">
+    <a class="wordmark" href="#home" id="home-link" aria-label="借光首页"><span class="wordmark-icon" aria-hidden="true"><i></i><i></i></span>借光<small>SHADOW<br>STORIES</small></a>
+    <nav class="story-nav" aria-label="旅程导航"><a href="#home" data-story-link>珞珈</a><a href="#gate" data-story-link>穿幕</a><a href="#market" data-story-link>灯市</a><a href="#play" data-story-link>入戏</a></nav>
+    <nav class="header-actions" aria-label="网站导航"><button id="sound-toggle" class="sound-toggle" aria-label="开启声音" aria-pressed="false"><i></i><i></i><i></i></button><button id="about-open" class="nav-pill">关于 <span>↗</span></button><button id="collection-open" class="nav-pill">留影册 <span id="collection-count">0</span></button><button class="nav-pill dark magnetic" id="skip-to-game" data-enter-game>去玩 <span>↗</span></button></nav>
+  </header>
+  <main id="site-content">
+    <section class="passage" id="journey-opening" data-reading aria-label="从珞珈穿过影幕，走入江汉夜市的滚动旅程">
+      <span id="home" class="passage-anchor" data-stop="0"></span><span id="gate" class="passage-anchor" data-stop="0.32"></span><span id="market" class="passage-anchor" data-stop="0.76"></span>
+      <div class="passage-viewport">
+        <div class="passage-fallback" aria-hidden="true"></div><canvas id="opening-canvas" aria-label="滚动向前穿过影幕；向上滚动可以退回校园"></canvas>
+        <div class="passage-shade" aria-hidden="true"></div>
+        <div class="passage-loading" id="passage-loading" role="status"><i></i><span>正在点亮归途</span></div>
+        <div class="passage-copy passage-copy-home active" data-passage-copy="home">
+          <p class="passage-eyebrow">珞珈此夜 / THE OTHER SIDE OF LIGHT</p>
+          <h1 id="story-title">循光，<br>入戏。</h1>
+          <p class="passage-description">从熟悉的校园出发。<br>循着一束光，走进另一场人间。</p>
+          <a class="passage-invitation" href="#gate" data-story-link><span class="passage-arrow">↓</span><span>向下滚动，往光里走<small>SCROLL TO STEP INSIDE</small></span></a>
+        </div>
+        <div class="passage-copy passage-copy-gate" data-passage-copy="gate" aria-hidden="true">
+          <p class="passage-eyebrow">第一道门 / 一张皮，一束光</p><h2>门后，<br>另有天地。</h2>
+          <p class="passage-description">皮料经过刻制与敷彩，<br>细小的镂空，成了光可以经过的路。</p>
+          <span class="passage-aside">继续向前，穿过这张幕。</span>
+        </div>
+        <div class="passage-copy passage-copy-crossing" data-passage-copy="crossing" aria-hidden="true"><p class="passage-eyebrow">幕间 / BETWEEN TWO WORLDS</p><h2>穿过，一线光。</h2></div>
+        <div class="passage-copy passage-copy-market" data-passage-copy="market" aria-hidden="true">
+          <p class="passage-eyebrow">灯火那头 / 江汉人间</p><h2>一街灯火。<br>一场人间。</h2>
+          <p class="passage-description">茶还热着，戏正要开。<br>让江汉的皮影，与你在珞珈相遇。</p>
+          <span class="passage-aside">灯笼轻摇，街巷渐近。再往前走。</span>
+        </div>
+        <div class="passage-copy passage-copy-arrival" data-passage-copy="arrival" aria-hidden="true">
+          <p class="passage-eyebrow">戏台已近 / YOUR STORY BEGINS</p><h2>幕后的手，<br>让影子活过来。</h2>
+          <p class="passage-description">头、身、四肢相接，操纵杆牵动关节。<br>这一回，轮到你来开场。</p>
+          <a class="passage-invitation" href="#play" data-story-link><span class="passage-arrow">↓</span><span>走到戏台前<small>TAKE THE RODS</small></span></a>
+        </div>
+        <div class="passage-footer"><span class="passage-location"><i></i><span id="journey-place">此刻 · 珞珈</span></span><span class="passage-directions">滚动前行 · 鼠标环顾<small>向上滚动，沿原路返回</small></span><span class="passage-distance"><b id="journey-percent">00</b> / 100</span></div>
+        <div class="passage-track" aria-hidden="true"><i id="journey-track"></i></div>
+      </div>
+    </section>
+    <section id="play" class="playground play-section" data-story-section="play" aria-labelledby="play-title">
+      <div class="play-intro" data-reading><div><p class="eyebrow reveal">抵达 / 入戏 · NOW IT IS YOUR TURN</p><h2 id="play-title" class="story-heading reveal">戏，<span>轮到你了。</span></h2></div><div class="play-intro-copy reveal"><p>穿过灯火，走到幕前。<br>接过手杆，让方才看见的影子，<br>在你手中活过来。</p><span>移动灯 · 接起桥 · 操纵影人<br>三幕小戏，在下面等你。</span></div></div>
+<div class="stage-container" id="stage-container">
+    <canvas id="stage" tabindex="0" aria-label="三维皮影戏台。直接拖动物体；空白处拖动转动视角。数字键选择物体，方向键移动，Q 和 E 调整角度或距离，空格切换视角。"></canvas><div id="stage-loading" class="stage-loading"><span></span>正在搭戏台</div><div id="stage-fallback" class="stage-fallback" hidden>当前设备无法打开三维场景，请使用支持 WebGL 2 的浏览器。</div>
+    <div class="home-stage-ui" id="home-stage-ui"><div class="scene-tag"><span></span>LUOJIA SHADOW PLAY</div><div class="scene-note">江汉皮影<br>珞珈新演</div><div class="entry"><button id="start-game" class="entry-button"><span>接过手杆</span><i aria-hidden="true">↗</i></button><p>拖动灯与影人，让戏开场。</p></div><div class="home-tools"><button id="replay-intro" aria-label="重演开场">↺</button><button id="hero-view-toggle">绕到幕后 <span>↗</span></button></div><span class="scene-index">01 — 03</span></div>
+    <section id="game-interface" class="game-interface" aria-label="游戏" hidden>
+      <div class="game-heading"><button id="exit-game" class="back-button">← 返回网站</button><div class="level-kicker"><span id="level-number">01 / 03</span><span class="live-dot"></span>正在排戏</div><h2 id="level-title">点灯</h2><p id="level-description"></p></div>
+      <div class="game-tools"><div class="view-switch" aria-label="视角"><button id="front-view" aria-pressed="false">幕前</button><button id="back-view" class="active" aria-pressed="true">幕后</button></div><button id="undo-action" class="tool-button" aria-label="撤销上一步" title="撤销 · Ctrl / ⌘ Z">↶</button><button id="reset-level" class="tool-button" aria-label="重新开始本关" title="重新开始">↺</button><button id="help-toggle" class="tool-button" aria-label="操作说明">?</button></div>
+      <div id="object-labels" class="object-labels" aria-hidden="true"></div>
+      <div class="game-bottom"><div class="interaction-note"><span class="pointer-glyph" aria-hidden="true">↖</span><div><strong id="interaction-title">抓住灯，试着移动</strong><span id="interaction-detail">拖动空白处转动视角</span></div></div><div id="alignment" class="alignment" role="status"><span id="match-hint">让影子贴合轮廓</span><div class="match-meter"><i id="match-fill"></i></div><span id="match-score">0</span><small>%</small></div><span class="keyboard-note"><kbd>SPACE</kbd> 切换视角</span></div>
+      <div class="performance-caption" aria-live="polite"><span class="live-dot"></span><p id="performance-line">开演了</p></div>
+    </section>
+  </div>
+  <footer class="site-footer"><span class="footer-cross" aria-hidden="true">+</span><div class="chapter-nav" id="game-chapters"><button data-level="0"><small>01</small>点灯</button><button data-level="1"><small>02</small>搭桥</button><button data-level="2"><small>03</small>对戏</button></div><span class="footer-location">武汉大学校园主题 · 江汉平原皮影</span><span class="footer-cross" aria-hidden="true">+</span></footer>
+    </section>
+    <section class="story-outro" data-reading aria-labelledby="outro-title"><p class="eyebrow reveal">YOUR HANDS. YOUR SHADOW. YOUR STORY.</p><h2 id="outro-title" class="story-heading reveal">这一幕，留给你。</h2><div class="outro-bottom"><p>每完成一幕，就留下属于你的光影。<br>把亲手排过的戏，收进留影册。</p><button class="outro-link magnetic" id="story-collection">翻开留影册 <span>↗</span></button></div></section>
+  </main>
+  <footer class="site-credits" data-reading><a href="#home" data-story-link>借光 · 珞珈夜戏 <span>↑ 回到珞珈此夜</span></a><p>以江汉平原皮影戏为文化参考的校园主题数字再创作。</p><a href="https://www.ihchina.cn/project_details/13398.html" target="_blank" rel="noopener noreferrer">文化资料来源 ↗</a></footer>
+  <div class="reading-progress" aria-hidden="true"><span id="reading-chapter">序</span><i><b id="reading-fill"></b></i><span>03</span></div>
+  <dialog id="help-dialog" class="sheet help-sheet"><button data-close="help-dialog" class="close-sheet" aria-label="关闭">×</button><span class="sheet-label">HOW TO PLAY</span><h2>直接上手。</h2><div id="help-instructions"></div><p class="help-general">对准金色轮廓后松手，影人会自动开演。<br>拖动空白处转动视角；空格键切换幕前 / 幕后。</p><details><summary>键盘操作</summary><p>在戏台上按 1 / 2 / 3 / 4 选择物体；方向键移动，Q / E 调整距离或角度。Ctrl / ⌘ Z 撤销，R 重置，Esc 返回。</p></details></dialog>
+  <dialog id="about-dialog" class="sheet about-sheet"><button data-close="about-dialog" class="close-sheet" aria-label="关闭">×</button><span class="sheet-label">ABOUT THE PLAY</span><h2>一盏灯。<br>一张幕。<br>一出皮影戏。</h2><p class="about-lead">皮影的“活”，来自幕后的人。</p><p>灯的位置改变影子的方向，影人离幕的距离改变影子的大小，操纵杆带动关节。这三件小事，是这场游戏的起点。</p><div class="about-facts"><span>文化参考</span><p>江汉平原皮影戏</p><span>场景创作</span><p>武汉大学校园主题。山门、樱枝与夜间戏台均为原创数字设计，不是历史场景复原。</p></div><a href="https://www.ihchina.cn/project_details/13398.html" target="_blank" rel="noopener noreferrer" class="source-link">了解江汉平原皮影戏 <span>↗</span></a></dialog>
+  <dialog id="collection-dialog" class="sheet collection-sheet"><button data-close="collection-dialog" class="close-sheet" aria-label="关闭">×</button><span class="sheet-label">YOUR PLAY, YOUR TAKE</span><h2>留影册<span id="works-count">00</span></h2><p class="collection-note">每完成一幕，留下一张。保存在当前浏览器，也可以下载。</p><div id="works-grid" class="works-grid"></div><div id="empty-collection" class="empty-collection"><span>还没有开演。</span><button id="collection-start" class="solid-button">去玩第一幕 ↗</button></div></dialog>
+  <dialog id="complete-dialog" class="result-card"><div class="result-check" aria-hidden="true">✓</div><div class="result-copy"><span id="complete-eyebrow">01 / 完成</span><h2 id="complete-title">灯点好了。</h2><button id="view-collection">留影已保存 ↗</button></div><button id="next-level" class="result-next">下一幕 <span>→</span></button><button id="close-complete" class="result-close" aria-label="关闭完成提示">×</button></dialog>
+  <div id="toast" class="toast" role="status"></div><script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script><script type="module" src="./src/app.js"></script>
+</body>
+</html>

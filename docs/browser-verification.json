@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-06T05:19:56.122Z",
+  "browser": "156.0.8078.75",
+  "checks": [
+    "Desktop WebGL renders",
+    "Front/back view switch",
+    "Unsolved level rejected",
+    "All three levels solved through controls",
+    "Three artworks saved",
+    "Progress persists after reload",
+    "Mobile 390px has no horizontal overflow",
+    "Mobile controls respond",
+    "Artwork download works"
+  ],
+  "hero": {
+    "diagnostics": {
+      "fallback": false,
+      "playing": false,
+      "level": 0,
+      "backstage": false,
+      "drawCalls": 146,
+      "triangles": 16482,
+      "score": 25,
+      "completed": [],
+      "works": 0
+    },
+    "width": 1440,
+    "scrollWidth": 1440
+  },
+  "errors": []
+}

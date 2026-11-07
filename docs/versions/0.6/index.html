@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#eeefeb">
+  <meta name="description" content="借光 · 珞珈夜戏。从影人的刻制到幕后的光影，一段可以触摸、探索与亲手开演的非遗数字之旅。">
+  <title>借光 — 从一片影人，到一场珞珈夜戏</title><link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="preload" href="./assets/fonts/ZhiMangXing-Regular.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="./src/playground.css"><link rel="stylesheet" href="./src/typography.css"><link rel="stylesheet" href="./src/journey.css">
+</head>
+<body>
+  <a class="skip-link" href="#play">跳到互动游戏</a>
+  <header class="site-header">
+    <a class="wordmark" href="#home" id="home-link" aria-label="借光首页"><span class="wordmark-icon" aria-hidden="true"><i></i><i></i></span>借光<small>SHADOW<br>STORIES</small></a>
+    <nav class="story-nav" aria-label="章节导航"><a href="#craft" data-story-link>01 造影</a><a href="#light" data-story-link>02 借光</a><a href="#play" data-story-link>03 入戏</a></nav>
+    <nav class="header-actions" aria-label="网站导航"><button id="sound-toggle" class="sound-toggle" aria-label="开启声音" aria-pressed="false"><i></i><i></i><i></i></button><button id="about-open" class="nav-pill">关于 <span>↗</span></button><button id="collection-open" class="nav-pill">留影册 <span id="collection-count">0</span></button><button class="nav-pill dark magnetic" id="skip-to-game" data-enter-game>去玩 <span>↗</span></button></nav>
+  </header>
+  <main id="site-content">
+    <div class="journey-opening" id="journey-opening" data-reading>
+      <div class="opening-visual" aria-hidden="true">
+        <div class="opening-grain"></div><div class="opening-orbit"></div>
+        <img class="opening-fallback" src="./assets/story/puppet-hero.png" alt="" fetchpriority="high">
+        <canvas id="opening-canvas"></canvas><span class="object-caption">FIG. 01 / 一片影人，万般神态</span>
+      </div>
+      <div class="opening-panels">
+        <section class="story-hero story-panel" id="home" data-story-section="home" aria-labelledby="story-title">
+          <div class="hero-copy"><p class="eyebrow reveal">江汉平原皮影 · 珞珈数字新演</p><h1 id="story-title" class="story-title"><span class="line-mask"><span>借光，</span></span><span class="line-mask"><span>入戏。</span></span></h1><p class="hero-description reveal">一张皮，一束光，千般故事。<br>让古老的影子，在你的指尖重新登场。</p></div>
+          <div class="hero-bottom"><a href="#craft" class="scroll-invitation magnetic" data-story-link><span class="round-arrow">↓</span><span>向下，让故事发生<small>SCROLL TO DISCOVER</small></span></a><p class="hero-interaction-note"><span class="tiny-cross">+</span> 移动鼠标，看看光与影</p><span class="hero-edition">JIANGHAN × LUOJIA<br>AN INTERACTIVE SHADOW STORY</span></div>
+        </section>
+        <section class="craft-panel story-panel" id="craft" data-story-section="craft" aria-labelledby="craft-title">
+          <div class="craft-copy"><p class="eyebrow reveal">01 / 造影 · THE MAKING</p><h2 id="craft-title" class="story-heading reveal">薄如纸。<br>自有乾坤。</h2><p class="section-description reveal">轮廓里有性格，镂空处透进光。<br>一片皮料，经过刻制、敷彩与联缀，<br>才有了登台的模样。</p>
+            <div class="craft-notes reveal" aria-label="影人制作中的三个细节">
+              <button class="craft-note active" data-craft="0" aria-expanded="true" aria-controls="craft-note-0"><span class="craft-number">01</span><span><strong>刻 · 留出光的路</strong><small id="craft-note-0">刻出轮廓与纹样，让光穿过细小的镂空。</small></span><i aria-hidden="true">↗</i></button>
+              <button class="craft-note" data-craft="1" aria-expanded="false" aria-controls="craft-note-1"><span class="craft-number">02</span><span><strong>染 · 让颜色透过幕</strong><small id="craft-note-1">为皮料敷彩，服饰与神态便在薄片上成形。</small></span><i aria-hidden="true">↗</i></button>
+              <button class="craft-note" data-craft="2" aria-expanded="false" aria-controls="craft-note-2"><span class="craft-number">03</span><span><strong>动 · 把关节交给手</strong><small id="craft-note-2">头、身与四肢相接，操纵杆带动影人的动作。</small></span><i aria-hidden="true">↗</i></button>
+            </div>
+            <span class="art-caption">影人为原创数字演绎，非馆藏复原 · <a href="https://www.ihchina.cn/project_details/13398.html" target="_blank" rel="noopener noreferrer">工艺资料 ↗</a></span>
+          </div>
+        </section>
+      </div>
+    </div>
+    <section id="light" class="light-section" data-story-section="light" data-reading aria-labelledby="light-title">
+      <div class="light-copy"><p class="eyebrow reveal">02 / 借光 · LIGHT MAKES A STORY</p><h2 id="light-title" class="story-heading reveal">光一动，<br>影就活了。</h2><p class="section-description reveal">艺人在幕后借光操影，<br>动作透过幕布，与唱腔一起讲故事。<br>先试着移动这束光，看影子如何回应。</p><div class="light-instruction reveal"><span class="instruction-line"></span><span>拖动光点<br><small>也可以聚焦光点后按方向键</small></span></div><a class="light-source" href="https://ich.unesco.org/en/RL/chinese-shadow-puppetry-00421" target="_blank" rel="noopener noreferrer">资料：UNESCO · 中国皮影戏 ↗</a></div>
+      <div class="study-window reveal" id="study-window"><span class="study-label">一束光的实验 / MOVE THE LIGHT</span><canvas id="light-study" aria-label="光源位置变化时，影子的投射方向随之改变"></canvas><button id="study-light" class="study-light" aria-label="拖动光源，或用方向键移动" aria-describedby="study-hint"><span></span><i aria-hidden="true">↔</i></button><span class="study-hint" id="study-hint">抓住这束光</span><div class="study-footer"><span>灯 · 影人 · 幕</span><span>没有标准答案，试试看。↗</span></div></div>
+    </section>
+    <section id="play" class="playground play-section" data-story-section="play" aria-labelledby="play-title">
+      <div class="play-intro" data-reading><div><p class="eyebrow reveal">03 / 入戏 · LUOJIA AFTER DARK</p><h2 id="play-title" class="story-heading reveal">珞珈的夜，<span>等你开场。</span></h2></div><div class="play-intro-copy reveal"><p>从江汉的皮影，到珞珈的夜色。<br>我们把樱枝、山门与校园意象，<br>写进这一场新的小戏。</p><span>移动灯 · 接起桥 · 操纵影人<br>三幕小戏，在下面等你。</span></div></div>
+<div class="stage-container" id="stage-container">
+    <canvas id="stage" tabindex="0" aria-label="三维皮影戏台。直接拖动物体；空白处拖动转动视角。数字键选择物体，方向键移动，Q 和 E 调整角度或距离，空格切换视角。"></canvas><div id="stage-loading" class="stage-loading"><span></span>正在搭戏台</div><div id="stage-fallback" class="stage-fallback" hidden>当前设备无法打开三维场景，请使用支持 WebGL 2 的浏览器。</div>
+    <div class="home-stage-ui" id="home-stage-ui"><div class="scene-tag"><span></span>LUOJIA SHADOW PLAY</div><div class="scene-note">江汉皮影<br>珞珈新演</div><div class="entry"><button id="start-game" class="entry-button"><span>接过手杆</span><i aria-hidden="true">↗</i></button><p>拖动灯与影人，让戏开场。</p></div><div class="home-tools"><button id="replay-intro" aria-label="重演开场">↺</button><button id="hero-view-toggle">绕到幕后 <span>↗</span></button></div><span class="scene-index">01 — 03</span></div>
+    <section id="game-interface" class="game-interface" aria-label="游戏" hidden>
+      <div class="game-heading"><button id="exit-game" class="back-button">← 返回网站</button><div class="level-kicker"><span id="level-number">01 / 03</span><span class="live-dot"></span>正在排戏</div><h2 id="level-title">点灯</h2><p id="level-description"></p></div>
+      <div class="game-tools"><div class="view-switch" aria-label="视角"><button id="front-view" aria-pressed="false">幕前</button><button id="back-view" class="active" aria-pressed="true">幕后</button></div><button id="undo-action" class="tool-button" aria-label="撤销上一步" title="撤销 · Ctrl / ⌘ Z">↶</button><button id="reset-level" class="tool-button" aria-label="重新开始本关" title="重新开始">↺</button><button id="help-toggle" class="tool-button" aria-label="操作说明">?</button></div>
+      <div id="object-labels" class="object-labels" aria-hidden="true"></div>
+      <div class="game-bottom"><div class="interaction-note"><span class="pointer-glyph" aria-hidden="true">↖</span><div><strong id="interaction-title">抓住灯，试着移动</strong><span id="interaction-detail">拖动空白处转动视角</span></div></div><div id="alignment" class="alignment" role="status"><span id="match-hint">让影子贴合轮廓</span><div class="match-meter"><i id="match-fill"></i></div><span id="match-score">0</span><small>%</small></div><span class="keyboard-note"><kbd>SPACE</kbd> 切换视角</span></div>
+      <div class="performance-caption" aria-live="polite"><span class="live-dot"></span><p id="performance-line">开演了</p></div>
+    </section>
+  </div>
+  <footer class="site-footer"><span class="footer-cross" aria-hidden="true">+</span><div class="chapter-nav" id="game-chapters"><button data-level="0"><small>01</small>点灯</button><button data-level="1"><small>02</small>搭桥</button><button data-level="2"><small>03</small>对戏</button></div><span class="footer-location">武汉大学校园主题 · 江汉平原皮影</span><span class="footer-cross" aria-hidden="true">+</span></footer>
+    </section>
+    <section class="story-outro" data-reading aria-labelledby="outro-title"><p class="eyebrow reveal">YOUR HANDS. YOUR SHADOW. YOUR STORY.</p><h2 id="outro-title" class="story-heading reveal">这一幕，留给你。</h2><div class="outro-bottom"><p>每完成一幕，就留下属于你的光影。<br>把亲手排过的戏，收进留影册。</p><button class="outro-link magnetic" id="story-collection">翻开留影册 <span>↗</span></button></div></section>
+  </main>
+  <footer class="site-credits" data-reading><a href="#home" data-story-link>借光 · 珞珈夜戏 <span>↑ 回到开场</span></a><p>以江汉平原皮影戏为文化参考的校园主题数字再创作。</p><a href="https://www.ihchina.cn/project_details/13398.html" target="_blank" rel="noopener noreferrer">文化资料来源 ↗</a></footer>
+  <div class="reading-progress" aria-hidden="true"><span id="reading-chapter">序</span><i><b id="reading-fill"></b></i><span>03</span></div>
+  <dialog id="help-dialog" class="sheet help-sheet"><button data-close="help-dialog" class="close-sheet" aria-label="关闭">×</button><span class="sheet-label">HOW TO PLAY</span><h2>直接上手。</h2><div id="help-instructions"></div><p class="help-general">对准金色轮廓后松手，影人会自动开演。<br>拖动空白处转动视角；空格键切换幕前 / 幕后。</p><details><summary>键盘操作</summary><p>在戏台上按 1 / 2 / 3 / 4 选择物体；方向键移动，Q / E 调整距离或角度。Ctrl / ⌘ Z 撤销，R 重置，Esc 返回。</p></details></dialog>
+  <dialog id="about-dialog" class="sheet about-sheet"><button data-close="about-dialog" class="close-sheet" aria-label="关闭">×</button><span class="sheet-label">ABOUT THE PLAY</span><h2>一盏灯。<br>一张幕。<br>一出皮影戏。</h2><p class="about-lead">皮影的“活”，来自幕后的人。</p><p>灯的位置改变影子的方向，影人离幕的距离改变影子的大小，操纵杆带动关节。这三件小事，是这场游戏的起点。</p><div class="about-facts"><span>文化参考</span><p>江汉平原皮影戏</p><span>场景创作</span><p>武汉大学校园主题。山门、樱枝与夜间戏台均为原创数字设计，不是历史场景复原。</p></div><a href="https://www.ihchina.cn/project_details/13398.html" target="_blank" rel="noopener noreferrer" class="source-link">了解江汉平原皮影戏 <span>↗</span></a></dialog>
+  <dialog id="collection-dialog" class="sheet collection-sheet"><button data-close="collection-dialog" class="close-sheet" aria-label="关闭">×</button><span class="sheet-label">YOUR PLAY, YOUR TAKE</span><h2>留影册<span id="works-count">00</span></h2><p class="collection-note">每完成一幕，留下一张。保存在当前浏览器，也可以下载。</p><div id="works-grid" class="works-grid"></div><div id="empty-collection" class="empty-collection"><span>还没有开演。</span><button id="collection-start" class="solid-button">去玩第一幕 ↗</button></div></dialog>
+  <dialog id="complete-dialog" class="result-card"><div class="result-check" aria-hidden="true">✓</div><div class="result-copy"><span id="complete-eyebrow">01 / 完成</span><h2 id="complete-title">灯点好了。</h2><button id="view-collection">留影已保存 ↗</button></div><button id="next-level" class="result-next">下一幕 <span>→</span></button><button id="close-complete" class="result-close" aria-label="关闭完成提示">×</button></dialog>
+  <div id="toast" class="toast" role="status"></div><script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script><script type="module" src="./src/app.js"></script>
+</body>
+</html>

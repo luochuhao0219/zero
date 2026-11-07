@@ -1,0 +1,11 @@
+{
+  "file": "puppet-hero.png",
+  "bytes": 2390066,
+  "width": 1024,
+  "height": 1536,
+  "mode": "RGBA",
+  "source": "Built-in imagegen",
+  "prompt": "../../docs/STORY-DESIGN.md",
+  "sha256": "ded26da9353092ea7a82d1a310bd9c42ab157fd60021833b1ad5d2bd78919d47",
+  "fullyTransparentPixels": 993900
+}

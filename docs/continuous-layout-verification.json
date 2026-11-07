@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-06T17:19:50.310Z",
+  "browser": "156.0.8078.75",
+  "bounds": {
+    "title": {
+      "x": 54.015625,
+      "y": 121.875,
+      "right": 408.484375,
+      "bottom": 216.90625
+    },
+    "entry": {
+      "x": 577.984375,
+      "y": 186,
+      "right": 789.984375,
+      "bottom": 245
+    },
+    "chapters": {
+      "x": 54.015625,
+      "y": 275,
+      "right": 450.6875,
+      "bottom": 317
+    },
+    "width": 844
+  },
+  "lines": [
+    {
+      "x": 78.03125,
+      "width": 233.921875,
+      "height": 77.515625
+    },
+    {
+      "x": 74.625,
+      "width": 240.734375,
+      "height": 77.515625
+    }
+  ],
+  "checks": [
+    "Slow scroll resumes story after manual orbit",
+    "Resize preserves normalized progress",
+    "Short landscape heading, entry and chapters fit",
+    "Landscape game entry and exit",
+    "Architectural threshold screenshots",
+    "Mobile stage and backstage screenshots",
+    "Mobile ending keeps phrases together and collection accessible"
+  ],
+  "errors": []
+}

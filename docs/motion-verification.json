@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-06T05:42:41.531Z",
+  "browser": "156.0.8078.75",
+  "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+  "viewport": "1440 × 1000 / DPR 1.5",
+  "idleFrames": {
+    "samples": 180,
+    "medianMs": 16.699999999999818,
+    "p95Ms": 16.800000000000182,
+    "framesOver34ms": 0
+  },
+  "dragFrames": {
+    "samples": 180,
+    "medianMs": 16.69999999999891,
+    "p95Ms": 16.700000000000728,
+    "framesOver34ms": 0
+  },
+  "early": {
+    "curtainOpen": 0
+  },
+  "idleMotion": {
+    "from": [
+      {
+        "x": -1.7310631707654682,
+        "y": 2.8577632807096407,
+        "pose": 71.93992834938555
+      },
+      {
+        "x": 2.326513735061846,
+        "y": 2.7217286535032486,
+        "pose": 92.27383173765551
+      }
+    ],
+    "to": [
+      {
+        "x": -1.7705110839568055,
+        "y": 2.785000046118901,
+        "pose": 40.123765521632244
+      },
+      {
+        "x": 2.2152711759893395,
+        "y": 2.806983982210313,
+        "pose": 91.41700660755704
+      }
+    ]
+  },
+  "interpolation": {
+    "before": 1.8,
+    "immediate": 1.8,
+    "middle": -2.207992234464783,
+    "settled": -2.9999019059732057
+  },
+  "performances": [
+    {
+      "level": 0,
+      "from": [
+        {
+          "x": -1.265772804610703,
+          "y": 2.925205736724158,
+          "pose": 41.594989789079314
+        }
+      ],
+      "to": [
+        {
+          "x": -0.8001178738293184,
+          "y": 2.968939644802744,
+          "pose": 61.37277660481794
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "from": [
+        {
+          "x": -2.8318148101219265,
+          "y": 2.9036956743084663,
+          "pose": 30.625413973821615
+        }
+      ],
+      "to": [
+        {
+          "x": -1.4844441631342813,
+          "y": 2.900980017782233,
+          "pose": 31.12676594789543
+        }
+      ]
+    },
+    {
+      "level": 2,
+      "from": [
+        {
+          "x": -1.075,
+          "y": 2.7749943728493154,
+          "pose": 74.49081362858254
+        },
+        {
+          "x": 1.075,
+          "y": 2.7749943728493154,
+          "pose": 82.3881048240528
+        }
+      ],
+      "to": [
+        {
+          "x": -1.075,
+          "y": 2.8188008061110454,
+          "pose": 94.4186825411413
+        },
+        {
+          "x": 1.075,
+          "y": 2.8188008061110454,
+          "pose": 111.94932202010402
+        }
+      ]
+    }
+  ],
+  "checks": [
+    "Curtain opening and replay",
+    "Continuous articulated puppet animation",
+    "No paper redraw or texture upload during idle/drag",
+    "Shared layout transition",
+    "Smooth slider interpolation with accurate settling",
+    "Eased camera orbit",
+    "All three performances visible before the result",
+    "Full three-level game completion",
+    "Artwork download and persistence",
+    "Exit cancels pending result",
+    "Reduced-motion behavior",
+    "Mobile layout and completion"
+  ],
+  "errors": []
+}
