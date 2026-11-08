@@ -185,7 +185,17 @@ export class PassageScene {
         float vignette=1.-smoothstep(.18,.9,length((uvp-.5)*vec2(.86,1.)));color*=.69+.31*vignette;gl_FragColor=vec4(color,1.);
         #include <colorspace_fragment>
       }`});
-    this.composite.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));
+    this.portalMaterial=material;
+    this.singleUniforms={image:{value:this.targetA.texture}};
+    this.singleMaterial=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,uniforms:this.singleUniforms,
+      vertexShader:material.vertexShader,
+      fragmentShader:`uniform sampler2D image;varying vec2 uvp;void main(){
+        vec3 color=texture2D(image,uvp).rgb;
+        float vignette=1.-smoothstep(.18,.9,length((uvp-.5)*vec2(.86,1.)));
+        gl_FragColor=vec4(color*(.69+.31*vignette),1.);
+        #include <colorspace_fragment>
+      }`});
+    this.compositeQuad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),material);this.composite.add(this.compositeQuad);
   }
   resize(){
     if(this.fallback)return;const {width,height}=this.canvas.parentElement.getBoundingClientRect();if(!width||!height)return;
@@ -210,15 +220,15 @@ export class PassageScene {
   setPointer(x,y){this.pointer.x=clamp(x,-1,1);this.pointer.y=clamp(y,-1,1);}
   update(time,dt,reduced){
     if(this.fallback||!this.visible||!this.loaded){this.quality.resetClock();return;}
-    if(this.quality.observe(performance.now())){this.pixelRatio=qualityPixelRatio(this.basePixelRatio,this.quality.tier);this.renderer.setPixelRatio(this.pixelRatio);this.resize();}
     const p=this.progress;this.smoothPointer.x=damp(this.smoothPointer.x,this.pointer.x,dt,4);this.smoothPointer.y=damp(this.smoothPointer.y,this.pointer.y,dt,4);
     const px=reduced?0:this.smoothPointer.x,py=reduced?0:this.smoothPointer.y;
-    if(reduced&&this.lastRenderedProgress===p&&this.lastRouteProgress===this.routeProgress&&!this.routeTransition&&!this.interactionDirty&&!this.resizeDirty&&this.frames>0)return;
+    if(reduced&&this.lastRenderedProgress===p&&this.lastRouteProgress===this.routeProgress&&!this.routeTransition&&!this.interactionDirty&&!this.resizeDirty&&this.frames>0){this.quality.resetClock();return;}
+    if(this.quality.observe(performance.now())){this.pixelRatio=qualityPixelRatio(this.basePixelRatio,this.quality.tier);this.renderer.setPixelRatio(this.pixelRatio);this.resize();}
     this.lastRenderedProgress=p;this.lastRouteProgress=this.routeProgress;this.interactionDirty=false;this.resizeDirty=false;this.frames++;this.sparkTime.value=reduced?0:time;
     const pose=this.world.update(this.route,this.route==='game'?smooth(0,.25,this.routeProgress):this.routeProgress,time,reduced,this.routeTransition);
     this.cameraG.position.copy(pose.position);this.cameraG.lookAt(pose.look);this.cameraG.updateMatrixWorld();
     if(this.route==='museum'){
-      this.renderer.setRenderTarget(null);this.renderer.render(this.gallery,this.cameraG);return;
+      this.compositeMode='direct';this.renderer.setRenderTarget(null);this.renderer.render(this.gallery,this.cameraG);return;
     }
     const approach=smooth(0,.22,p),az=mix(28,.35,approach),ax=this.doorPoint.x*approach;
     const ay=mix(2.8,this.doorPoint.y,smooth(.02,.18,p)),idle=reduced?0:Math.sin(time*.55)*.014;
@@ -246,7 +256,12 @@ export class PassageScene {
     if(p<.21){this.renderer.setRenderTarget(this.targetA);this.renderer.render(this.campus,this.cameraA);}
     if(p>.10&&(this.route!=='game'||this.routeProgress<.27)){this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);}
     if(p>.27){this.renderer.setRenderTarget(this.targetB);this.renderer.render(this.market,this.cameraB);}
+    // Only portals need three texture reads and the angular/rim shader per pixel.
+    const single=p<=.10?this.targetA:this.route!=='game'&&p>=.21?this.targetG:this.route==='game'&&this.routeProgress>=.27?this.targetB:null;
+    this.compositeMode=single?'single':'portal';
+    this.compositeQuad.material=single?this.singleMaterial:this.portalMaterial;
+    if(single)this.singleUniforms.image.value=single.texture;
     this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);
   }
-  diagnostics(){return{qualityTier:this.quality.tier,fallback:!!this.fallback,loaded:!!this.loaded,assetErrors:[...this.assetErrors],assetsLoaded:this.assetsLoaded,visible:this.visible,frames:this.frames,progress:this.progress,route:this.route,routeProgress:this.routeProgress,targetProgress:this.targetProgress,worldReady:!!this.world?.prepared,campusZ:this.cameraA?.position.z,galleryZ:this.cameraG?.position.z,doorReveal:this.uniforms?.doorReveal.value,marketZ:this.cameraB?.position.z,pointer:{...this.smoothPointer},cameraX:this.cameraA?.position.x,portalRadius:this.uniforms?.radius.value,pixelRatio:this.pixelRatio};}
+  diagnostics(){return{qualityTier:this.quality.tier,memory:this.renderer?{...this.renderer.info.memory,programs:this.renderer.info.programs.length}:null,compositeMode:this.compositeMode,fallback:!!this.fallback,loaded:!!this.loaded,assetErrors:[...this.assetErrors],assetsLoaded:this.assetsLoaded,visible:this.visible,frames:this.frames,progress:this.progress,route:this.route,routeProgress:this.routeProgress,targetProgress:this.targetProgress,worldReady:!!this.world?.prepared,campusZ:this.cameraA?.position.z,galleryZ:this.cameraG?.position.z,doorReveal:this.uniforms?.doorReveal.value,marketZ:this.cameraB?.position.z,pointer:{...this.smoothPointer},cameraX:this.cameraA?.position.x,portalRadius:this.uniforms?.radius.value,pixelRatio:this.pixelRatio};}
 }

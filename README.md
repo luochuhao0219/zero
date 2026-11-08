@@ -104,7 +104,7 @@ npm test
 
 可参考 `docs/REFERENCES.md` 中的文化与设计来源。优秀网站只用于观察视觉和交互原则，未复制其源码、页面或美术资产。
 
-本版测试与实测限制见 `docs/ACCEPTANCE-2026-11-08.md`。`scripts/qa/` 使用 agent-browser 真实输入、录屏和只读诊断，需先启动服务器并准备相应浏览器会话。两条 WebM 位于 `recordings/`。
+本版初次验收见 `docs/ACCEPTANCE-2026-11-08.md`；后续性能优化、普通动态三关与循环稳定性实测见 `docs/FOLLOWUP-2026-11-08.md`，请以新记录中的结果与限制为准。`scripts/qa/` 使用 agent-browser 真实输入、录屏和只读诊断，需先启动服务器并准备相应浏览器会话。两条 WebM 位于 `recordings/`。
 
 `tests/browser-*.cjs` 与 `screenshots/v8-*.png` 是 **0.8 历史材料**，其中脚本依赖未声明的 Playwright 包及旧机器的 Chrome 路径，不作为 0.9 回归结论。`docs/VERIFICATION.md` 也仅保留历史记录。
 

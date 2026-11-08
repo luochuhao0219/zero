@@ -22,7 +22,29 @@ test('pixel-ratio tiers never increase an already low-resolution device',()=>{
 
 test('sustained very slow foreground frames trigger degradation instead of being discarded as pauses',()=>{
   const q=new AdaptiveQuality();let now=0;q.observe(now);
-  for(let i=0;i<20;i++)q.observe(now+=400);
+  for(let i=0;i<5;i++)q.observe(now+=400);
   assert.equal(q.tier,1);
   q.resetClock();q.observe(now+=10000);assert.equal(q.samples.length,0);
+});
+
+test('multi-second foreground stalls reduce quality within a bounded wall-clock window',()=>{
+  const q=new AdaptiveQuality();let now=0;q.observe(now);
+  for(let i=0;i<4;i++)q.observe(now+=1000);
+  assert.equal(q.tier,1);
+  q.resetClock();q.observe(now+=30000);
+  assert.equal(q.samples.length,0);
+  for(let i=0;i<4;i++)q.observe(now+=1000);
+  assert.equal(q.tier,2);
+});
+
+test('isolated stalls and interrupted slow samples do not degrade quality',()=>{
+  const q=new AdaptiveQuality();let now=0;q.observe(now);
+  q.observe(now+=1200);
+  for(let i=0;i<149;i++)q.observe(now+=16.67);
+  assert.equal(q.tier,0);
+  for(let i=0;i<3;i++)q.observe(now+=1000);
+  q.resetClock();q.observe(now+=10000);
+  assert.equal(q.samples.length,0);
+  q.observe(now+=1000);
+  assert.equal(q.tier,0);
 });

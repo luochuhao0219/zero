@@ -85,9 +85,9 @@ export class Exploration {
     $('compose-reset').addEventListener('click',()=>{this.draft=defaultDraft();this.syncComposer();this.updateComposer();});
     $('compose-save').addEventListener('click',()=>this.saveComposition());$('compose-download').addEventListener('click',()=>this.download(this.poster(),'借光-'+(this.draft.title||'无题小戏')));
     const canvas=$('compose-canvas');let drag=null;
-    canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;const p=this.canvasPoint(canvas,e);const hits=this.actorBounds();let hit=-1;for(let i=hits.length-1;i>=0;i--){const b=hits[i];if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h){hit=i;break;}}if(hit<0)return;e.preventDefault();this.draft.selected=hit;const a=this.draft.actors[hit];drag={pointer:e.pointerId,x:p.x,y:p.y,startX:a.x,startY:a.y};canvas.setPointerCapture(e.pointerId);canvas.focus({preventScroll:true});this.syncComposer();});
+    canvas.addEventListener('pointerdown',e=>{if(e.button!==0||drag)return;const p=this.canvasPoint(canvas,e);const hits=this.actorBounds();let hit=-1;for(let i=hits.length-1;i>=0;i--){const b=hits[i];if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h){hit=i;break;}}if(hit<0)return;e.preventDefault();this.draft.selected=hit;const a=this.draft.actors[hit];drag={pointer:e.pointerId,x:p.x,y:p.y,startX:a.x,startY:a.y};canvas.setPointerCapture(e.pointerId);canvas.focus({preventScroll:true});this.syncComposer();});
     canvas.addEventListener('pointermove',e=>{if(!drag||drag.pointer!==e.pointerId)return;const p=this.canvasPoint(canvas,e),a=this.draft.actors[this.draft.selected];a.x=Math.max(16,Math.min(84,drag.startX+(p.x-drag.x)/12));a.y=Math.max(45,Math.min(86,drag.startY+(p.y-drag.y)/8.4));this.syncComposer();this.updateComposer(false);});
-    for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{if(drag){drag=null;this.updateComposer();}});
+    for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,e=>{if(drag&&drag.pointer===e.pointerId){drag=null;this.updateComposer();}});
     canvas.addEventListener('keydown',e=>{const shifts={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]},delta=shifts[e.key];if(!delta)return;e.preventDefault();const a=this.draft.actors[this.draft.selected],step=e.shiftKey?4:1;a.x=Math.max(16,Math.min(84,a.x+delta[0]*step));a.y=Math.max(45,Math.min(86,a.y+delta[1]*step));this.syncComposer();this.updateComposer();});
     this.bindSceneHandles();
     window.addEventListener('journey:frame',event=>this.updateRoute(event.detail));
@@ -127,7 +127,7 @@ export class Exploration {
     for(const [id,kind] of events){
       const handle=$(id);let drag=null;
       handle.addEventListener('pointerdown',event=>{
-        if(event.button!==0||this.journey.state.transition)return;
+        if(event.button!==0||this.journey.state.transition||this.journey.state.interaction||drag)return;
         event.preventDefault();handle.setPointerCapture(event.pointerId);handle.focus({preventScroll:true});
         const actor=kind.startsWith('actor-')?Number(kind.at(-1)):null;
         if(actor!==null){this.draft.selected=actor;this.syncComposer();}
@@ -142,7 +142,7 @@ export class Exploration {
         else if(kind==='arm'){$('craft-arm').value=clamp(drag.arm-dy*.6+dx*.3,-30,120);this.drawCraft();}
         else {const actor=this.draft.actors[this.draft.selected],bounds=this.screenBounds();actor.x=clamp(drag.actor.x+dx/bounds.width*100,16,84);actor.y=clamp(drag.actor.y+dy/bounds.height*100,45,86);this.syncComposer();this.updateComposer(false);}
       });
-      const release=()=>{if(!drag)return;drag=null;this.journey.state.interaction=null;this.journey.goPosition(this.journey.progress,true);if(kind.startsWith('actor-'))this.updateComposer();};
+      const release=event=>{if(!drag||drag.id!==event.pointerId)return;drag=null;this.journey.state.interaction=null;this.journey.goPosition(this.journey.progress,true);if(kind.startsWith('actor-'))this.updateComposer();};
       for(const event of ['pointerup','pointercancel','lostpointercapture'])handle.addEventListener(event,release);
       handle.addEventListener('keydown',event=>{
         if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;

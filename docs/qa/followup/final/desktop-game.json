@@ -1,0 +1,63 @@
+{
+  "assetErrors": [],
+  "avgFPS": 5.14,
+  "compositeMode": "single",
+  "date": "2026-11-08T01:33:32.327Z",
+  "dpr": 1,
+  "draws": {
+    "passage": 0,
+    "stage": 63
+  },
+  "durationMs": 12066.2,
+  "frames": 62,
+  "maxMs": 333.3,
+  "medianMs": 183.4,
+  "memory": {
+    "passage": {
+      "geometries": 248,
+      "programs": 39,
+      "textures": 35
+    },
+    "stage": {
+      "geometries": 87,
+      "programs": 64,
+      "textures": 37
+    }
+  },
+  "mode": "idle",
+  "over25ms": 62,
+  "p95Ms": 233.3,
+  "playing": true,
+  "post": {
+    "bloom": false,
+    "mode": "direct",
+    "samples": 0
+  },
+  "quality": {
+    "passageDPR": 0.7,
+    "passageTier": 4,
+    "reflection": false,
+    "shadows": false,
+    "stageDPR": 0.7,
+    "stageDrawCalls": 101,
+    "stageTier": 4,
+    "stageTriangles": 145618
+  },
+  "qualityAtStart": {
+    "passageTier": 4,
+    "stageTier": 3
+  },
+  "renderedFPS": {
+    "passage": 0,
+    "stage": 5.22
+  },
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "route": "game",
+  "steadyQuality": false,
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+  "viewport": [
+    1440,
+    900
+  ],
+  "wallDurationMs": 12070.3
+}

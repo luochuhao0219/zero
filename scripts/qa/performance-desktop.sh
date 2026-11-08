@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Run after recording is stopped, with all other automated sessions closed.
 source "$(dirname "$0")/browser-common.sh"
-sample(){ ab eval "$(cat scripts/qa/sample-performance.js)" > "docs/qa/$1.json"; }
+OUT="${QA_OUTPUT_DIR:-docs/qa}"
+mkdir -p "$OUT"
+sample(){ ab eval "$(cat scripts/qa/sample-performance.js)" > "$OUT/$1.json"; }
 ab set media dark >/dev/null
 ab set viewport 1440 900 >/dev/null
 ab open http://127.0.0.1:4173/ >/dev/null
@@ -23,4 +25,4 @@ scroll_path .82 2500
 ab click '#start-game';pause 5000
 sample desktop-game
 ab press Escape;pause 5000
-ab errors > docs/qa/desktop-browser-errors.txt
+ab errors > "$OUT/desktop-browser-errors.txt"

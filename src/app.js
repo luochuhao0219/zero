@@ -21,7 +21,7 @@ const instructions=[
 const defaultHints=[['抓住灯，试着移动','再推拉影人，调整影子的大小'],['抓住右侧桥面','拖动桥端的小圆点可以旋转'],['抓住影人的手杆','拖动身体可调整两人的距离']];
 
 function toast(text){$('toast').textContent=text;$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),2600);}
-function openSheet(id){clearTimeout(autoTimer);$(id).showModal();direct.enabled=false;}
+function openSheet(id){clearTimeout(autoTimer);direct.cancel();$(id).showModal();direct.enabled=false;}
 function anySheetOpen(){return !!document.querySelector('dialog[open]');}
 function moveStage(change){
  const el=$('stage-container'),before=el.getBoundingClientRect(),fromVisible=before.bottom>0&&before.top<innerHeight;layoutAnimation?.cancel();change();stage.resize();const after=el.getBoundingClientRect();if(reduced())return;
@@ -42,7 +42,7 @@ function nextIncomplete(){const i=LEVELS.findIndex((_,n)=>!progress.completed.in
 function beginGrab(){if(!playing||completing)return;clearTimeout(autoTimer);if(!grabSnapshot)grabSnapshot={...state};}
 function applyChange(patch){if(!playing||completing)return;state={...state,...patch};sync();tickSound();}
 function endGrab(){if(grabSnapshot&&JSON.stringify(grabSnapshot)!==JSON.stringify(state)){undoStack.push(grabSnapshot);if(undoStack.length>30)undoStack.shift();}grabSnapshot=null;sync();considerCompletion();}
-function considerCompletion(){clearTimeout(autoTimer);if(!playing||completing||completedCurrent||anySheetOpen()||scoreState(state.level,state)<WIN_SCORE)return;autoTimer=setTimeout(()=>{if(!playing||completing||direct.drag||scoreState(state.level,state)<WIN_SCORE)return;state={...state,...LEVELS[state.level].target};sync();completeLevel();},500);}
+function considerCompletion(){clearTimeout(autoTimer);if(document.hidden||!playing||completing||completedCurrent||anySheetOpen()||scoreState(state.level,state)<WIN_SCORE)return;autoTimer=setTimeout(()=>{if(document.hidden||!playing||completing||direct.drag||scoreState(state.level,state)<WIN_SCORE)return;state={...state,...LEVELS[state.level].target};sync();completeLevel();},500);}
 function undo(){if(!undoStack.length||completing)return;clearTimeout(autoTimer);state=undoStack.pop();grabSnapshot=null;direct.reset();sync();toast('已撤销这一步');}
 function saveProgress(){try{localStorage.setItem('borrow-light-v1',JSON.stringify(progress));}catch{toast('本次留影暂存在页面中，可先下载。');}}
 function renderWorks(){const root=$('works-grid');root.replaceChildren();$('empty-collection').hidden=!!progress.works.length;const workCount=progress.works.length+document.querySelectorAll('#composition-works figure').length;$('collection-count').textContent=workCount;$('works-count').textContent=String(workCount).padStart(2,'0');for(const work of progress.works){const figure=document.createElement('figure');figure.className='work-item';const image=document.createElement('img');image.src=work.image;image.alt=`${LEVELS[work.level].name}留影`;const caption=document.createElement('figcaption'),name=document.createElement('span'),date=document.createElement('small'),download=document.createElement('button');name.textContent=LEVELS[work.level].name;date.textContent=new Date(work.date||Date.now()).toLocaleDateString('zh-CN');name.append(date);download.textContent='下载 ↗';download.setAttribute('aria-label',`下载${LEVELS[work.level].name}留影`);download.addEventListener('click',()=>{const link=document.createElement('a');link.href=work.image;link.download=`借光-${LEVELS[work.level].name}.webp`;link.click();});caption.append(name,download);figure.append(image,caption);root.append(figure);}}
@@ -74,6 +74,7 @@ $('collection-start').addEventListener('click',()=>{$('collection-dialog').close
   },{once:true});
   openSheet('collection-dialog');
 });
+document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(autoTimer);direct.cancel();}else if(playing)considerCompletion();});
 document.addEventListener('keydown',e=>{if(anySheetOpen())return;if(e.code==='Space'&&playing&&!e.repeat&&!completing){e.preventDefault();setView(!stage.backstage);}if(e.key==='Escape'&&playing)exitGame();if(playing&&!completing&&(e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}if(playing&&!completing&&e.key.toLowerCase()==='r')loadLevel(state.level);});
 const exploration=new Exploration({journey,toast,onPause:()=>{if(completing){toast('这幕演完，就能继续探索。');return false;}clearTimeout(autoTimer);direct.cancel();direct.enabled=false;return true;},onResume:()=>{direct.enabled=!completing&&!anySheetOpen();if(playing)considerCompletion();},onPlay:enterGame});
 renderWorks();renderChapters();renderHelp();stage.setState(state,false);if(stage.fallback)$('start-game').setAttribute('aria-disabled','true');

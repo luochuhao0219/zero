@@ -10,7 +10,7 @@ scroll_path(){
   pause 700
 }
 drag_handle(){
-  local selector="$1" dx="$2" dy="$3" x y
+  local selector="$1" dx="$2" dy="$3" x y i
   read -r x y < <(ab eval "(()=>{const r=document.querySelector('$selector').getBoundingClientRect();return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)}})()" | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d["x"],d["y"])')
   ab mouse move "$x" "$y" >/dev/null;ab mouse down >/dev/null
   for i in 1 2 3 4 5 6;do ab mouse move "$((x+dx*i/6))" "$((y+dy*i/6))" >/dev/null;done

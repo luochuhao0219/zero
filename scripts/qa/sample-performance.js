@@ -30,7 +30,7 @@
   const gl = canvas.getContext('webgl2');
   const extension = gl?.getExtension('WEBGL_debug_renderer_info');
   return {
-    date: new Date().toISOString(), mode: scroll ? 'native-scroll-forward-and-back' : 'idle',
+    date: new Date().toISOString(), wallDurationMs: +(performance.now()-start).toFixed(1), mode: scroll ? 'native-scroll-forward-and-back' : 'idle',
     route: before.journey.route, playing: before.playing,
     durationMs: +samples.reduce((a,b) => a+b,0).toFixed(1), frames: samples.length,
     avgFPS: +(samples.length * 1000 / samples.reduce((a,b)=>a+b,0)).toFixed(2),
@@ -39,6 +39,9 @@
     over25ms: samples.filter(t => t > 25).length,
     maxMs: +Math.max(...samples).toFixed(2),
     draws: {passage: after.journey.opening.frames-before.journey.opening.frames, stage: after.frames-before.frames},
+    renderedFPS: {passage: +((after.journey.opening.frames-before.journey.opening.frames)*1000/(performance.now()-start)).toFixed(2), stage: +((after.frames-before.frames)*1000/(performance.now()-start)).toFixed(2)},
+    steadyQuality: before.qualityTier===after.qualityTier&&before.journey.opening.qualityTier===after.journey.opening.qualityTier,
+    memory: {stage:after.memory,passage:after.journey.opening.memory},post:after.post,compositeMode:after.journey.opening.compositeMode,
     viewport: [innerWidth, innerHeight], dpr: devicePixelRatio,
     userAgent: navigator.userAgent,
     renderer: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : gl?.getParameter(gl.RENDERER),

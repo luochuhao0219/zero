@@ -169,5 +169,22 @@ export function createPostProcessing(stage){
       float grain=fract(sin(dot(vUv+fract(time*.037),vec2(12.9898,78.233)))*43758.5453)-.5;
       c+=grain*.006;gl_FragColor=vec4(c,1.0);
     }`});composer.addPass(finish);
-  return {composer,bloom,finish};
+  let direct=false, multisampled=true;
+  return {composer,bloom,finish,
+    setQuality(tier){
+      if(tier>=1&&multisampled){
+        const replacement=composer.renderTarget1.clone();replacement.samples=0;
+        composer.reset(replacement);multisampled=false;
+      }
+      if(tier>=2)bloom.enabled=false;
+      if(tier>=3&&!direct){
+        // Emergency path retains scene lighting, ACES and sRGB, but drops screen effects.
+        // Release both multisample targets AND bloom mip targets, not just their passes.
+        direct=true;composer.dispose();for(const pass of composer.passes)pass.dispose();
+      }
+    },
+    resize(width,height,pixelRatio){if(!direct){composer.setPixelRatio(pixelRatio);composer.setSize(width,height);}},
+    render(dt){if(direct)stage.renderer.render(stage.scene,stage.camera);else composer.render(dt);},
+    diagnostics(){return {mode:direct?'direct':'composer',samples:direct?0:composer.renderTarget1.samples,bloom:!direct&&bloom.enabled};}
+  };
 }
