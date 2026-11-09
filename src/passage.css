@@ -57,3 +57,10 @@ body:not(.is-playing){background:#152020;color:var(--passage-cream)}
 }
 @media(max-height:650px) and (min-width:701px){.passage-copy{top:21%}.passage-copy h1{font-size:94px;margin-bottom:16px}.passage-eyebrow{margin-bottom:16px}.passage-invitation{margin-top:21px}.passage-copy-gate{top:auto;bottom:19%}.passage-copy h2{font-size:57px}.passage-copy-crossing{top:17%}.passage-copy-crossing h2{font-size:44px}.passage-footer{bottom:22px}}
 @media(prefers-reduced-motion:reduce){.passage-copy{will-change:auto;transform:none!important}}
+
+/* Dedicated opening plate: WebGL readiness cannot dismiss the distant campus. */
+.opening-intro-plate{position:absolute;inset:0;z-index:2;pointer-events:none;background:url('../assets/passage/luojia-dusk.png') center/cover;opacity:1;transform-origin:center center;transition:opacity .55s ease}
+body.opening-intro-running .opening-intro-plate{animation:campus-push 2.5s linear both}
+body.opening-intro-finished .opening-intro-plate{opacity:0}
+@keyframes campus-push{from{transform:scale(1)}to{transform:scale(1.13)}}
+@media(prefers-reduced-motion:reduce){.opening-intro-plate{animation:none}}

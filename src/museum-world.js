@@ -1,5 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
 import {clamp,smooth} from './route-state.js';
+import {WalkingGallery,walkingPose} from './walking-gallery.js';
 import {MuseumBackdrop} from './museum-backdrop.js';
 import {sampleCameraPath,MUSEUM_CAMERA} from './camera-path.js';
 export {MUSEUM_CAMERA} from './camera-path.js';
@@ -13,7 +14,7 @@ export class MuseumWorld {
   constructor(renderer){
     this.renderer=renderer;this.scene=new THREE.Scene();this.backdrop=new MuseumBackdrop(this.scene,renderer);
     this.ready=this.backdrop.ready;this.errors=this.backdrop.errors;
-    this.currentPose=this.hallPose(1);this.prepared=true;
+    this.walk=new WalkingGallery(this.scene,renderer);this.ready=Promise.all([this.backdrop.ready,this.walk.ready]);this.errors=this.backdrop.errors;this.walk.ready.then(()=>this.errors.push(...this.walk.errors));this.currentPose=this.hallPose(1);this.prepared=true;
   }
   hallPose(progress){
     const z=mix(41,12,smooth(.30,1,progress))+(this.hallDistanceOffset||0);
@@ -26,11 +27,20 @@ export class MuseumWorld {
   }
   update(route,progress,time,reduced,transition){
     if(transition&&this.transitionFrom==='public'&&route!=='public')progress*=smooth(0,1,transition.fraction);
-    const pose=route==='museum'?sampleCamera(MUSEUM_CAMERA,progress):route==='game'?this.gamePose(progress,this.gameOrigin):this.hallPose(progress);
+    const inGallery=route==='museum'&&progress>=.065;this.walk.group.visible=inGallery;this.backdrop.mesh.visible=route!=='museum'||progress<.10;
+    this.backdrop.uniforms.opacity.value=route==='museum'?1-smooth(.065,.10,progress):1;
+    this.backdrop.mesh.renderOrder=route==='museum'?1000:-1000;
+    const pose=route==='museum'?walkingPose(progress):route==='game'?this.gamePose(progress,this.gameOrigin):this.hallPose(progress);
     this.currentPose=pose;this.backdrop.update(route,progress,this.gameOrigin);return pose;
   }
   // Full-screen plates already use camera-independent image coordinates.
-  syncCamera(){}
+  syncCamera(camera){if(this.walk.group.visible){
+    if(camera.aspect<1.15)camera.setViewOffset(1,1,0,.16,1,1);else camera.clearViewOffset();
+    const distance=Math.max(6.6,6.5/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect));
+    camera.position.x+=distance-4.9;camera.lookAt(this.currentPose.look);camera.updateMatrixWorld();
+    this.backdrop.cabinetPositions=this.walk.sync(camera);
+    this.backdrop.signPositions=this.walk.syncSigns(camera);
+  }else camera.clearViewOffset();}
   startTransition(from){
     this.transitionFrom=from;
     if(from==='museum')this.backdrop.leaveMuseum();

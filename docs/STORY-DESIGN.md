@@ -44,4 +44,4 @@ Use case: product-mockup. Asset type: high-resolution transparent PNG hero artwo
 - 手机改为上下构图；段落高度随内容增长，游戏预览允许正常触摸滚页。进入游戏后才采用全屏操作布局。
 - 系统“减少动态效果”模式关闭待机浮动、鼠标轻摆、磁性链接和内容入场过渡；保留用户主动的章节滚动与光点、物体操作。
 
-验收方法与实际结果见 `VERIFICATION.md`；浏览器脚本 `tests/browser-journey.cjs` 使用真实输入验证页面、实验和游戏之间的切换。
+当前回归以 `npm test` 的逻辑测试为准。
