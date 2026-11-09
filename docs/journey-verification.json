@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-06T13:59:17.484Z",
+  "browser": "156.0.8078.75",
+  "openingFrames": {
+    "samples": 120,
+    "medianMs": 16.699999999999818,
+    "p95Ms": 16.800000000000182
+  },
+  "pointerTilt": {
+    "before": -0.07180852967609258,
+    "after": -0.11257481475644712
+  },
+  "intermediateScroll": 0.48,
+  "lightDrag": {
+    "before": {
+      "x": 0.22000000000000003,
+      "y": 0.69
+    },
+    "after": {
+      "x": 0.7199357637896352,
+      "y": 0.3800443452580083
+    }
+  },
+  "touchLight": {
+    "before": {
+      "x": 0.22,
+      "y": 0.69
+    },
+    "after": {
+      "x": 0.532470703125,
+      "y": 0.5533927755152925
+    }
+  },
+  "checks": [
+    "Story is the default entry",
+    "Pointer-responsive artwork",
+    "Native scroll scene transition",
+    "Craft detail selection",
+    "Mouse and keyboard light manipulation",
+    "Offscreen rendering pause",
+    "Header shortcut enters fullscreen game",
+    "Exit restores the reading site",
+    "Collection accessible from closing section",
+    "Real mobile touch scrolling",
+    "Real touch light manipulation",
+    "Game preview does not trap page scrolling",
+    "Reduced-motion reading and game navigation"
+  ],
+  "errors": []
+}

@@ -27,14 +27,14 @@ export class MuseumBackdrop {
       return [name,plate];
     }));
     this.ready=Promise.all(this.pending);
-    this.uniforms={opacity:{value:1},imageA:{value:this.plates.hall.map},imageB:{value:this.plates.corridor.map},
+    this.uniforms={imageA:{value:this.plates.hall.map},imageB:{value:this.plates.corridor.map},
       cropA:{value:new THREE.Vector4(0,0,1,1)},cropB:{value:new THREE.Vector4(0,0,1,1)},blend:{value:0}};
     this.mesh=new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.ShaderMaterial({
-      uniforms:this.uniforms,transparent:true,depthWrite:false,depthTest:false,toneMapped:false,
+      uniforms:this.uniforms,depthWrite:false,depthTest:false,toneMapped:false,
       vertexShader:'varying vec2 screenUV; void main(){screenUV=uv;gl_Position=vec4(position.xy,.9999,1.);}',
-      fragmentShader:`uniform float opacity; uniform sampler2D imageA,imageB; uniform vec4 cropA,cropB; uniform float blend; varying vec2 screenUV;
+      fragmentShader:`uniform sampler2D imageA,imageB; uniform vec4 cropA,cropB; uniform float blend; varying vec2 screenUV;
         vec2 imageUV(vec4 crop){return vec2(crop.x+screenUV.x*crop.z,1.-crop.y-(1.-screenUV.y)*crop.w);}
-        void main(){gl_FragColor=vec4(mix(texture2D(imageA,imageUV(cropA)).rgb,texture2D(imageB,imageUV(cropB)).rgb,blend),opacity);
+        void main(){gl_FragColor=vec4(mix(texture2D(imageA,imageUV(cropA)).rgb,texture2D(imageB,imageUV(cropB)).rgb,blend),1.);
           #include <colorspace_fragment>
         }`,
     }));
@@ -66,8 +66,7 @@ export class MuseumBackdrop {
       if(progress<MUSEUM_ENTRY){
         const entrance=smooth(0,.09,progress),door=hall.doors[0];
         fa=photoFrame(hall.aspect,this.aspect,mix(publicZoom,2.65,entrance),[mix(.5,door[0],entrance),mix(.5,.52,entrance)]);
-        // Doorway push and reveal are sampled from scroll, never elapsed time.
-        b=hall;fb=fa;blend=0;
+        fb=this.frameFor('corridor',progress);blend=smooth(.04,.095,progress);
       }else{
         a=b=this.plates.corridor;fa=fb=galleryFrame;blend=0;
       }

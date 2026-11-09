@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-06T10:14:43.602Z",
+  "browser": "156.0.8078.75",
+  "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+  "viewport": "1440 × 1000 / DPR 1.5",
+  "graphics": {
+    "pixelRatio": 1.5,
+    "roofTiles": 1570,
+    "materialAssetsLoaded": 13,
+    "drawCalls": 168,
+    "triangles": 295685,
+    "shadows": true,
+    "reflection": true
+  },
+  "idleFrames": {
+    "samples": 180,
+    "medianMs": 16.699999999999818,
+    "p95Ms": 33.400000000000546,
+    "framesOver34ms": 0
+  },
+  "dragFrames": {
+    "samples": 180,
+    "medianMs": 33.29999999999927,
+    "p95Ms": 33.400000000001455,
+    "framesOver34ms": 0
+  },
+  "interpolation": {
+    "before": 1.8,
+    "immediate": 0.5410240247167692,
+    "middle": -2.2037033735491676,
+    "settled": -2.9999211299525985
+  },
+  "layouts": [
+    {
+      "width": 844,
+      "viewport": 844,
+      "bottom": 390,
+      "height": 390
+    },
+    {
+      "width": 844,
+      "viewport": 844,
+      "bottom": 390,
+      "height": 390
+    }
+  ],
+  "checks": [
+    "Articulated idle motion",
+    "Opening replay",
+    "Continuous stage layout transition",
+    "Real pointer drag interpolation and settling",
+    "No canvas redraw or texture uploads during drag",
+    "Camera easing",
+    "Front shadow direct manipulation",
+    "Reduced-motion gesture completion",
+    "844px landscape layout"
+  ],
+  "errors": []
+}

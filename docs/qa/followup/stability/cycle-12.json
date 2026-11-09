@@ -1,0 +1,18 @@
+{
+  "cycle": 12,
+  "elapsedMs": 501776.59999999986,
+  "errors": [],
+  "passage": {
+    "geometries": 248,
+    "programs": 39,
+    "textures": 37
+  },
+  "quality": 4,
+  "route": "public",
+  "stage": {
+    "geometries": 87,
+    "programs": 64,
+    "textures": 37
+  },
+  "works": 6
+}

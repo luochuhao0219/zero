@@ -1,0 +1,15 @@
+{
+  "completed": [
+    0,
+    1,
+    2
+  ],
+  "score": 100,
+  "state": {
+    "level": 2,
+    "poseLeft": 68,
+    "poseRight": 82,
+    "spacing": 2.15
+  },
+  "works": 3
+}

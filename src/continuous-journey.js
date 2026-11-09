@@ -1,4 +1,3 @@
-import {CabinetVisit} from './cabinet-visit.js';
 import {PassageScene} from './passage-scene.js';
 import {RouteState, ROUTE_HEIGHTS, MUSEUM_ENTRY, MUSEUM_STOPS, museumStop, clamp, smooth} from './route-state.js';
 import {museumRoomId} from './museum-content.js';
@@ -20,15 +19,9 @@ const $ = id => document.getElementById(id);
 export class Journey {
   constructor({stage,onEnter,onLeave,onCollection,onProgress=()=>{}}) {
     Object.assign(this,{stage,onEnter,onLeave,onCollection,onProgress});
-    this.visit=new CabinetVisit();this.state = new RouteState(); this.opening = $('journey-opening'); this.play = $('play');
+    this.state = new RouteState(); this.opening = $('journey-opening'); this.play = $('play');
     this.intro = new PassageScene($('opening-canvas'));
     this.progress = 0; this.target = 0; this.gameActive = false; this.active = 'home';
-    this.openingPushStart=Infinity;this.openingPushDone=!!location.hash&&location.hash!=='#home';
-    if(this.openingPushDone)document.body.classList.add('opening-intro-finished');
-    const openingPhoto=new Image();openingPhoto.src=new URL('../assets/passage/luojia-dusk.png',import.meta.url).href;
-    openingPhoto.decode().catch(()=>{}).then(()=>{
-      this.openingPushStart=performance.now();document.body.classList.add('opening-intro-running');
-    });
     this.media = matchMedia('(prefers-reduced-motion: reduce)'); this.lastTime = performance.now(); this.dirty = true;
     this.copies = phases.map(phase => ({...phase,element:document.querySelector(`[data-passage-copy="${phase.id}"]`)}));
     this.homeUI = $('home-stage-ui'); this.chapters = document.querySelector('#play .site-footer');
@@ -81,33 +74,12 @@ export class Journey {
     document.body.dataset.route = this.state.route;
   }
   goPosition(progress, instant=false) {
-    const requested=clamp(progress),p=this.state.route==='museum'&&!this.state.transition?this.visit.constrain(this.progress,requested):requested,top=this.opening.getBoundingClientRect().top+scrollY;
+    const p=clamp(progress),top=this.opening.getBoundingClientRect().top+scrollY;
     scrollTo({top:top+p*(this.opening.offsetHeight-innerHeight),behavior:instant||this.media.matches?'instant':'smooth'});
     if(instant||this.media.matches){this.progress=this.target=p;this.state.setProgress(p);}
     this.dirty=true;
   }
-  fadeReturn(options){
-    if(this.returning)return false;
-    this.returning=true;this.pendingPlay=undefined;
-    const veil=document.createElement('div');veil.className='hall-return-veil';veil.setAttribute('aria-label','返回大厅');document.body.append(veil);
-    const delay=this.media.matches?0:240;
-    requestAnimationFrame(()=>veil.classList.add('opaque'));
-    setTimeout(()=>{
-      options?.beforeCommit?.();
-      this.state.transition=null;this.state.interaction=null;this.visit.reset();
-      this.choose('public',{...options,fadeCommit:true});
-      this.state.transition=null;this.returnJourney=this.gameReturn=null;
-      this.intro.setRoute('public',1,null);this.dirty=true;
-      setTimeout(()=>{veil.classList.remove('opaque');setTimeout(()=>{veil.remove();this.returning=false;},delay);},80);
-    },delay);
-    return true;
-  }
-  finishCabinet(){
-    if(!this.visit.finish())return;
-    this.goPosition(this.progress,true);this.dispatch();
-  }
-  choose(route,{destination,room,fadeCommit=false}={}) {
-    if(route==='public'&&!fadeCommit)return this.fadeReturn({destination,room});
+  choose(route,{destination,room}={}) {
     if(!this.intro.loaded||!this.intro.world?.prepared){
       $('route-status').className='route-notice';
       $('route-status').textContent=this.intro.fallback?'当前浏览器无法创建三维场景，请启用 WebGL 2 后重新打开。':'场景正在准备，请稍候再选择入口。';
@@ -120,21 +92,19 @@ export class Journey {
     this.intro.world.startTransition(from);
     if(from==='public'&&this.progress<.98)this.intro.world.transitionPose=this.intro.world.hallPose(1);
     if(route==='game')this.intro.world.gameOrigin=from==='museum'?'museum':'public';
-    this.returnJourney = null;
-    this.gameReturn = null;
+    this.returnJourney = route==='public'&&from==='museum'?this.progress:null;
+    this.gameReturn = route==='public'&&from==='game'?this.progress:null;
     this.returnViaMuseum=this.gameReturn!==null&&this.intro.world.gameOrigin==='museum';
     this.museumReturnDistance=this.state.progress.museum;
     if(route!=='public')this.state.transition.duration=from==='public'&&this.progress<.98?3500:1850;
-    if(route==='public')this.state.transition.duration=0;
-    this.visit.reset();
+    if(route==='public')this.state.transition.duration=1400+Math.round(this.progress*1800)+(this.returnViaMuseum?1800:0);
     this.transitionOrigin=from;
-    this.progress=this.target=route==='public'?1:route==='museum'?0:.09;
-    if(route==='museum'){this.state.transition=null;this.entryPublicProgress=null;}
+    this.progress=this.target=route==='public'?1:route==='museum'?MUSEUM_ENTRY:.09;
     this.state.setProgress(this.progress);this.resizeProgress=undefined;
     this.setTrack();this.goPosition(this.progress,true);
-    this.afterTransition=route==='museum'?undefined:destination!==undefined?destination:room?MUSEUM_STOPS.find(s=>s.id===room)?.at:undefined;
+    this.afterTransition=destination!==undefined?destination:room?MUSEUM_STOPS.find(s=>s.id===room)?.at:undefined;
     history.replaceState(null,'',`#${route==='public'?'hall':route==='museum'?'museum':'gate'}`);
-    $('route-status').textContent=route==='public'?'返回教学楼内厅':route==='museum'?'走进江汉皮影馆':'穿过影幕，前往灯市';
+    $('route-status').textContent=route==='public'?'沿原路返回教学楼内厅':route==='museum'?'走进江汉皮影馆':'穿过影幕，前往灯市';
     this.dispatch();return true;
   }
   returnHall() {
@@ -159,14 +129,10 @@ export class Journey {
     if(this.state.route!=='game')this.choose('game',{destination:p});else this.goPosition(p,instant);
   }
   openMuseum(room) {
-    // A museum shortcut never plays the campus entrance on the visitor's behalf.
-    if(this.state.route==='public'&&this.progress<.94){
-      return;
-    }
     room=museumRoomId(room);
     const p=MUSEUM_STOPS.find(stop=>stop.id===room)?.at??MUSEUM_ENTRY;
     if(this.gameActive){this.onLeave();this.queuedMuseum=room||'corridor';return;}
-    if(this.state.route==='museum'){if(this.visit.locked)return;this.goPosition(p);}
+    if(this.state.route==='museum')this.goPosition(p);
     else if(this.state.transition)this.queuedMuseum=room||'corridor';
     else this.choose('museum',{room});
   }
@@ -196,7 +162,7 @@ export class Journey {
     element.inert=opacity<.55;element.setAttribute('aria-hidden',String(opacity<.55));
   }
   dispatch() {
-    window.dispatchEvent(new CustomEvent('journey:frame',{detail:{route:this.state.route,progress:this.progress,transition:!!this.state.transition,viewing:this.visit.locked?.id||null}}));
+    window.dispatchEvent(new CustomEvent('journey:frame',{detail:{route:this.state.route,progress:this.progress,transition:!!this.state.transition}}));
   }
   syncCopy() {
     const route=this.state.route,p=route==='public'?this.progress*.23:route==='game'?.21+this.progress*.79:-1;
@@ -232,7 +198,7 @@ export class Journey {
     this.onProgress(route==='public'?this.progress*.23:route==='museum'?.25:p);
   }
   positionDoors() {
-    if(this.intro.fallback||!this.intro.world?.backdrop?.doorPositions)return;
+    if(this.intro.fallback)return;
     for(const [i,id] of ['choose-museum','choose-game'].entries()) {
       const point=this.intro.world.backdrop.doorPositions[i];
       const half=$(id).offsetWidth/2+12;
@@ -255,16 +221,6 @@ export class Journey {
     if(this.resizeProgress!==undefined){const p=this.resizeProgress;this.resizeProgress=undefined;this.goPosition(p,true);}
     if(this.dirty&&!this.state.interaction&&!this.state.transition) {
       const rect=this.opening.getBoundingClientRect();this.target=clamp(-rect.top/Math.max(1,rect.height-innerHeight));this.dirty=false;
-    }
-    if(!this.openingPushDone&&this.state.route==='public'){
-      const elapsed=now-this.openingPushStart;
-      if(elapsed<2500||!this.intro.loaded){
-        this.target=0;if(scrollY>2)scrollTo({top:0,behavior:'instant'});
-      }else{this.openingPushDone=true;document.body.classList.add('opening-intro-finished');}
-    }
-    if(this.state.route==='museum'&&!this.state.transition){
-      const limited=this.visit.constrain(this.progress,this.target);
-      if(limited!==this.target){this.target=limited;const top=this.opening.getBoundingClientRect().top+scrollY;scrollTo({top:top+limited*(this.opening.offsetHeight-innerHeight),behavior:'instant'});}
     }
     // A short exponential response, independent of input speed; no long catch-up.
     if(!this.state.interaction) this.progress=this.media.matches?this.target:this.progress+(this.target-this.progress)*(1-Math.exp(-20*dt));

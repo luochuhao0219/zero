@@ -1,0 +1,134 @@
+{
+  "before": {
+    "source": "zero-stage-real-before-trace.json",
+    "note": "Durations can overlap across nested events/threads; do not add these rows together.",
+    "events": [
+      {
+        "name": "RunTask",
+        "count": 6568,
+        "sumMs": 22014.64
+      },
+      {
+        "name": "ThreadControllerImpl::RunTask",
+        "count": 6442,
+        "sumMs": 21993.36
+      },
+      {
+        "name": "GPUTask",
+        "count": 158,
+        "sumMs": 10781.33
+      },
+      {
+        "name": "Commit",
+        "count": 12,
+        "sumMs": 10387.39
+      },
+      {
+        "name": "ThreadPool_RunTask",
+        "count": 65,
+        "sumMs": 544.25
+      },
+      {
+        "name": "WebFrameWidgetImpl::BeginMainFrame",
+        "count": 12,
+        "sumMs": 513.81
+      },
+      {
+        "name": "Blink.Animate.UpdateTime",
+        "count": 12,
+        "sumMs": 513.68
+      },
+      {
+        "name": "PageAnimator::serviceScriptedAnimations",
+        "count": 12,
+        "sumMs": 513.64
+      },
+      {
+        "name": "FrameRequestCallbackCollection::ExecuteFrameCallbacks",
+        "count": 12,
+        "sumMs": 513.17
+      },
+      {
+        "name": "FireAnimationFrame",
+        "count": 24,
+        "sumMs": 513.14
+      },
+      {
+        "name": "AsyncTask Run",
+        "count": 24,
+        "sumMs": 513.03
+      },
+      {
+        "name": "v8.callFunction",
+        "count": 24,
+        "sumMs": 512.81
+      }
+    ]
+  },
+  "postOnly": {
+    "source": "zero-stage-after-trace.json",
+    "note": "Durations can overlap across nested events/threads; do not add these rows together.",
+    "events": [
+      {
+        "name": "RunTask",
+        "count": 6878,
+        "sumMs": 26585.61
+      },
+      {
+        "name": "ThreadControllerImpl::RunTask",
+        "count": 6839,
+        "sumMs": 26562.32
+      },
+      {
+        "name": "Commit",
+        "count": 25,
+        "sumMs": 12946.89
+      },
+      {
+        "name": "GPUTask",
+        "count": 132,
+        "sumMs": 12930.78
+      },
+      {
+        "name": "EpollEvent",
+        "count": 1956,
+        "sumMs": 68.27
+      },
+      {
+        "name": "Receive mojo message",
+        "count": 1890,
+        "sumMs": 67.43
+      },
+      {
+        "name": "WebFrameWidgetImpl::BeginMainFrame",
+        "count": 26,
+        "sumMs": 64.69
+      },
+      {
+        "name": "Blink.Animate.UpdateTime",
+        "count": 26,
+        "sumMs": 64.5
+      },
+      {
+        "name": "PageAnimator::serviceScriptedAnimations",
+        "count": 26,
+        "sumMs": 64.37
+      },
+      {
+        "name": "FrameRequestCallbackCollection::ExecuteFrameCallbacks",
+        "count": 26,
+        "sumMs": 63.35
+      },
+      {
+        "name": "FireAnimationFrame",
+        "count": 77,
+        "sumMs": 63.25
+      },
+      {
+        "name": "AsyncTask Run",
+        "count": 77,
+        "sumMs": 62.96
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "completed": [
+    0,
+    1
+  ],
+  "score": 100,
+  "state": {
+    "bridgeAngle": 0,
+    "bridgeDepth": 0.85,
+    "bridgeX": 1.05,
+    "level": 1
+  },
+  "works": 2
+}

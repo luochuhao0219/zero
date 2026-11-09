@@ -1,0 +1,165 @@
+{
+  "date": "2026-11-06T17:02:36.747Z",
+  "browser": "156.0.8078.75",
+  "viewport": "1440 × 1000 / DPR 1.5",
+  "campusFrames": {
+    "samples": 100,
+    "medianMs": 16.699999999999818,
+    "p95Ms": 16.799999999999727,
+    "over34ms": 0
+  },
+  "stageFrames": {
+    "samples": 100,
+    "medianMs": 16.80000000000291,
+    "p95Ms": 33.400000000001455,
+    "over34ms": 0
+  },
+  "route": [
+    {
+      "name": "approach",
+      "progress": 0.08997645143347195,
+      "camera": {
+        "x": 9.027104038906675,
+        "y": 5.100402491128287,
+        "z": 23.25055180784883
+      },
+      "angle": 0.2,
+      "campusZ": 17.908199345738048,
+      "galleryZ": 28,
+      "marketZ": 29
+    },
+    {
+      "name": "door",
+      "progress": 0.16997164736791756,
+      "camera": {
+        "x": 9.027104038906675,
+        "y": 5.100402491128287,
+        "z": 23.25055180784883
+      },
+      "angle": 0.2,
+      "campusZ": 3.9891800774427155,
+      "galleryZ": 26.982432988392034,
+      "marketZ": 29
+    },
+    {
+      "name": "room",
+      "progress": 0.23997134555008223,
+      "camera": {
+        "x": 9.027104038906675,
+        "y": 5.100402491128287,
+        "z": 23.25055180784883
+      },
+      "angle": 0.2,
+      "campusZ": 0.35,
+      "galleryZ": 18.879953134049728,
+      "marketZ": 29
+    },
+    {
+      "name": "crossing",
+      "progress": 0.34998412093253894,
+      "camera": {
+        "x": 9.027104038906675,
+        "y": 5.100402491128287,
+        "z": 23.25055180784883
+      },
+      "angle": 0.2,
+      "campusZ": 0.35,
+      "galleryZ": 3.025959483830676,
+      "marketZ": 27.030781400129506
+    },
+    {
+      "name": "market",
+      "progress": 0.4699726132519903,
+      "camera": {
+        "x": 9.027104038906675,
+        "y": 5.100402491128287,
+        "z": 23.25055180784883
+      },
+      "angle": 0.2,
+      "campusZ": 0.35,
+      "galleryZ": 0.35,
+      "marketZ": -6.676184915315124
+    },
+    {
+      "name": "arrival",
+      "progress": 0.5699771968182825,
+      "camera": {
+        "x": 9.027104038906675,
+        "y": 5.100402491128287,
+        "z": 23.25055180784883
+      },
+      "angle": 0.2,
+      "campusZ": 0.35,
+      "galleryZ": 0.35,
+      "marketZ": -38.65368924493379
+    },
+    {
+      "name": "stage",
+      "progress": 0.68,
+      "camera": {
+        "x": 6.181831725745518,
+        "y": 5.864800000000001,
+        "z": 21.146202702404967
+      },
+      "angle": 0.2757611519583935,
+      "campusZ": 0.35,
+      "galleryZ": 0.35,
+      "marketZ": -46
+    },
+    {
+      "name": "backstage",
+      "progress": 0.78,
+      "camera": {
+        "x": 13.098620101508194,
+        "y": 6.215234375,
+        "z": -20.050752003385337
+      },
+      "angle": 2.5465354507320157,
+      "campusZ": 0.35,
+      "galleryZ": 0.35,
+      "marketZ": -46
+    },
+    {
+      "name": "ready",
+      "progress": 0.855,
+      "camera": {
+        "x": 4.762334905085839,
+        "y": 5.5,
+        "z": 21.801559196015752
+      },
+      "angle": 0.20856686851208944,
+      "campusZ": 0.35,
+      "galleryZ": 0.35,
+      "marketZ": -46
+    },
+    {
+      "name": "ending",
+      "progress": 1,
+      "camera": {
+        "x": -7.039843344482377,
+        "y": 12.5,
+        "z": 35.62410502249363
+      },
+      "angle": -0.1914331259847688,
+      "campusZ": 0.35,
+      "galleryZ": 0.35,
+      "marketZ": -46
+    }
+  ],
+  "checks": [
+    "Architectural campus entrance and indoor gallery replace road booth",
+    "Nine passage assets load",
+    "Native scroll controls every chapter through page bottom",
+    "Reverse scroll restores entrance",
+    "Backstage orbit and ending crane movement follow scroll",
+    "Copy and navigation follow the same progress",
+    "Inactive 3D worlds stop rendering",
+    "Game entry from beginning and stage, then return",
+    "Ending collection works",
+    "Mouse parallax and sound toggle",
+    "Real mobile touch advances both introduction and stage",
+    "390px layout has no horizontal overflow",
+    "Reduced motion freezes idle scenes while retaining navigation"
+  ],
+  "errors": []
+}

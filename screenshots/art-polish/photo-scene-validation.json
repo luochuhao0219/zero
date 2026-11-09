@@ -1,0 +1,50 @@
+{
+  "wide": {
+    "route": "game",
+    "progress": 0.1707,
+    "fps": 60,
+    "p95": 18.399999976158142,
+    "samples": 180,
+    "motionFps": 60.2,
+    "motionP95": 19,
+    "motionMax": 28.5,
+    "motionSamples": 240,
+    "tier": 0,
+    "pixelRatio": 2,
+    "canvas": [
+      2560,
+      1440
+    ],
+    "calls": 42,
+    "triangles": 16920,
+    "errors": []
+  },
+  "narrow": {
+    "route": "public",
+    "progress": 1,
+    "fps": 60,
+    "p95": 18.30000001192093,
+    "samples": 180,
+    "motionFps": null,
+    "motionP95": 0,
+    "motionMax": 0,
+    "motionSamples": 0,
+    "tier": 0,
+    "pixelRatio": 2,
+    "canvas": [
+      1342,
+      1514
+    ],
+    "calls": 3,
+    "triangles": 4,
+    "errors": []
+  },
+  "checks": [
+    "Four craft stages: transparent silhouette, no rectangle",
+    "Arm keyboard control: 35 to 39 degrees",
+    "Light controls: -25 to -21, depth 30 to 32",
+    "Composer: x 36 to 37 and restored to 36",
+    "Exterior entry, hall, both branches and return",
+    "38 automated tests passed"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-06T10:56:59.705Z",
+  "checks": [
+    {
+      "name": "desktop",
+      "overflow": false,
+      "assets": 3,
+      "targets": 2,
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "overflow": false,
+      "assets": 3,
+      "targets": 2,
+      "errors": []
+    }
+  ]
+}

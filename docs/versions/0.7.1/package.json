@@ -1,0 +1,1 @@
+{"name":"borrow-the-light","version":"0.7.1","private":true,"type":"module","description":"借光 · 珞珈夜戏 — 可探索的非遗光影网站与三维皮影游戏","scripts":{"dev":"python3 server.py","start":"python3 server.py","test":"node --test tests/game.test.mjs"}}

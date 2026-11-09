@@ -1,0 +1,43 @@
+{
+  "cycles": 20,
+  "durationMs": 836647,
+  "warmupCycles": 2,
+  "warmStart": {
+    "cycle": 3,
+    "elapsedMs": 123411.49999999977,
+    "errors": [],
+    "passage": {
+      "geometries": 248,
+      "programs": 39,
+      "textures": 37
+    },
+    "quality": 4,
+    "route": "public",
+    "stage": {
+      "geometries": 87,
+      "programs": 64,
+      "textures": 37
+    },
+    "works": 6
+  },
+  "end": {
+    "cycle": 20,
+    "elapsedMs": 836647.3,
+    "errors": [],
+    "passage": {
+      "geometries": 248,
+      "programs": 39,
+      "textures": 37
+    },
+    "quality": 4,
+    "route": "public",
+    "stage": {
+      "geometries": 87,
+      "programs": 64,
+      "textures": 37
+    },
+    "works": 6
+  },
+  "maxResourceSpread": 2,
+  "passed": true
+}

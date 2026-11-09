@@ -1,0 +1,148 @@
+{
+  "actorPose": [
+    {
+      "pose": 59.90859135708403,
+      "x": -1.075,
+      "y": 2.7781099859265037
+    },
+    {
+      "pose": 70.09251370753572,
+      "x": 1.075,
+      "y": 2.7781099859265037
+    }
+  ],
+  "backstage": false,
+  "cameraAngle": 0.20000000000000004,
+  "cameraPosition": {
+    "x": 4.291257545173323,
+    "y": 6.15,
+    "z": 20.46943808137082
+  },
+  "canvasRedraws": 3,
+  "completed": [
+    0,
+    1,
+    2
+  ],
+  "curtainOpen": 1,
+  "direct": {
+    "dragging": null,
+    "pointerCount": 0,
+    "selected": "actor-1",
+    "targets": []
+  },
+  "drawCalls": 109,
+  "exploration": {
+    "open": false,
+    "room": "heritage",
+    "works": 3
+  },
+  "fallback": false,
+  "frameMedianMs": 193.6000000000888,
+  "frameP95Ms": 216.49999999999636,
+  "frames": 580,
+  "journey": {
+    "active": "play",
+    "camera": [
+      4.4,
+      3.1,
+      -4.699999999999999
+    ],
+    "gameActive": true,
+    "interaction": null,
+    "opening": {
+      "assetErrors": [],
+      "assetsLoaded": 9,
+      "cameraX": 1.0012222408712803,
+      "campusZ": 0.35,
+      "compositeMode": "single",
+      "doorReveal": 1,
+      "fallback": false,
+      "frames": 127,
+      "galleryZ": -4.699999999999999,
+      "loaded": true,
+      "marketZ": -46,
+      "memory": {
+        "geometries": 234,
+        "programs": 39,
+        "textures": 34
+      },
+      "pixelRatio": 1,
+      "pointer": {
+        "x": 0.526967087967547,
+        "y": 0.21324319402407568
+      },
+      "portalRadius": 3,
+      "progress": 0.853818412783544,
+      "qualityTier": 0,
+      "route": "game",
+      "routeProgress": 0.8149600161817012,
+      "targetProgress": 0.853818412783544,
+      "visible": false,
+      "worldReady": true
+    },
+    "progress": 0.8149600161817012,
+    "route": "game",
+    "routes": {
+      "game": 0.8149600161817012,
+      "museum": 0,
+      "public": 1
+    },
+    "scrollY": 10332,
+    "stageOpacity": 1,
+    "target": 0.82,
+    "transition": null
+  },
+  "level": 2,
+  "materialAssetsLoaded": 13,
+  "memory": {
+    "geometries": 97,
+    "programs": 64,
+    "textures": 46
+  },
+  "neighborhood": {
+    "assetsLoaded": 3,
+    "lanterns": 32,
+    "phase": 29.000000000000277,
+    "spectators": 6,
+    "standees": 4,
+    "steamPuffs": 28
+  },
+  "paused": false,
+  "performing": false,
+  "pixelRatio": 0.7,
+  "playing": true,
+  "post": {
+    "bloom": false,
+    "mode": "direct",
+    "samples": 0
+  },
+  "qualityTier": 4,
+  "reducedMotion": false,
+  "reflection": false,
+  "renderState": {
+    "level": 2,
+    "poseLeft": 68,
+    "poseRight": 82,
+    "spacing": 2.15
+  },
+  "roofTiles": 1570,
+  "score": 100,
+  "shadows": false,
+  "simplifiedMaterials": 24,
+  "state": {
+    "level": 2,
+    "poseLeft": 68,
+    "poseRight": 82,
+    "spacing": 2.15
+  },
+  "storyManual": false,
+  "storyProgress": 0.853818412783544,
+  "storyVisible": true,
+  "textureUploads": 30,
+  "time": 29.000000000000277,
+  "triangles": 145170,
+  "undoCount": 3,
+  "viewTransition": false,
+  "works": 3
+}

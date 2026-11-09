@@ -1,0 +1,74 @@
+{
+  "date": "2026-11-08",
+  "samples": [
+    {
+      "scene": "desktop entrance to museum",
+      "stats": {
+        "route": "museum",
+        "progress": 0.1,
+        "fps": 60,
+        "p95": 18.80000001192093,
+        "samples": 180,
+        "motionFps": 60,
+        "motionP95": 18.400000005960464,
+        "motionMax": 18.900000005960464,
+        "motionSamples": 240,
+        "tier": 0,
+        "pixelRatio": 1,
+        "canvas": [
+          1280,
+          800
+        ],
+        "calls": 76,
+        "triangles": 50562,
+        "errors": []
+      }
+    },
+    {
+      "scene": "desktop hall return",
+      "stats": {
+        "route": "public",
+        "progress": 1,
+        "fps": 60,
+        "p95": 18.69999998807907,
+        "samples": 180,
+        "motionFps": 60,
+        "motionP95": 18.599999994039536,
+        "motionMax": 19.19999998807907,
+        "motionSamples": 240,
+        "tier": 0,
+        "pixelRatio": 1,
+        "canvas": [
+          1280,
+          800
+        ],
+        "calls": 100,
+        "triangles": 95898,
+        "errors": []
+      }
+    },
+    {
+      "scene": "native window 2x museum entry",
+      "stats": {
+        "route": "museum",
+        "progress": 0.085,
+        "fps": 60,
+        "p95": 18.200000017881393,
+        "samples": 180,
+        "motionFps": 60,
+        "motionP95": 18.399999976158142,
+        "motionMax": 19.19999998807907,
+        "motionSamples": 240,
+        "tier": 0,
+        "pixelRatio": 2,
+        "canvas": [
+          1342,
+          1514
+        ],
+        "calls": 75,
+        "triangles": 55010,
+        "errors": []
+      }
+    }
+  ]
+}
