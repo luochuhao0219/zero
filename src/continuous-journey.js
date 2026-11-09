@@ -1,5 +1,6 @@
 import {PassageScene} from './passage-scene.js';
-import {RouteState, ROUTE_HEIGHTS, MUSEUM_STOPS, museumStop, clamp, smooth} from './route-state.js';
+import {RouteState, ROUTE_HEIGHTS, MUSEUM_ENTRY, MUSEUM_STOPS, museumStop, clamp, smooth} from './route-state.js';
+import {museumRoomId} from './museum-content.js';
 
 const phases = [
   {id:'home',from:0,to:.115,label:'此刻 · 珞珈',nav:'home'},
@@ -25,6 +26,7 @@ export class Journey {
     this.copies = phases.map(phase => ({...phase,element:document.querySelector(`[data-passage-copy="${phase.id}"]`)}));
     this.homeUI = $('home-stage-ui'); this.chapters = document.querySelector('#play .site-footer');
     this.credits = document.querySelector('.site-credits'); this.seam = $('scene-seam');
+    this.shade = document.querySelector('.passage-shade');
     document.body.classList.add('has-journey','has-passage','has-continuous','in-passage');
     this.mountHall(); this.setTrack(); this.bind(); this.frame();
     const hash = location.hash.slice(1);
@@ -33,8 +35,8 @@ export class Journey {
   mountHall() {
     const hall = document.createElement('section'); hall.id = 'hall-ui'; hall.hidden = true;
     hall.setAttribute('aria-label','教学楼内厅 · 请选择去向');
-    hall.innerHTML = `<div class="hall-heading"><p>教学楼内厅 / TWO WAYS INTO THE LIGHT</p><h2 tabindex="-1">往光里走，<span>选一条路。</span></h2><p>参观一出戏的来处，或亲手开演。<br>在这里停下，不必着急选择。</p></div>
-      <button id="choose-museum" class="hall-door" data-branch="museum"><small>左廊 · 参观约五分钟</small><strong>历史馆 <span>↖</span></strong><span>循着光，认识一出戏的来处</span></button>
+    hall.innerHTML = `<div class="hall-heading"><p>教学楼内厅 / TWO WAYS INTO THE LIGHT</p><h2 tabindex="-1">往光里走，<span>选一条路。</span></h2><p>左廊看手艺与传承，右廊亲手演一出戏。<br>在这里停下，不必着急选择。</p></div>
+      <button id="choose-museum" class="hall-door" data-branch="museum"><small>左廊 · 五柜文化小展</small><strong>江汉皮影馆 <span>↖</span></strong><span>沿着展柜，认识一门手艺与传艺的人</span></button>
       <button id="choose-game" class="hall-door" data-branch="game"><small>右廊 · 三幕小戏</small><strong>皮影戏台 <span>↗</span></strong><span>接过手杆，亲手开演</span></button>
       <p class="hall-instruction">点击门牌 / Tab 选择后按 Enter · 向上滚动返回校园</p>`;
     document.body.append(hall); this.hall = hall;
@@ -86,19 +88,23 @@ export class Journey {
     $('route-status').className='sr-only';
     const from=this.state.route;
     if(!this.state.begin(route,performance.now()))return false;
-    this.intro.world.startTransition();
+    this.entryPublicProgress=from==='public'?this.progress:null;
+    this.intro.world.startTransition(from);
+    if(from==='public'&&this.progress<.98)this.intro.world.transitionPose=this.intro.world.hallPose(1);
     if(route==='game')this.intro.world.gameOrigin=from==='museum'?'museum':'public';
     this.returnJourney = route==='public'&&from==='museum'?this.progress:null;
     this.gameReturn = route==='public'&&from==='game'?this.progress:null;
     this.returnViaMuseum=this.gameReturn!==null&&this.intro.world.gameOrigin==='museum';
+    this.museumReturnDistance=this.state.progress.museum;
+    if(route!=='public')this.state.transition.duration=from==='public'&&this.progress<.98?3500:1850;
     if(route==='public')this.state.transition.duration=1400+Math.round(this.progress*1800)+(this.returnViaMuseum?1800:0);
     this.transitionOrigin=from;
-    this.progress=this.target=route==='public'?1:route==='museum'?.085:.09;
+    this.progress=this.target=route==='public'?1:route==='museum'?MUSEUM_ENTRY:.09;
     this.state.setProgress(this.progress);this.resizeProgress=undefined;
     this.setTrack();this.goPosition(this.progress,true);
     this.afterTransition=destination!==undefined?destination:room?MUSEUM_STOPS.find(s=>s.id===room)?.at:undefined;
     history.replaceState(null,'',`#${route==='public'?'hall':route==='museum'?'museum':'gate'}`);
-    $('route-status').textContent=route==='public'?'沿原路返回教学楼内厅':route==='museum'?'走进历史馆':'穿过影幕，前往灯市';
+    $('route-status').textContent=route==='public'?'沿原路返回教学楼内厅':route==='museum'?'走进江汉皮影馆':'穿过影幕，前往灯市';
     this.dispatch();return true;
   }
   returnHall() {
@@ -108,6 +114,7 @@ export class Journey {
     this.choose('public');
   }
   goTo(id,instant=false) {
+    id= museumRoomId(id);
     if(id==='home'||id==='door'||id==='hall') {
       if(this.state.route!=='public') {
         if(this.choose('public'))this.afterTransition=id==='home'?0:id==='door'?.73:1;
@@ -121,11 +128,12 @@ export class Journey {
     const p=(legacy-.21)/.79;
     if(this.state.route!=='game')this.choose('game',{destination:p});else this.goPosition(p,instant);
   }
-  openMuseum(room='heritage') {
-    const p=MUSEUM_STOPS.find(stop=>stop.id===room)?.at??.10;
-    if(this.gameActive){this.onLeave();this.queuedMuseum=room;return;}
+  openMuseum(room) {
+    room=museumRoomId(room);
+    const p=MUSEUM_STOPS.find(stop=>stop.id===room)?.at??MUSEUM_ENTRY;
+    if(this.gameActive){this.onLeave();this.queuedMuseum=room||'corridor';return;}
     if(this.state.route==='museum')this.goPosition(p);
-    else if(this.state.transition)this.queuedMuseum=room;
+    else if(this.state.transition)this.queuedMuseum=room||'corridor';
     else this.choose('museum',{room});
   }
   requestPlay(index) {
@@ -146,7 +154,11 @@ export class Journey {
   setExploring() {} // Historical optional-room API; the museum now owns a native scroll route.
   returnToPlay() {this.setGameActive(false);this.returnHall();}
   layer(element,opacity) {
-    element.style.opacity=opacity.toFixed(4);element.style.visibility=opacity>.002?'visible':'hidden';
+    this.layerCache ||= new WeakMap();
+    const value=opacity.toFixed(4);
+    if(this.layerCache.get(element)===value)return;
+    this.layerCache.set(element,value);
+    element.style.opacity=value;element.style.visibility=opacity>.002?'visible':'hidden';
     element.inert=opacity<.55;element.setAttribute('aria-hidden',String(opacity<.55));
   }
   dispatch() {
@@ -154,6 +166,12 @@ export class Journey {
   }
   syncCopy() {
     const route=this.state.route,p=route==='public'?this.progress*.23:route==='game'?.21+this.progress*.79:-1;
+    const key=route+'/'+Math.round(this.progress*100000)+'/'+!!this.state.transition;
+    if(this.lastCopyKey===key){if(!this.hall.hidden)this.positionDoors();return;}
+    this.lastCopyKey=key;
+    // The campus needs a reading scrim; indoor materials already have their own
+    // exposure and lighting. Fade it away as the camera enters the doorway.
+    this.layer(this.shade,route==='public'?1-smooth(.3,.72,this.progress):route==='museum'?0:smooth(.18,.33,this.progress));
     let current=phases[0];
     for(const item of this.copies) {
       const allowed=route==='game'||route==='public'&&(item.id==='home'||item.id==='door');
@@ -171,7 +189,7 @@ export class Journey {
     if(atHall)this.positionDoors();
     $('return-hall').hidden=route==='public'||!!this.state.transition;
     this.active=route==='museum'?museumStop(this.progress).id:atHall?'hall':current.nav;
-    $('journey-place').textContent=route==='museum'?`历史馆 · ${museumStop(this.progress).label}`:atHall?'教学楼内厅 · 选择去向':current.label;
+    $('journey-place').textContent=route==='museum'?`江汉皮影馆 · ${museumStop(this.progress).label}`:atHall?'教学楼内厅 · 选择去向':current.label;
     $('journey-percent').textContent=String(Math.round(this.progress*100)).padStart(2,'0');
     $('journey-track').style.transform=`scaleX(${this.progress})`;
     $('reading-chapter').textContent=route==='museum'?String(MUSEUM_STOPS.findIndex(s=>s.id===this.active)+1).padStart(2,'0'):atHall?'岔':'序';
@@ -182,10 +200,10 @@ export class Journey {
   positionDoors() {
     if(this.intro.fallback)return;
     for(const [i,id] of ['choose-museum','choose-game'].entries()) {
-      const point=this.intro.world.currentPose.position.clone().set(i?4.4:-4.4,1.9,.7).project(this.intro.cameraG);
+      const point=this.intro.world.backdrop.doorPositions[i];
       const half=$(id).offsetWidth/2+12;
-      $(id).style.left=`${clamp((point.x*.5+.5)*innerWidth,half,innerWidth-half)}px`;
-      $(id).style.top=`${(-point.y*.5+.5)*100}%`;
+      $(id).style.left=`${clamp(point[0]*innerWidth,half,innerWidth-half)}px`;
+      $(id).style.top=`${point[1]*100}%`;
     }
   }
   frame() {
@@ -211,11 +229,15 @@ export class Journey {
     const route=this.state.route;
     this.intro.visible=route!=='game'||this.progress<.56;
     let renderRoute=route,renderProgress=this.progress,renderTransition=transition?{fraction}:null;
-    if(this.returnJourney!==null&&this.returnJourney!==undefined){renderRoute='museum';renderProgress=this.returnJourney*(1-smooth(0,1,fraction));renderTransition=null;}
+    if(transition&&this.entryPublicProgress!==null&&this.entryPublicProgress<.98&&route!=='public'){
+      if(fraction<.6){renderRoute='public';renderProgress=this.entryPublicProgress+(1-this.entryPublicProgress)*smooth(0,.6,fraction);renderTransition=null;}
+      else renderTransition={fraction:(fraction-.6)/.4};
+    }
+    else if(this.returnJourney!==null&&this.returnJourney!==undefined){renderRoute='museum';renderProgress=this.returnJourney*(1-smooth(0,1,fraction));renderTransition=null;}
     else if(this.gameReturn!==null&&this.gameReturn!==undefined){
-      const distance=smooth(0,1,fraction)*(this.gameReturn+(this.returnViaMuseum?1:0));
+      const distance=smooth(0,1,fraction)*(this.gameReturn+(this.returnViaMuseum?this.museumReturnDistance:0));
       renderRoute=this.returnViaMuseum&&distance>this.gameReturn?'museum':'game';
-      renderProgress=renderRoute==='museum'?1-(distance-this.gameReturn):Math.max(0,this.gameReturn-distance);
+      renderProgress=renderRoute==='museum'?this.museumReturnDistance-(distance-this.gameReturn):Math.max(0,this.gameReturn-distance);
       renderTransition=null;this.intro.visible=true;
     }
     this.intro.setRoute(renderRoute,renderProgress,renderTransition);this.intro.update(now/1000,dt,this.media.matches);

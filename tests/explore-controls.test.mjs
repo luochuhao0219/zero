@@ -1,53 +1,59 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Exploration} from '../src/explore.js';
+import {FreePlayStudio} from '../src/compose-studio.js';
+import {defaultDraft} from '../src/explore-data.js';
 
-function handles(t) {
-  const nodes=new Map();
-  const node=id=>{
-    if(!nodes.has(id))nodes.set(id,{value:0,listeners:new Map(),captures:[],focus(){},
-      setPointerCapture(pointer){this.captures.push(pointer);},
-      addEventListener(type,handler){this.listeners.set(type,handler);},
-      emit(type,pointerId,clientX=0,clientY=0){this.listeners.get(type)?.({button:0,pointerId,clientX,clientY,preventDefault(){}});}});
-    return nodes.get(id);
-  };
+function studioCanvas(t) {
+  const canvas={width:1200,height:840,listeners:new Map(),captures:[],focus(){},
+    getBoundingClientRect:()=>({left:0,top:0,width:1200,height:840}),
+    setPointerCapture(pointer){this.captures.push(pointer);},
+    addEventListener(type,handler){this.listeners.set(type,handler);},
+    emit(type,event){this.listeners.get(type)?.({button:0,preventDefault(){},...event});}};
   const original=globalThis.document;
-  globalThis.document={getElementById:node};
+  globalThis.document={getElementById:()=>canvas};
   t.after(()=>{if(original===undefined)delete globalThis.document;else globalThis.document=original;});
-  const calls={resume:0,draw:0,save:0};
-  const exploration=Object.create(Exploration.prototype);
-  Object.assign(exploration,{journey:{state:{transition:null,interaction:null},progress:.75,goPosition(){calls.resume++;}},
-    draft:{selected:0,actors:[{x:36,y:65},{x:64,y:65}]},
-    drawLight(){calls.draw++;},drawCraft(){calls.draw++;},syncComposer(){},updateComposer(){calls.save++;},screenBounds(){return {width:100,height:100};}});
-  exploration.bindSceneHandles();
-  return {node,exploration,calls};
+  const calls=[];
+  const studio=Object.create(FreePlayStudio.prototype);
+  Object.assign(studio,{draft:defaultDraft(),syncComposer(){},updateComposer(persist=true){calls.push(persist);}});
+  studio.bindCanvas();
+  const point={clientX:432,clientY:450};
+  return {canvas,studio,calls,point};
 }
 
-test('a second pointer or another museum handle cannot take over the route lock',t=>{
-  const {node,exploration,calls}=handles(t),lamp=node('handle-lamp'),puppet=node('handle-puppet');
-  lamp.emit('pointerdown',1);
-  lamp.emit('pointerdown',2);puppet.emit('pointerdown',2);
-  lamp.emit('pointermove',2,80);puppet.emit('pointermove',2,80);
-  lamp.emit('pointercancel',2);puppet.emit('pointerup',2);
-  assert.equal(exploration.journey.state.interaction,'lamp');
-  assert.deepEqual(lamp.captures,[1]);assert.deepEqual(puppet.captures,[]);
-  assert.equal(node('light-position').value,0);assert.equal(calls.resume,0);
-  lamp.emit('pointermove',1,20);
-  assert.equal(node('light-position').value,10);assert.equal(calls.draw,1);
-  lamp.emit('lostpointercapture',1);
-  assert.equal(exploration.journey.state.interaction,null);assert.equal(calls.resume,1);
-  lamp.emit('pointerup',1);assert.equal(calls.resume,1);
-  puppet.emit('pointerdown',2);
-  assert.equal(exploration.journey.state.interaction,'puppet');
+test('only the owning pointer moves and saves a studio actor',t=>{
+  const {canvas,studio,calls,point}=studioCanvas(t);
+  canvas.emit('pointerdown',{pointerId:7,...point});
+  canvas.emit('pointerdown',{pointerId:8,...point});
+  canvas.emit('pointermove',{pointerId:8,clientX:552,clientY:450});
+  canvas.emit('pointercancel',{pointerId:8});
+  assert.equal(studio.draft.actors[0].x,36);
+  assert.deepEqual(canvas.captures,[7]);assert.deepEqual(calls,[]);
+  canvas.emit('pointermove',{pointerId:7,clientX:552,clientY:450});
+  assert.equal(studio.draft.actors[0].x,46);assert.deepEqual(calls,[false]);
+  canvas.emit('lostpointercapture',{pointerId:7});
+  canvas.emit('pointerup',{pointerId:7});
+  assert.deepEqual(calls,[false,true]);
 });
 
-test('only the actor owner can finish a composition drag and restore scrolling',t=>{
-  const {node,exploration,calls}=handles(t),actor=node('handle-actor-1');
-  actor.emit('pointerdown',7);actor.emit('pointermove',7,10);
-  assert.equal(exploration.draft.selected,1);assert.equal(exploration.draft.actors[1].x,74);
-  assert.equal(calls.save,1);
-  actor.emit('lostpointercapture',8);
-  assert.equal(exploration.journey.state.interaction,'actor-1');assert.equal(calls.resume,0);
-  actor.emit('pointercancel',7);
-  assert.equal(exploration.journey.state.interaction,null);assert.equal(calls.resume,1);assert.equal(calls.save,2);
+test('closing a studio drag prevents stray moves and accepts a new owner',t=>{
+  const {canvas,studio,calls,point}=studioCanvas(t);
+  canvas.emit('pointerdown',{pointerId:1,...point});
+  studio.cancelDrag();
+  canvas.emit('pointermove',{pointerId:1,clientX:900,clientY:500});
+  assert.equal(studio.draft.actors[0].x,36);assert.deepEqual(calls,[]);
+  canvas.emit('pointerdown',{pointerId:2,...point});
+  canvas.emit('pointermove',{pointerId:2,clientX:9000,clientY:9000});
+  assert.equal(studio.draft.actors[0].x,84);assert.equal(studio.draft.actors[0].y,86);
+  assert.deepEqual(canvas.captures,[1,2]);
+});
+
+test('studio keyboard nudges respect bounds and persist the result',t=>{
+  const {canvas,studio,calls}=studioCanvas(t);
+  canvas.emit('keydown',{key:'ArrowRight',shiftKey:true});
+  assert.equal(studio.draft.actors[0].x,40);
+  studio.draft.actors[0].x=83;
+  canvas.emit('keydown',{key:'ArrowRight',shiftKey:true});
+  assert.equal(studio.draft.actors[0].x,84);
+  canvas.emit('keydown',{key:'Escape'});
+  assert.deepEqual(calls,[true,true]);
 });

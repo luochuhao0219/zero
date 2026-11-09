@@ -1,12 +1,19 @@
-import {AdaptiveQuality,qualityPixelRatio} from './adaptive-quality.js';
+import {AdaptiveQuality} from './adaptive-quality.js';
 import * as THREE from '../vendor/three.module.js';
 import {MuseumWorld} from './museum-world.js';
+import {MUSEUM_ENTRY,MUSEUM_STOPS} from './route-state.js';
 
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t);};
 const mix=THREE.MathUtils.lerp;
 const damp=(a,b,dt,s=8)=>mix(a,b,1-Math.exp(-s*dt));
 const TAU=Math.PI*2;
+// The interior photographs already contain their lighting and color balance.
+// Applying the old HDR/ACES grade a second time washed out their real texture.
+const interiorGrade=`
+  vec3 film(vec3 value){
+    return max(value,vec3(0.))*interiorExposure;
+  }`;
 
 function random(seed=7){return()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};}
 function painted(width,height,paint){const c=document.createElement('canvas');c.width=width;c.height=height;paint(c.getContext('2d'),width,height);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
@@ -30,19 +37,23 @@ export class PassageScene {
     this.canvas=canvas;this.quality=new AdaptiveQuality();this.progress=0;this.targetProgress=0;this.visible=true;this.frames=0;
     this.pointer={x:0,y:0};this.smoothPointer={x:0,y:0};this.assetsLoaded=0;this.assetErrors=[];
     this.lanterns=[];this.drifting=[];this.sparkTime={value:0};
-    try{this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});}
+    // The interior render target resolves its own MSAA. The final canvas only
+    // draws a full-screen composite, so a second MSAA buffer adds no detail.
+    try{this.renderer=new THREE.WebGLRenderer({canvas,antialias:false,depth:false,alpha:false,powerPreference:'high-performance'});}
     catch{this.fallback=true;return;}
-    this.basePixelRatio=Math.min(devicePixelRatio,innerWidth<701?1:1.6);this.pixelRatio=this.basePixelRatio;this.renderer.setPixelRatio(this.pixelRatio);
+    this.basePixelRatio=Math.min(devicePixelRatio,2);this.pixelRatio=this.basePixelRatio;this.renderer.setPixelRatio(this.pixelRatio);
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.campus=new THREE.Scene();this.campus.background=new THREE.Color('#112326');
-    this.world=new MuseumWorld();this.gallery=this.world.scene;this.route='public';this.routeProgress=0;
+    this.world=new MuseumWorld(this.renderer);this.gallery=this.world.scene;this.route='public';this.routeProgress=0;
+    this.frameTimes=[];this.motionFrameTimes=[];this.renderer.info.autoReset=false;
+    this.inspect=new URLSearchParams(location.search).has('inspect');
     this.market=new THREE.Scene();this.market.background=new THREE.Color('#162324');
     this.cameraA=new THREE.PerspectiveCamera(50,1,.06,300);
     this.cameraG=new THREE.PerspectiveCamera(50,1,.06,300);
     this.cameraB=new THREE.PerspectiveCamera(50,1,.06,300);
     this.doorPoint=new THREE.Vector3();this.portalPoint=new THREE.Vector3();this.projectedPoint=new THREE.Vector3();
     this.targetA=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true});
-    this.targetG=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true});
+    this.targetG=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true,type:THREE.HalfFloatType,samples:Math.min(4,this.renderer.capabilities.maxSamples)});
     this.targetB=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true});
     this.promises=[];this.loader=new THREE.TextureLoader();
     this.campusMap=this.load('./assets/passage/campus-entrance.png');
@@ -56,9 +67,14 @@ export class PassageScene {
     this.stoneMap=this.load('./assets/materials/stone/color.jpg');
     this.stoneMap.wrapS=this.stoneMap.wrapT=THREE.RepeatWrapping;
     this.makeCampus();this.makeMarket();this.makeComposite();
-    Promise.all(this.promises).then(async()=>{
+    Promise.all([...this.promises,this.world.ready,document.fonts.ready]).then(async()=>{
+      this.assetErrors.push(...this.world.errors);
       // Prepare shader programs before allowing either threshold to open.
-      try{await this.renderer.compileAsync(this.gallery,this.cameraG);await this.renderer.compileAsync(this.market,this.cameraB);}catch(error){this.assetErrors.push('shader preparation: '+error.message);}
+      try{
+        await this.renderer.compileAsync(this.gallery,this.cameraG);
+        await this.renderer.compileAsync(this.market,this.cameraB);
+        await this.warmup();
+      }catch(error){this.assetErrors.push('shader preparation: '+error.message);}
       this.loaded=true;document.body.classList.add('passage-ready');
       window.dispatchEvent(new Event('passage:ready'));
     });
@@ -68,6 +84,27 @@ export class PassageScene {
     let done;this.promises.push(new Promise(resolve=>done=resolve));
     const texture=this.loader.load(url,()=>{this.assetsLoaded++;done();},undefined,()=>{this.assetErrors.push(url);done();});
     texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,this.renderer.capabilities.getMaxAnisotropy());return texture;
+  }
+  async warmup(){
+    // Program compilation alone does not upload maps or allocate shadow targets.
+    // Prime the actual render paths while the loading cover is still visible.
+    for(const [route,progress] of [['public',1],['museum',MUSEUM_ENTRY],...MUSEUM_STOPS.map(stop=>['museum',stop.at])]){
+      const pose=this.world.update(route,progress,0,true,null);
+      this.cameraG.position.copy(pose.position);this.cameraG.lookAt(pose.look);this.cameraG.updateMatrixWorld();
+      this.world.syncCamera(this.cameraG);
+      this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);
+      await new Promise(resolve=>requestAnimationFrame(resolve));
+    }
+    this.cameraA.position.set(0,2.8,28);this.cameraA.lookAt(0,2.8,-40);
+    this.renderer.setRenderTarget(this.targetA);this.renderer.render(this.campus,this.cameraA);
+    this.cameraB.position.set(0,2.9,29);this.cameraB.lookAt(0,3.4,-70);
+    this.renderer.setRenderTarget(this.targetB);this.renderer.render(this.market,this.cameraB);
+    for(const material of [this.portalMaterial,this.singleMaterial]){
+      this.compositeQuad.material=material;
+      await this.renderer.compileAsync(this.composite,this.screenCamera);
+      this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);
+    }
+    this.world.update('public',0,0,true,null);this.renderer.info.reset();
   }
   makeCampus(){
     this.campusBackdrop=plane(this.campusMap,40,26.667,0,3,0,{transparent:false});this.campus.add(this.campusBackdrop);
@@ -169,40 +206,55 @@ export class PassageScene {
   makeComposite(){
     this.composite=new THREE.Scene();this.screenCamera=new THREE.OrthographicCamera(-1,1,1,-1,0,2);
     this.uniforms={campus:{value:this.targetA.texture},gallery:{value:this.targetG.texture},market:{value:this.targetB.texture},center:{value:new THREE.Vector2(.5,.5)},doorCenter:{value:new THREE.Vector2(.5,.5)},doorHalf:{value:new THREE.Vector2(.1,.2)},doorReveal:{value:0},doorFull:{value:0},radius:{value:0},aspect:{value:1},reveal:{value:0}};
+    this.uniforms.interiorExposure={value:1};
     const material=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,uniforms:this.uniforms,
       vertexShader:'varying vec2 uvp;void main(){uvp=uv;gl_Position=vec4(position.xy,0.,1.);}',
-      fragmentShader:`uniform sampler2D campus,gallery,market;uniform vec2 center,doorCenter,doorHalf;uniform float radius,aspect,reveal,doorReveal,doorFull;varying vec2 uvp;
+      fragmentShader:`uniform sampler2D campus,gallery,market;uniform vec2 center,doorCenter,doorHalf;uniform float radius,aspect,reveal,doorReveal,doorFull,interiorExposure;varying vec2 uvp;
+      ${interiorGrade}
       void main(){
-        vec2 q=(uvp-doorCenter)*vec2(aspect,1.);float shoulder=doorHalf.y-doorHalf.x;
+        vec2 q=(uvp-doorCenter)*vec2(aspect,1.);float rise=doorHalf.x*.62;float shoulder=doorHalf.y-rise;
         float doorEdge=max(abs(q.x)-doorHalf.x,-q.y-doorHalf.y);
-        if(q.y>shoulder)doorEdge=max(doorEdge,length(vec2(q.x,q.y-shoulder))-doorHalf.x);
-        float throughDoor=doorFull>.5?1.:(1.-smoothstep(-.003,.003,doorEdge))*doorReveal;
-        vec3 color=mix(texture2D(campus,uvp).rgb,texture2D(gallery,uvp).rgb,throughDoor);
+        if(q.y>shoulder)doorEdge=max(doorEdge,(length(vec2(q.x/doorHalf.x,(q.y-shoulder)/rise))-1.)*doorHalf.x);
+        float throughDoor=mix((1.-smoothstep(-.005,.005,doorEdge))*doorReveal,1.,doorFull);
+        vec3 color=mix(texture2D(campus,uvp).rgb,film(texture2D(gallery,uvp).rgb),throughDoor);
         vec2 p=(uvp-center)*vec2(aspect,.88);float angle=atan(p.y,p.x);float edge=radius*(1.+.045*cos(angle*8.)+.018*sin(angle*13.));float d=length(p);
         float inside=radius>=2.9?1.:(1.-smoothstep(edge-.0025,edge+.0025,d))*reveal;
         color=mix(color,texture2D(market,uvp).rgb,inside);
         float rim=exp(-abs(d-edge)*250.)*reveal*(1.-smoothstep(1.,1.7,radius));color+=vec3(.64,.34,.095)*rim*.8;
-        float vignette=1.-smoothstep(.18,.9,length((uvp-.5)*vec2(.86,1.)));color*=.69+.31*vignette;gl_FragColor=vec4(color,1.);
+        float vignette=1.-smoothstep(.18,.9,length((uvp-.5)*vec2(.86,1.)));float shade=mix(.31,.12,throughDoor);color*=1.-shade+shade*vignette;gl_FragColor=vec4(color,1.);
         #include <colorspace_fragment>
       }`});
     this.portalMaterial=material;
-    this.singleUniforms={image:{value:this.targetA.texture}};
+    this.singleUniforms={image:{value:this.targetA.texture},grade:{value:0},interiorExposure:this.uniforms.interiorExposure};
     this.singleMaterial=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,uniforms:this.singleUniforms,
       vertexShader:material.vertexShader,
-      fragmentShader:`uniform sampler2D image;varying vec2 uvp;void main(){
+      fragmentShader:`uniform sampler2D image;uniform float grade,interiorExposure;varying vec2 uvp;
+      ${interiorGrade}
+      void main(){
         vec3 color=texture2D(image,uvp).rgb;
+        if(grade>.5)color=film(color);
         float vignette=1.-smoothstep(.18,.9,length((uvp-.5)*vec2(.86,1.)));
-        gl_FragColor=vec4(color*(.69+.31*vignette),1.);
+        float shade=mix(.31,.12,grade);gl_FragColor=vec4(color*(1.-shade+shade*vignette),1.);
         #include <colorspace_fragment>
       }`});
     this.compositeQuad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),material);this.composite.add(this.compositeQuad);
   }
   resize(){
     if(this.fallback)return;const {width,height}=this.canvas.parentElement.getBoundingClientRect();if(!width||!height)return;
-    this.width=width;this.height=height;this.renderer.setSize(width,height,false);this.mobile=width<701;
+    this.width=width;this.height=height;
+    // Keep high-density screens crisp, with a bounded total pixel budget.
+    // Spend the former duplicate reflection pass on real image detail. Preserve
+    // native density through the first quality step, then reduce it gradually.
+    this.basePixelRatio=Math.min(devicePixelRatio,2,Math.sqrt(6400000/(width*height)));
+    this.pixelRatio=Math.min(this.basePixelRatio,[Infinity,Infinity,1.6,1.3,.9][this.quality.tier]);
+    this.renderer.setPixelRatio(this.pixelRatio);this.renderer.setSize(width,height,false);this.mobile=width<701;
+    const pixels=width*height*this.pixelRatio**2;
+    const samples=this.quality.tier>0||pixels>4500000?0:Math.min(this.renderer.capabilities.maxSamples,this.pixelRatio>=1.5||pixels>2600000?2:4);
+    if(this.targetG.samples!==samples){this.targetG.samples=samples;this.targetG.dispose();}
     for(const camera of [this.cameraA,this.cameraG,this.cameraB]){camera.aspect=width/height;camera.fov=this.mobile?62:50;camera.updateProjectionMatrix();}
     for(const target of [this.targetA,this.targetG,this.targetB])target.setSize(Math.round(width*this.pixelRatio),Math.round(height*this.pixelRatio));
     this.uniforms.aspect.value=width/height;
+    this.world.backdrop.resize(width,height);
     // Keep both physical entrances in view in a portrait viewport.
     this.world.hallDistanceOffset=Math.max(0,7.3/(Math.tan(THREE.MathUtils.degToRad(this.cameraG.fov/2))*this.cameraG.aspect)-12);
     const coverHeight=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*28;
@@ -219,16 +271,31 @@ export class PassageScene {
   }
   setPointer(x,y){this.pointer.x=clamp(x,-1,1);this.pointer.y=clamp(y,-1,1);}
   update(time,dt,reduced){
-    if(this.fallback||!this.visible||!this.loaded){this.quality.resetClock();return;}
+    if(this.fallback||!this.visible||!this.loaded){this.quality.resetClock();this.lastDrawAt=null;return;}
     const p=this.progress;this.smoothPointer.x=damp(this.smoothPointer.x,this.pointer.x,dt,4);this.smoothPointer.y=damp(this.smoothPointer.y,this.pointer.y,dt,4);
+    this.uniforms.interiorExposure.value=this.route==='public'?mix(.5,1,smooth(.45,.88,this.routeProgress)):1;
     const px=reduced?0:this.smoothPointer.x,py=reduced?0:this.smoothPointer.y;
     if(reduced&&this.lastRenderedProgress===p&&this.lastRouteProgress===this.routeProgress&&!this.routeTransition&&!this.interactionDirty&&!this.resizeDirty&&this.frames>0){this.quality.resetClock();return;}
-    if(this.quality.observe(performance.now())){this.pixelRatio=qualityPixelRatio(this.basePixelRatio,this.quality.tier);this.renderer.setPixelRatio(this.pixelRatio);this.resize();}
+    if(this.quality.observe(performance.now())){
+      // Drop extra samples/reflections before reducing the image resolution.
+      if(this.quality.tier===1){this.targetG.samples=0;this.targetG.dispose();}
+      this.resize();
+    }
+    const frameNow=performance.now();
+    if(this.lastDrawAt!==null&&this.lastDrawAt!==undefined){
+      const elapsed=frameNow-this.lastDrawAt;
+      this.frameTimes.push(elapsed);if(this.frameTimes.length>180)this.frameTimes.shift();
+      if(this.routeTransition||Math.abs(this.routeProgress-(this.lastRouteProgress??this.routeProgress))>.00001){this.motionFrameTimes.push(elapsed);if(this.motionFrameTimes.length>240)this.motionFrameTimes.shift();}
+    }
+    this.lastDrawAt=frameNow;this.renderer.info.reset();this.world.qualityTier=this.quality.tier;
     this.lastRenderedProgress=p;this.lastRouteProgress=this.routeProgress;this.interactionDirty=false;this.resizeDirty=false;this.frames++;this.sparkTime.value=reduced?0:time;
     const pose=this.world.update(this.route,this.route==='game'?smooth(0,.25,this.routeProgress):this.routeProgress,time,reduced,this.routeTransition);
     this.cameraG.position.copy(pose.position);this.cameraG.lookAt(pose.look);this.cameraG.updateMatrixWorld();
+    this.world.syncCamera(this.cameraG);
     if(this.route==='museum'){
-      this.compositeMode='direct';this.renderer.setRenderTarget(null);this.renderer.render(this.gallery,this.cameraG);return;
+      this.compositeMode='gallery';this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);
+      this.compositeQuad.material=this.singleMaterial;this.singleUniforms.image.value=this.targetG.texture;this.singleUniforms.grade.value=1;
+      this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);this.finishFrame();return;
     }
     const approach=smooth(0,.22,p),az=mix(28,.35,approach),ax=this.doorPoint.x*approach;
     const ay=mix(2.8,this.doorPoint.y,smooth(.02,.18,p)),idle=reduced?0:Math.sin(time*.55)*.014;
@@ -244,24 +311,34 @@ export class PassageScene {
     this.steam.forEach(({mesh,k,base})=>{const t=reduced?k/8:(time*.12+k/8)%1;mesh.position.copy(base);mesh.position.y+=t*2.3;mesh.position.x+=Math.sin(t*5+k)*.18;mesh.scale.setScalar(.35+t);mesh.material.opacity=Math.sin(t*Math.PI)*.05;mesh.quaternion.copy(this.cameraB.quaternion);});
     this.projectedPoint.copy(this.doorPoint).project(this.cameraA);this.uniforms.doorCenter.value.set(this.projectedPoint.x*.5+.5,this.projectedPoint.y*.5+.5);
     const doorFrustum=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*az;
-    this.uniforms.doorHalf.value.set(2.59*this.matteScale/doorFrustum,3.71*this.matteScale/doorFrustum);
-    this.uniforms.doorReveal.value=smooth(.10,.15,p);this.uniforms.doorFull.value=p>=.21?1:0;
+    this.uniforms.doorHalf.value.set(3.4*this.matteScale/doorFrustum,3.78*this.matteScale/doorFrustum);
+    this.uniforms.doorReveal.value=smooth(.065,.095,p);this.uniforms.doorFull.value=smooth(.195,.226,p);
     if(this.route==='game')this.portalPoint.set(this.world.gameOrigin==='museum'?-9:4.4,3,this.world.gameOrigin==='museum'?-94:-5);
-    this.projectedPoint.copy(this.portalPoint).project(this.cameraG);this.uniforms.center.value.set(this.projectedPoint.x*.5+.5,this.projectedPoint.y*.5+.5);
+    const linen=this.world.backdrop.theaterRect;
+    this.uniforms.center.value.set(linen.x+linen.width/2,1-linen.y-linen.height/2);
     const portalDistance=Math.max(.3,this.cameraG.position.distanceTo(this.portalPoint));
     let radius=2.15/(2*Math.tan(THREE.MathUtils.degToRad(this.cameraG.fov/2))*portalDistance)*smooth(.12,.22,this.routeProgress);
     if(this.routeProgress>.22)radius=mix(radius,3,smooth(.22,.25,this.routeProgress));
     this.uniforms.radius.value=this.route==='game'?radius:0;
     this.uniforms.reveal.value=this.route==='game'?smooth(.12,.14,this.routeProgress):0;
-    if(p<.21){this.renderer.setRenderTarget(this.targetA);this.renderer.render(this.campus,this.cameraA);}
-    if(p>.10&&(this.route!=='game'||this.routeProgress<.27)){this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);}
+    if(p<.228){this.renderer.setRenderTarget(this.targetA);this.renderer.render(this.campus,this.cameraA);}
+    if(p>.065&&(this.route!=='game'||this.routeProgress<.27)){this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);}
     if(p>.27){this.renderer.setRenderTarget(this.targetB);this.renderer.render(this.market,this.cameraB);}
     // Only portals need three texture reads and the angular/rim shader per pixel.
-    const single=p<=.10?this.targetA:this.route!=='game'&&p>=.21?this.targetG:this.route==='game'&&this.routeProgress>=.27?this.targetB:null;
+    const single=p<=.065?this.targetA:this.route!=='game'&&p>=.228?this.targetG:this.route==='game'&&this.routeProgress>=.27?this.targetB:null;
     this.compositeMode=single?'single':'portal';
     this.compositeQuad.material=single?this.singleMaterial:this.portalMaterial;
     if(single)this.singleUniforms.image.value=single.texture;
-    this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);
+    this.singleUniforms.grade.value=single===this.targetG?1:0;
+    this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);this.finishFrame();
+  }
+  finishFrame(){
+    if(this.inspect&&performance.now()-(this.lastStatsAt||0)>800){
+      this.lastStatsAt=performance.now();
+      const sorted=[...this.frameTimes].sort((a,b)=>a-b),mean=sorted.reduce((a,b)=>a+b,0)/Math.max(1,sorted.length);
+      const motion=[...this.motionFrameTimes].sort((a,b)=>a-b),motionMean=motion.reduce((a,b)=>a+b,0)/Math.max(1,motion.length);
+      document.documentElement.dataset.journeyRender=JSON.stringify({route:this.route,progress:+this.routeProgress.toFixed(4),fps:+(1000/Math.max(1,mean)).toFixed(1),p95:sorted[Math.floor(sorted.length*.95)]||0,samples:sorted.length,motionFps:motion.length?+(1000/Math.max(1,motionMean)).toFixed(1):null,motionP95:motion[Math.floor(motion.length*.95)]||0,motionMax:motion.at(-1)||0,motionSamples:motion.length,tier:this.quality.tier,pixelRatio:this.pixelRatio,canvas:[this.canvas.width,this.canvas.height],calls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,errors:this.assetErrors});
+    }
   }
   diagnostics(){return{qualityTier:this.quality.tier,memory:this.renderer?{...this.renderer.info.memory,programs:this.renderer.info.programs.length}:null,compositeMode:this.compositeMode,fallback:!!this.fallback,loaded:!!this.loaded,assetErrors:[...this.assetErrors],assetsLoaded:this.assetsLoaded,visible:this.visible,frames:this.frames,progress:this.progress,route:this.route,routeProgress:this.routeProgress,targetProgress:this.targetProgress,worldReady:!!this.world?.prepared,campusZ:this.cameraA?.position.z,galleryZ:this.cameraG?.position.z,doorReveal:this.uniforms?.doorReveal.value,marketZ:this.cameraB?.position.z,pointer:{...this.smoothPointer},cameraX:this.cameraA?.position.x,portalRadius:this.uniforms?.radius.value,pixelRatio:this.pixelRatio};}
 }

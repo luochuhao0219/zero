@@ -1,0 +1,332 @@
+{
+  "downloaded": "2026-11-08",
+  "provider": "Poly Haven",
+  "license": "CC0-1.0",
+  "license_url": "https://polyhaven.com/license",
+  "files": [
+    {
+      "asset": "plastered_stone_wall",
+      "source": "https://polyhaven.com/a/plastered_stone_wall",
+      "path": "assets/materials/aged-plaster/color.jpg",
+      "map": "Diffuse",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/plastered_stone_wall/plastered_stone_wall_diff_2k.jpg",
+      "md5": "3a7eacd687ab3bf02c72f82c4441224a",
+      "sha256": "8f20192144ce4725c7cfa7def9cbcd0d069bccc59ee8f2a2d80ed9647f717213",
+      "bytes": 2877659,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        2500,
+        2500
+      ]
+    },
+    {
+      "asset": "plastered_stone_wall",
+      "source": "https://polyhaven.com/a/plastered_stone_wall",
+      "path": "assets/materials/aged-plaster/normal.jpg",
+      "map": "nor_gl",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/plastered_stone_wall/plastered_stone_wall_nor_gl_2k.jpg",
+      "md5": "04540496a051f6049e34b4046fb73184",
+      "sha256": "25bed6b5b2d66bb3305ffa9a4308d105828fafa6cc37e806041b8b3d103139f1",
+      "bytes": 3940544,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        2500,
+        2500
+      ]
+    },
+    {
+      "asset": "plastered_stone_wall",
+      "source": "https://polyhaven.com/a/plastered_stone_wall",
+      "path": "assets/materials/aged-plaster/roughness.jpg",
+      "map": "Rough",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_stone_wall/plastered_stone_wall_rough_1k.jpg",
+      "md5": "8bab4178befcd298d625d27d792a21b8",
+      "sha256": "978bd1d9f8d4132564d40375f705975e897ca588c2d756e6257f68946651bab0",
+      "bytes": 508548,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        2500,
+        2500
+      ]
+    },
+    {
+      "asset": "plastered_stone_wall",
+      "source": "https://polyhaven.com/a/plastered_stone_wall",
+      "path": "assets/materials/aged-plaster/ao.jpg",
+      "map": "AO",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_stone_wall/plastered_stone_wall_ao_1k.jpg",
+      "md5": "77734201afeab110e9a79888a1c41678",
+      "sha256": "d1a8fdbf39639536c11911354e6675c80678a7e0d59190bc541a5b7d153cec0d",
+      "bytes": 678440,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        2500,
+        2500
+      ]
+    },
+    {
+      "asset": "plastered_stone_wall",
+      "source": "https://polyhaven.com/a/plastered_stone_wall",
+      "path": "assets/materials/aged-plaster/height.jpg",
+      "map": "Displacement",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_stone_wall/plastered_stone_wall_disp_1k.jpg",
+      "md5": "eb31ebbe8de3daf1f53f80bc3401f513",
+      "sha256": "9da658ce251d91c4ef1a2e26e13e2a57e86fe117440e6d97e67431a8e7de7f96",
+      "bytes": 332971,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        2500,
+        2500
+      ]
+    },
+    {
+      "asset": "fine_grained_wood",
+      "source": "https://polyhaven.com/a/fine_grained_wood",
+      "path": "assets/materials/aged-wood/color.jpg",
+      "map": "Diffuse",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/fine_grained_wood/fine_grained_wood_col_2k.jpg",
+      "md5": "cfbfbf2cc0e0633af9b959a0e6e17182",
+      "sha256": "d97b1ab2c5206ac43bc0c42f21878da14f4d02497fd21396399406c03f3755a9",
+      "bytes": 1327517,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        600.0000238418579,
+        600.0000238418579
+      ]
+    },
+    {
+      "asset": "fine_grained_wood",
+      "source": "https://polyhaven.com/a/fine_grained_wood",
+      "path": "assets/materials/aged-wood/normal.jpg",
+      "map": "nor_gl",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/fine_grained_wood/fine_grained_wood_nor_gl_2k.jpg",
+      "md5": "24423b733087ca4cefe5833d131a1f62",
+      "sha256": "c76fcd29434978227db5a35b5b0238da1bee0fb5fa8cdfc6819a76c7ef723f3c",
+      "bytes": 855682,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        600.0000238418579,
+        600.0000238418579
+      ]
+    },
+    {
+      "asset": "fine_grained_wood",
+      "source": "https://polyhaven.com/a/fine_grained_wood",
+      "path": "assets/materials/aged-wood/roughness.jpg",
+      "map": "Rough",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/fine_grained_wood/fine_grained_wood_rough_1k.jpg",
+      "md5": "5e29204cca6747b5df219e9a7255540f",
+      "sha256": "f281f682e62fe322303dfeaa13dac18b5cb9e113617fe0aca43605b49161d82b",
+      "bytes": 215155,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        600.0000238418579,
+        600.0000238418579
+      ]
+    },
+    {
+      "asset": "fine_grained_wood",
+      "source": "https://polyhaven.com/a/fine_grained_wood",
+      "path": "assets/materials/aged-wood/ao.jpg",
+      "map": "AO",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/fine_grained_wood/fine_grained_wood_ao_1k.jpg",
+      "md5": "12b0641a728dc24d19473f5188560f19",
+      "sha256": "c77f62fcb7b36f525b1143842d7be3e327a14b0b9d2616e3187aa961e3b1d9b4",
+      "bytes": 601268,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        600.0000238418579,
+        600.0000238418579
+      ]
+    },
+    {
+      "asset": "stone_block_wall",
+      "source": "https://polyhaven.com/a/stone_block_wall",
+      "path": "assets/materials/aged-masonry/color.jpg",
+      "map": "Diffuse",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/stone_block_wall/stone_block_wall_diff_2k.jpg",
+      "md5": "5e286314d2466bd43089cafdf07bc3ae",
+      "sha256": "cfe9eea5f081ef7e9a45c87ee867212b6e049e63c67db9ec7cca239b3ed9a304",
+      "bytes": 2609095,
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        2099.9999046325684,
+        2099.9999046325684
+      ]
+    },
+    {
+      "asset": "stone_block_wall",
+      "source": "https://polyhaven.com/a/stone_block_wall",
+      "path": "assets/materials/aged-masonry/normal.jpg",
+      "map": "nor_gl",
+      "resolution": "2k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/stone_block_wall/stone_block_wall_nor_gl_2k.jpg",
+      "md5": "5b3b943c61fdc050a73aff910563b52a",
+      "sha256": "b5fa3862163d1a4c54da4518059e9869f19ab4d3f0bff3e68bc7ed606e7892d8",
+      "bytes": 4922651,
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        2099.9999046325684,
+        2099.9999046325684
+      ]
+    },
+    {
+      "asset": "stone_block_wall",
+      "source": "https://polyhaven.com/a/stone_block_wall",
+      "path": "assets/materials/aged-masonry/roughness.jpg",
+      "map": "Rough",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_block_wall/stone_block_wall_rough_1k.jpg",
+      "md5": "de073a15a2046267fe8bdf83a222197c",
+      "sha256": "5cdbd70cc4d1285dc75af0acca350fbde2dea9921418fc594ae5525482b32c7f",
+      "bytes": 440405,
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        2099.9999046325684,
+        2099.9999046325684
+      ]
+    },
+    {
+      "asset": "stone_block_wall",
+      "source": "https://polyhaven.com/a/stone_block_wall",
+      "path": "assets/materials/aged-masonry/ao.jpg",
+      "map": "AO",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_block_wall/stone_block_wall_ao_1k.jpg",
+      "md5": "b9fb61abf605c87249cbda7a85ace66c",
+      "sha256": "c6a00e2be3058daf65d80388c0fc42c27f9c4cb9603a29707fb41c2273149c02",
+      "bytes": 655135,
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        2099.9999046325684,
+        2099.9999046325684
+      ]
+    },
+    {
+      "asset": "stone_block_wall",
+      "source": "https://polyhaven.com/a/stone_block_wall",
+      "path": "assets/materials/aged-masonry/height.jpg",
+      "map": "Displacement",
+      "resolution": "1k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_block_wall/stone_block_wall_disp_1k.jpg",
+      "md5": "5c32d73af88653cc239ff2c3d61591a3",
+      "sha256": "435ebb27ef9fa9b1cc40ea18b9b4a534f228c6ddc6fca518d9e0ba4ba30f1787",
+      "bytes": 422756,
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        2099.9999046325684,
+        2099.9999046325684
+      ]
+    },
+    {
+      "asset": "plastered_stone_wall",
+      "source": "https://polyhaven.com/a/plastered_stone_wall",
+      "path": "assets/materials/aged-plaster/color-4k.jpg",
+      "map": "Diffuse",
+      "resolution": "4k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/plastered_stone_wall/plastered_stone_wall_diff_4k.jpg",
+      "md5": "f606527c708605f6d68bbeb94f308cef",
+      "sha256": "f92029b13bd30c01394c3c03493a65121196a8eb8a143ef7a53673588534b070",
+      "bytes": 11645259,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        2500,
+        2500
+      ]
+    },
+    {
+      "asset": "plastered_stone_wall",
+      "source": "https://polyhaven.com/a/plastered_stone_wall",
+      "path": "assets/materials/aged-plaster/normal-4k.jpg",
+      "map": "nor_gl",
+      "resolution": "4k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/plastered_stone_wall/plastered_stone_wall_nor_gl_4k.jpg",
+      "md5": "83527d8b213a2e2e342b71d7f2b03ab6",
+      "sha256": "807f087aec147749dfa6fbb9b78b7e9fc33788f27078523e274943bc5f83585c",
+      "bytes": 13978370,
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "physical_mm": [
+        2500,
+        2500
+      ]
+    },
+    {
+      "asset": "stone_block_wall",
+      "source": "https://polyhaven.com/a/stone_block_wall",
+      "path": "assets/materials/aged-masonry/color-4k.jpg",
+      "map": "Diffuse",
+      "resolution": "4k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/stone_block_wall/stone_block_wall_diff_4k.jpg",
+      "md5": "39d2e3361ce573da9e5b6964b89bb37e",
+      "sha256": "50de137c4303094d5bf1578662d30e18dca7e1b7dd106d0ea01f1e1060ddf6d3",
+      "bytes": 10835426,
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        2099.9999046325684,
+        2099.9999046325684
+      ]
+    },
+    {
+      "asset": "stone_block_wall",
+      "source": "https://polyhaven.com/a/stone_block_wall",
+      "path": "assets/materials/aged-masonry/normal-4k.jpg",
+      "map": "nor_gl",
+      "resolution": "4k",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/stone_block_wall/stone_block_wall_nor_gl_4k.jpg",
+      "md5": "e7017bc7e945fe73e918f34cafa0a7a5",
+      "sha256": "275d83665fa583ae81cd401124ffbb927bc79ced8cddaab837e8d15d812362cd",
+      "bytes": 17595727,
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "physical_mm": [
+        2099.9999046325684,
+        2099.9999046325684
+      ]
+    }
+  ]
+}

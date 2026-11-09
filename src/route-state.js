@@ -5,14 +5,15 @@ export const smooth = (a, b, value) => {
   return t * t * (3 - 2 * t);
 };
 
+export const MUSEUM_ENTRY = .10;
 export const MUSEUM_STOPS = [
-  {id: 'heritage', at: .10, from: 0, to: .22, label: '识影馆'},
-  {id: 'craft', at: .31, from: .22, to: .43, label: '影人工坊'},
-  {id: 'stories', at: .52, from: .43, to: .64, label: '戏摊故事'},
-  {id: 'light', at: .73, from: .64, to: .84, label: '光影实验'},
-  {id: 'compose', at: .92, from: .84, to: 1, label: '自由编戏'},
+  {id: 'heritage', at: .20, from: 0, to: .29, label: '江汉水土'},
+  {id: 'craft', at: .38, from: .29, to: .47, label: '刀下纹样'},
+  {id: 'voices', at: .56, from: .47, to: .65, label: '乡音戏班'},
+  {id: 'people', at: .74, from: .65, to: .83, label: '传艺的人'},
+  {id: 'legacy', at: .92, from: .83, to: 1, label: '留住一门戏'},
 ];
-export const ROUTE_HEIGHTS = {public: 5, museum: 24, game: 14};
+export const ROUTE_HEIGHTS = {public: 5, museum: 18, game: 14};
 export function museumStop(progress) {
   return MUSEUM_STOPS.find(stop => progress < stop.to) || MUSEUM_STOPS.at(-1);
 }

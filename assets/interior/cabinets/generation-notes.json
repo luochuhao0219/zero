@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-08",
+  "method": "built-in image_gen.imagegen",
+  "reference": "../hall-photo.jpg",
+  "asset": "corridor.png",
+  "nativeSize": [
+    1672,
+    941
+  ],
+  "generatedSource": "/Users/luochuhao/.codex/generated_images/01a1b911-138b-7bf2-9f30-659975d36dfa/exec-ac36fc74-5e27-411f-8b52-9d7976d7dda4.png",
+  "prompt": "Use case: photorealistic-natural. Asset type: wide photographic environment for a continuous museum walk website, no user interface.\nReference image: the supplied existing old building entrance. Preserve its architectural identity and aged material quality.\nCreate the view from JUST INSIDE THE LEFT ARCHWAY of this exact building, looking down the long museum corridor with five separate antique dark walnut and glass exhibition cabinets in sequence along the left side. Keep a clearly walkable aisle to the right of the cabinets and a blue dusk window at the far end. Each cabinet is its own physical piece of furniture, with brass handles, carved cornices, aged lower drawers and gently glowing cream linen backing. Show the nearest cabinet completely including its base, then four progressively more distant cabinets so the visitor understands a route. A few original colorful Chinese leather shadow puppet figures and craft objects appear inside the cabinets; treat these as themed digital exhibits, not identifiable historic artifacts. Windows, worn stone flags, lime plaster, reddish-brown timber and amber pendant lanterns must match the reference. The right side has quiet aged stone/plaster surfaces and occasional window light.\nComposition: landscape 16:9, eye level 1.55m, architectural photography with straight verticals. Main near cabinet on the left half, floor and receding aisle clearly visible. Rich but restrained cinnabar, teal, warm leather, ivory and walnut, natural cool evening fill light. Crisp realistic wood grain, worn edges, delicate glass reflections, small scratches, subtle contact shadows, deep focus throughout. No blur, no game-render appearance, no giant canvas screen, no modern displays, no people, no readable writing, no logos, no UI, no watermark. High detail suitable for a full-screen site scene.",
+  "usage": "One continuous photographic-style digital corridor with five cabinet locations. The tour pans within this same scene and attaches HTML labels to its image coordinates. It is generated artwork, not a photograph of historical artifacts.",
+  "nearViewGeneration": "Separate cabinet view requests failed due to connection errors and are not used."
+}

@@ -1,0 +1,8 @@
+{
+  "file": "color.png",
+  "source": "Built-in image_gen",
+  "date": "2026-11-08",
+  "role": "Old lime plaster base color, used on real 3D interior walls and stone arch trim; not a photograph of Wuhan University.",
+  "sha256": "f4571b73f56181028ac428540f925fc649715470a00ca97dc8dc89ae22d8857b",
+  "prompt": "Create a production-quality seamless tileable physically based BASE COLOR texture, square, for the interior walls of an early 20th century Wuhan University academic stone building. An extremely realistic orthographic close-up of aged warm gray lime plaster over old limestone masonry. The whole image is a single flat wall surface, no perspective, no room, no windows, no furniture, no text, no borders, no lighting gradient, no cast shadows. Subtle fine mineral grain, tiny pores, faint weathering, occasional very fine hairline cracks and gently mottled pale greige gray color. Broad irregular patches of worn limewash, with only tiny hints of limestone underneath. Restrained authentic architectural conservation photography, not grunge, not a dungeon, not a game illustration. Material should look like the pale gray-beige stone and plaster inside a historic Chinese university building at dusk, accompanying dark aged brown timber and amber lanterns. Even diffuse illumination, medium-light neutral albedo, avoid green or yellow color cast. Seamless all four edges. Fine physical texture rather than repeated large blotches, pebbles, or brush strokes."
+}

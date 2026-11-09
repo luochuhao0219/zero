@@ -1,0 +1,101 @@
+{
+  "date": "2026-11-08",
+  "environment": "Local in-app browser, desktop Mac, 1280x800; frame timings include actual route movement",
+  "samples": [
+    {
+      "scene": "hall",
+      "viewport": "1280x800",
+      "stats": {
+        "route": "public",
+        "progress": 1,
+        "fps": 60,
+        "p95": 19.899999976158142,
+        "samples": 180,
+        "motionFps": null,
+        "motionP95": 0,
+        "motionMax": 0,
+        "motionSamples": 0,
+        "tier": 0,
+        "calls": 119,
+        "triangles": 57862,
+        "errors": []
+      }
+    },
+    {
+      "scene": "museum-entry",
+      "viewport": "1280x800",
+      "stats": {
+        "route": "museum",
+        "progress": 0.085,
+        "fps": 60,
+        "p95": 19.899999976158142,
+        "samples": 180,
+        "motionFps": 60,
+        "motionP95": 18.200000017881393,
+        "motionMax": 21.700000017881393,
+        "motionSamples": 103,
+        "tier": 0,
+        "calls": 70,
+        "triangles": 27354,
+        "errors": []
+      }
+    },
+    {
+      "scene": "stories",
+      "viewport": "1280x800",
+      "stats": {
+        "route": "museum",
+        "progress": 0.52,
+        "fps": 60,
+        "p95": 19,
+        "samples": 180,
+        "motionFps": 59.9,
+        "motionP95": 18.5,
+        "motionMax": 21.899999976158142,
+        "motionSamples": 240,
+        "tier": 0,
+        "calls": 65,
+        "triangles": 26142,
+        "errors": []
+      }
+    },
+    {
+      "scene": "light",
+      "viewport": "1280x800",
+      "stats": {
+        "route": "museum",
+        "progress": 0.73,
+        "fps": 60,
+        "p95": 19.5,
+        "samples": 180,
+        "motionFps": 59.9,
+        "motionP95": 18.599999994039536,
+        "motionMax": 21.899999976158142,
+        "motionSamples": 240,
+        "tier": 0,
+        "calls": 85,
+        "triangles": 27152,
+        "errors": []
+      }
+    },
+    {
+      "scene": "compose",
+      "viewport": "1280x800",
+      "stats": {
+        "route": "museum",
+        "progress": 0.92,
+        "fps": 60,
+        "p95": 18.900000005960464,
+        "samples": 180,
+        "motionFps": 59.9,
+        "motionP95": 18.899999976158142,
+        "motionMax": 22.400000005960464,
+        "motionSamples": 240,
+        "tier": 0,
+        "calls": 47,
+        "triangles": 16598,
+        "errors": []
+      }
+    }
+  ]
+}

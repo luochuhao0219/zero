@@ -1,0 +1,65 @@
+[
+  {
+    "label": "native museum entry",
+    "route": "museum",
+    "progress": 0.1,
+    "fps": 60,
+    "p95": 18.19999998807907,
+    "samples": 180,
+    "motionFps": 60,
+    "motionP95": 17.899999976158142,
+    "motionMax": 27.799999982118607,
+    "motionSamples": 240,
+    "tier": 0,
+    "pixelRatio": 2,
+    "canvas": [
+      1342,
+      1514
+    ],
+    "calls": 81,
+    "triangles": 61154,
+    "errors": []
+  },
+  {
+    "label": "right doorway after color pass",
+    "route": "game",
+    "progress": 0.09,
+    "fps": 60,
+    "p95": 17.200000017881393,
+    "samples": 180,
+    "motionFps": 60,
+    "motionP95": 17.200000017881393,
+    "motionMax": 17.799999982118607,
+    "motionSamples": 112,
+    "tier": 0,
+    "pixelRatio": 1,
+    "canvas": [
+      1280,
+      800
+    ],
+    "calls": 148,
+    "triangles": 125482,
+    "errors": []
+  },
+  {
+    "label": "desktop hall after return",
+    "route": "public",
+    "progress": 1,
+    "fps": 60,
+    "p95": 17.69999998807907,
+    "samples": 180,
+    "motionFps": 60,
+    "motionP95": 17.599999994039536,
+    "motionMax": 17.80000001192093,
+    "motionSamples": 207,
+    "tier": 0,
+    "pixelRatio": 1,
+    "canvas": [
+      1280,
+      800
+    ],
+    "calls": 112,
+    "triangles": 104530,
+    "errors": []
+  }
+]

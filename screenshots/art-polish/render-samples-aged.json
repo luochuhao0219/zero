@@ -1,0 +1,65 @@
+[
+  {
+    "label": "desktop museum entry, 3.6 MP",
+    "route": "museum",
+    "progress": 0.085,
+    "fps": 54,
+    "p95": 26.799999982118607,
+    "samples": 180,
+    "motionFps": 50,
+    "motionP95": 24,
+    "motionMax": 26.19999998807907,
+    "motionSamples": 94,
+    "tier": 0,
+    "pixelRatio": 1.976423537605237,
+    "canvas": [
+      2529,
+      1423
+    ],
+    "calls": 73,
+    "triangles": 54154,
+    "errors": []
+  },
+  {
+    "label": "desktop return to hall, 3.6 MP",
+    "route": "museum",
+    "progress": 0.0104,
+    "fps": 51.4,
+    "p95": 27.5,
+    "samples": 180,
+    "motionFps": 51.3,
+    "motionP95": 23.900000005960464,
+    "motionMax": 39.400000005960464,
+    "motionSamples": 159,
+    "tier": 0,
+    "pixelRatio": 1.976423537605237,
+    "canvas": [
+      2529,
+      1423
+    ],
+    "calls": 184,
+    "triangles": 195768,
+    "errors": []
+  },
+  {
+    "label": "right doorway entry",
+    "route": "game",
+    "progress": 0.09,
+    "fps": 58.9,
+    "p95": 20.799999982118607,
+    "samples": 180,
+    "motionFps": 55.5,
+    "motionP95": 22.80000001192093,
+    "motionMax": 39.400000005960464,
+    "motionSamples": 240,
+    "tier": 1,
+    "pixelRatio": 1.976423537605237,
+    "canvas": [
+      2529,
+      1423
+    ],
+    "calls": 140,
+    "triangles": 118488,
+    "errors": []
+  }
+]
