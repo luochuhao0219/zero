@@ -15,14 +15,15 @@
 .museum-cabinet-pin:focus-visible,#museum-start:focus-visible,.museum-overview-return:focus-visible{outline:2px solid #ffe5ab;outline-offset:5px}
 .museum-overview-return{position:absolute;left:4%;top:100px;pointer-events:auto;font-size:11px;color:#e8d9b8;background:#24392ce8;border:1px solid #bb9f6a66;border-radius:24px;padding:10px 16px;cursor:pointer}
 .museum-cabinet-route[data-overview=true] .museum-overview-return{display:none}
-.museum-cabinet-route .museum-tools.museum-placard{right:4%;left:auto;top:50%;bottom:auto;transform:translateY(-50%);box-sizing:border-box;width:300px;max-width:28vw;max-height:calc(100svh - 250px);height:auto;padding:23px 25px;background:linear-gradient(120deg,#f2e7cfee,#e8d9baf5),repeating-linear-gradient(0deg,#96805a12 0 1px,transparent 1px 3px);color:#374337;border:1px solid #c6ae7e;border-radius:2px;box-shadow:0 12px 32px #10180d33,0 1px 0 #fffa inset;overscroll-behavior:contain}
+.museum-cabinet-route .museum-tools.museum-placard{right:4%;left:auto;top:50%;bottom:auto;transform:translateY(-50%);box-sizing:border-box;width:300px;max-width:28vw;max-height:calc(100svh - 250px);height:auto;overflow-y:auto;padding:23px 25px;background:linear-gradient(120deg,#f2e7cfee,#e8d9baf5),repeating-linear-gradient(0deg,#96805a12 0 1px,transparent 1px 3px);color:#374337;border:1px solid #c6ae7e;border-radius:2px;box-shadow:0 12px 32px #10180d33,0 1px 0 #fffa inset;overscroll-behavior:contain}
 .museum-cabinet-route[data-reading=false] .museum-placard{pointer-events:none}
 .museum-cabinet-route .museum-tool-heading{align-items:center;gap:8px;border-color:#9d87574a;margin-bottom:14px;padding-bottom:10px;color:#796a4d;font-size:10px;letter-spacing:.1em}
 .museum-cabinet-route #museum-expand{font-size:10px;color:#725734;background:transparent;border:0;padding:2px 0;white-space:nowrap}
 .museum-cabinet-route #ex-title{font:39px/1.3 'Zhi Mang Xing',serif;margin:0 0 8px;color:#354c3b}
 .museum-cabinet-route #ex-intro{font-size:12px;line-height:1.8;margin:0 0 17px;color:#7d6545}
 .museum-cabinet-route .museum-focus,.museum-cabinet-route #museum-article-title,.museum-cabinet-route .museum-curator-note,.museum-cabinet-route .museum-sources{display:none}
-.museum-cabinet-route #museum-article-text{font-size:13px;line-height:1.9;margin:0;color:#485142}
+.museum-cabinet-route #museum-article-text{font-size:13px;line-height:1.9;margin:0;color:#485142;white-space:pre-line}
+.museum-cabinet-route .museum-placard:not(.is-expanded) #museum-article-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
 .museum-placard-foot{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #9d875735;padding-top:13px;margin-top:20px;color:#8c7c5d;font-size:9px;line-height:1.6}
 .museum-cabinet-route .museum-tools.is-expanded{max-height:calc(100svh - 205px)}
 .museum-cabinet-route .is-expanded .museum-focus{display:flex;gap:5px;margin:5px 0 17px}
@@ -95,3 +96,25 @@
 }
 .museum-cabinet-route .museum-tools.museum-placard{background-color:#efe3c8}
 @media(min-width:761px){.museum-overview-return{left:auto;right:164px;top:90px}}
+/* The physical display remains clear; reading lives beside it. */
+.hall-return-veil{position:fixed;inset:0;z-index:100000;background:#14201d;opacity:0;transition:opacity .24s ease;pointer-events:all}.hall-return-veil.opaque{opacity:1}
+.cabinet-finish{display:block;width:100%;margin-top:18px;padding:14px 12px;border:1px solid #d8bf86;background:#304b40;color:#fff0ce;font:inherit;cursor:pointer}.cabinet-finish[hidden]{display:none}
+.museum-cabinet-route button:disabled{opacity:.45;cursor:default}
+@media(min-width:761px){.museum-cabinet-route .museum-tools.museum-placard{left:auto!important;right:3%;width:300px;max-width:28vw}.museum-cabinet-route .museum-tools.is-expanded{max-height:calc(100svh - 220px)}}
+@media(max-width:760px){.museum-cabinet-route .museum-tools.museum-placard{max-height:215px}.cabinet-finish{margin-top:8px;padding:10px}.museum-cabinet-route .museum-tools.is-expanded{max-height:58svh}}
+@media(prefers-reduced-motion:reduce){.hall-return-veil{transition:none}}
+/* One freestanding interpretation stand opens a single complete paper label. */
+.museum-cabinet-route .museum-sign-hotspot{position:absolute;z-index:12;transform:translate(-50%,-50%);width:108px;height:68px;border:1px solid #c9a66c;background:linear-gradient(145deg,#efe0bd,#c9ab77);color:#463c2b;box-shadow:0 5px 18px #09120ab0;font-size:12px;cursor:pointer;pointer-events:auto}
+.museum-cabinet-route .museum-sign-hotspot[hidden]{display:none}
+.museum-cabinet-route .museum-tools.museum-placard{display:none}
+.museum-cabinet-route.paper-open .museum-tools.museum-placard{display:block;position:fixed;z-index:30;left:50%!important;right:auto!important;top:50%;bottom:auto;transform:translate(-50%,-50%);width:min(700px,calc(100vw - 32px));max-width:none;max-height:min(78svh,760px);padding:30px 42px;overflow:auto;opacity:1!important;pointer-events:auto;background:#f1e5c9}
+.museum-cabinet-route.paper-open .museum-tool-heading{position:static;display:flex;justify-content:space-between}
+.museum-cabinet-route.paper-open #museum-article-text{display:block;-webkit-line-clamp:unset;overflow:visible;white-space:normal}
+.museum-cabinet-route #museum-sections{display:block;margin-top:24px}
+.museum-cabinet-route #museum-sections section{padding:15px 0;border-top:1px solid #b6a17877}
+.museum-cabinet-route #museum-sections h3{font:25px/1.4 'Zhi Mang Xing',serif;color:#5f4933;margin:0 0 8px}
+.museum-cabinet-route #museum-sections p{font-size:13px;line-height:1.9;color:#485142;margin:0}
+.museum-cabinet-route.paper-open .museum-sources{display:grid;gap:5px}
+@media(max-width:760px){.museum-cabinet-route.paper-open .museum-tools.museum-placard{max-height:76svh;width:calc(100vw - 24px);padding:22px 23px;bottom:auto}.museum-cabinet-route .museum-sign-hotspot{width:84px;height:56px;font-size:10px}}
+
+.museum-cabinet-route.paper-open .museum-tool-heading{position:sticky;top:-30px;z-index:2;background:#f1e5c9;padding:10px 0}

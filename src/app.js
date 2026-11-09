@@ -36,7 +36,12 @@ function renderHelp(){$('help-instructions').replaceChildren();instructions[stat
 function cancelPerformance(){clearTimeout(autoTimer);clearTimeout(completionTimer);completing=false;document.body.classList.remove('is-performing');stage.celebration=-1;direct.enabled=!anySheetOpen();direct.reset();grabSnapshot=null;}
 function loadLevel(index){cancelPerformance();state=initialState(index);completedCurrent=false;undoStack=[];stage.transitionStart=stage.time;$('level-number').textContent=`${String(index+1).padStart(2,'0')} / 03`;$('level-title').textContent=LEVELS[index].name;$('level-description').textContent=LEVELS[index].description;sync();renderChapters();renderHelp();setView(index<2);if(!reduced())document.querySelector('.game-heading').animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:500,easing:'ease-out'});}
 function enterGame(index=0){if(playing||completing)return;if(!journey.canPlay()){journey.requestPlay(index);return;}if(stage.fallback){toast('当前设备不能运行三维操作，请在新版 Chrome 或 Safari 中打开。');return;}journey.setGameActive(true);moveStage(()=>{playing=true;document.body.classList.add('is-playing');travelSound?.set(1,soundEnabled,true);$('game-interface').hidden=false;stage.setPlaying(true);loadLevel(index);});$('stage').focus({preventScroll:true});}
-function exitGame({memories=false}={}){cancelPerformance();$('complete-dialog').close();moveStage(()=>{playing=false;document.body.classList.remove('is-playing');$('game-interface').hidden=true;stage.setPlaying(false);stage.setState(state,false);setView(false);if(memories){journey.setGameActive(false);journey.goTo('memories');}else journey.returnToPlay();travelSound?.set(1,soundEnabled,false);});renderChapters();}
+function exitGame({memories=false}={}){
+ cancelPerformance();$('complete-dialog').close();
+ const leave=()=>{playing=false;document.body.classList.remove('is-playing');$('game-interface').hidden=true;stage.setPlaying(false);stage.setState(state,false);setView(false);journey.setGameActive(false);travelSound?.set(1,soundEnabled,false);renderChapters();};
+ if(memories){moveStage(()=>{leave();journey.goTo('memories');});}
+ else {layoutAnimation?.cancel();journey.fadeReturn({beforeCommit:leave});}
+}
 function nextIncomplete(){const i=LEVELS.findIndex((_,n)=>!progress.completed.includes(n));return i<0?0:i;}
 
 function beginGrab(){if(!playing||completing)return;clearTimeout(autoTimer);if(!grabSnapshot)grabSnapshot={...state};}
