@@ -58,6 +58,7 @@ export class Journey {
   }
   bind() {
     window.addEventListener('scroll',()=>{this.dirty=true;},{passive:true});
+    for(const type of ['wheel','pointerdown','touchstart'])window.addEventListener(type,()=>this.visit.interrupt(),{passive:true});
     window.addEventListener('resize',()=>{if(!this.gameActive)this.resizeProgress=this.target;this.dirty=true;},{passive:true});
     document.addEventListener('visibilitychange',()=>{this.lastTime=performance.now();this.dirty=true;});
     this.media.addEventListener('change',()=>{this.intro.resizeDirty=true;});
@@ -70,6 +71,7 @@ export class Journey {
     $('story-collection').addEventListener('click',this.onCollection);
     window.addEventListener('hashchange',()=>this.goTo(location.hash.slice(1),true));
     document.addEventListener('keydown',e=>{
+      if(['ArrowUp','ArrowDown','PageUp','PageDown',' '].includes(e.key))this.visit.interrupt();
       if(e.key==='Escape'&&!this.gameActive&&!document.querySelector('dialog[open]')&&this.state.route!=='public')this.returnHall();
       if((e.target.closest('input,select,textarea,button,a')||this.gameActive||document.querySelector('dialog[open]')))return;
       if(e.key==='Home'){e.preventDefault();this.goPosition(0);}
@@ -81,7 +83,8 @@ export class Journey {
     document.body.dataset.route = this.state.route;
   }
   goPosition(progress, instant=false) {
-    const requested=clamp(progress),p=this.state.route==='museum'&&!this.state.transition?this.visit.constrain(this.progress,requested):requested,top=this.opening.getBoundingClientRect().top+scrollY;
+    const p=clamp(progress),top=this.opening.getBoundingClientRect().top+scrollY;
+    if(this.state.route==='museum'&&!this.state.transition)this.visit.seek(p);
     scrollTo({top:top+p*(this.opening.offsetHeight-innerHeight),behavior:instant||this.media.matches?'instant':'smooth'});
     if(instant||this.media.matches){this.progress=this.target=p;this.state.setProgress(p);}
     this.dirty=true;
@@ -101,10 +104,6 @@ export class Journey {
       setTimeout(()=>{veil.classList.remove('opaque');setTimeout(()=>{veil.remove();this.returning=false;},delay);},80);
     },delay);
     return true;
-  }
-  finishCabinet(){
-    if(!this.visit.finish())return;
-    this.goPosition(this.progress,true);this.dispatch();
   }
   choose(route,{destination,room,fadeCommit=false}={}) {
     if(route==='public'&&!fadeCommit)return this.fadeReturn({destination,room});
@@ -166,7 +165,7 @@ export class Journey {
     room=museumRoomId(room);
     const p=MUSEUM_STOPS.find(stop=>stop.id===room)?.at??MUSEUM_ENTRY;
     if(this.gameActive){this.onLeave();this.queuedMuseum=room||'corridor';return;}
-    if(this.state.route==='museum'){if(this.visit.locked)return;this.goPosition(p);}
+    if(this.state.route==='museum'){this.goPosition(p);}
     else if(this.state.transition)this.queuedMuseum=room||'corridor';
     else this.choose('museum',{room});
   }
@@ -196,7 +195,7 @@ export class Journey {
     element.inert=opacity<.55;element.setAttribute('aria-hidden',String(opacity<.55));
   }
   dispatch() {
-    window.dispatchEvent(new CustomEvent('journey:frame',{detail:{route:this.state.route,progress:this.progress,transition:!!this.state.transition,viewing:this.visit.locked?.id||null}}));
+    window.dispatchEvent(new CustomEvent('journey:frame',{detail:{route:this.state.route,progress:this.progress,transition:!!this.state.transition,viewing:this.visit.aligned?.id||null}}));
   }
   syncCopy() {
     const route=this.state.route,p=route==='public'?this.progress*.23:route==='game'?.21+this.progress*.79:-1;

@@ -98,10 +98,9 @@
 @media(min-width:761px){.museum-overview-return{left:auto;right:164px;top:90px}}
 /* The physical display remains clear; reading lives beside it. */
 .hall-return-veil{position:fixed;inset:0;z-index:100000;background:#14201d;opacity:0;transition:opacity .24s ease;pointer-events:all}.hall-return-veil.opaque{opacity:1}
-.cabinet-finish{display:block;width:100%;margin-top:18px;padding:14px 12px;border:1px solid #d8bf86;background:#304b40;color:#fff0ce;font:inherit;cursor:pointer}.cabinet-finish[hidden]{display:none}
 .museum-cabinet-route button:disabled{opacity:.45;cursor:default}
 @media(min-width:761px){.museum-cabinet-route .museum-tools.museum-placard{left:auto!important;right:3%;width:300px;max-width:28vw}.museum-cabinet-route .museum-tools.is-expanded{max-height:calc(100svh - 220px)}}
-@media(max-width:760px){.museum-cabinet-route .museum-tools.museum-placard{max-height:215px}.cabinet-finish{margin-top:8px;padding:10px}.museum-cabinet-route .museum-tools.is-expanded{max-height:58svh}}
+@media(max-width:760px){.museum-cabinet-route .museum-tools.museum-placard{max-height:215px}.museum-cabinet-route .museum-tools.is-expanded{max-height:58svh}}
 @media(prefers-reduced-motion:reduce){.hall-return-veil{transition:none}}
 /* One freestanding interpretation stand opens a single complete paper label. */
 .museum-cabinet-route .museum-sign-hotspot{position:absolute;z-index:12;transform:translate(-50%,-50%);width:108px;height:68px;border:1px solid #c9a66c;background:linear-gradient(145deg,#efe0bd,#c9ab77);color:#463c2b;box-shadow:0 5px 18px #09120ab0;font-size:12px;cursor:pointer;pointer-events:auto}
