@@ -1,3 +1,4 @@
+import {createWorkActions,deleteSavedWork} from './collection-actions.js';
 import {puppetCanvas,drawPaper,gateCanvas,branchCanvas,bridgeCanvas} from './art.js';
 import {COMPOSITION_KEY,DRAFT_KEY,defaultDraft,sanitizeDraft,readJSON,readCompositions} from './explore-data.js';
 const $=id=>document.getElementById(id);
@@ -86,8 +87,22 @@ export class FreePlayStudio {
     this.renderWorks();this.toast('小戏已收进留影册');
   }
   renderWorks(){
-    const populate=(root,compact)=>{root.replaceChildren();for(const work of this.works){const figure=document.createElement('figure');figure.className=compact?'work-item':'ex-personal-work';const img=document.createElement('img');img.src=work.image;img.alt=work.title+'的自由编戏留影';img.loading='lazy';const caption=document.createElement('figcaption'),name=document.createElement('span'),button=document.createElement('button');name.textContent=work.title;button.textContent='下载 ↗';button.setAttribute('aria-label','下载戏票：'+work.title);button.addEventListener('click',()=>this.download(work.image,'借光-'+work.title));caption.append(name,button);figure.append(img,caption);root.append(figure);}};
-    populate($('compose-gallery'),false);populate($('composition-works'),true);$('compose-empty').hidden=!!this.works.length;$('ex-collection-empty').hidden=!!this.works.length;const count=$('works-grid').children.length+this.works.length;$('collection-count').textContent=count;$('works-count').textContent=String(count).padStart(2,'0');
+    const populate=(root,compact)=>{
+      root.replaceChildren();
+      for(const work of this.works){
+        const figure=document.createElement('figure');figure.className=compact?'work-item':'ex-personal-work';
+        const img=document.createElement('img');img.src=work.image;img.alt=work.title+'的自由编戏留影';img.loading='lazy';
+        const caption=document.createElement('figcaption'),name=document.createElement('span');name.textContent=work.title;
+        const actions=createWorkActions({title:work.title,onDownload:()=>this.download(work.image,'借光-'+work.title),onDelete:()=>{
+          try{this.works=deleteSavedWork(this.storage,COMPOSITION_KEY,this.works,work);this.renderWorks();$('compose-status').textContent='留影已删除，当前编戏草稿保留';this.toast('留影已删除');return true;}
+          catch{this.toast('删除未能保存，请重试。');return false;}
+        }});
+        caption.append(name,actions);figure.append(img,caption);root.append(figure);
+      }
+    };
+    populate($('compose-gallery'),false);populate($('composition-works'),true);
+    $('compose-empty').hidden=!!this.works.length;$('ex-collection-empty').hidden=!!this.works.length;
+    const count=$('works-grid').children.length+this.works.length;$('collection-count').textContent=count;$('works-count').textContent=String(count).padStart(2,'0');
   }
   download(image,name){const a=document.createElement('a');a.href=image;a.download=name+'.webp';a.click();}
 }

@@ -18,3 +18,12 @@
 /* Geometric close icons stay centered independently of text-font baselines. */
 :is(#about-dialog,#collection-dialog) .close-sheet{padding:0;line-height:1}
 :is(#about-dialog,#collection-dialog) .close-sheet svg{display:block;width:16px;height:16px;pointer-events:none}
+
+/* Collection actions share the same confirmation in the album and studio. */
+.work-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px 12px;flex-wrap:wrap;max-width:72%}
+.work-actions button{min-height:32px;padding:4px 2px;white-space:nowrap}
+.work-actions .work-delete{color:#98523e}
+.work-actions .work-delete:hover{color:#773422;text-decoration:underline;text-underline-offset:3px}
+.work-delete-question{font-size:11px;color:#727461;line-height:1.5}
+.work-item figcaption,.ex-personal-work figcaption{gap:12px;align-items:flex-start}
+.work-item figcaption>span,.ex-personal-work figcaption>span{min-width:0;overflow-wrap:anywhere}

@@ -1,3 +1,4 @@
+import {createWorkActions,deleteSavedWork} from './collection-actions.js';
 import {ShadowStage} from './scene.js';
 import {Journey} from './continuous-journey.js';
 import {Exploration} from './explore.js';
@@ -50,7 +51,24 @@ function endGrab(){if(grabSnapshot&&JSON.stringify(grabSnapshot)!==JSON.stringif
 function considerCompletion(){clearTimeout(autoTimer);if(document.hidden||!playing||completing||completedCurrent||anySheetOpen()||scoreState(state.level,state)<WIN_SCORE)return;autoTimer=setTimeout(()=>{if(document.hidden||!playing||completing||direct.drag||scoreState(state.level,state)<WIN_SCORE)return;state={...state,...LEVELS[state.level].target};sync();completeLevel();},500);}
 function undo(){if(!undoStack.length||completing)return;clearTimeout(autoTimer);state=undoStack.pop();grabSnapshot=null;direct.reset();sync();toast('已撤销这一步');}
 function saveProgress(){try{localStorage.setItem('borrow-light-v1',JSON.stringify(progress));}catch{toast('本次留影暂存在页面中，可先下载。');}}
-function renderWorks(){const root=$('works-grid');root.replaceChildren();$('empty-collection').hidden=!!progress.works.length;const workCount=progress.works.length+document.querySelectorAll('#composition-works figure').length;$('collection-count').textContent=workCount;$('works-count').textContent=String(workCount).padStart(2,'0');for(const work of progress.works){const figure=document.createElement('figure');figure.className='work-item';const image=document.createElement('img');image.src=work.image;image.alt=`${LEVELS[work.level].name}留影`;const caption=document.createElement('figcaption'),name=document.createElement('span'),date=document.createElement('small'),download=document.createElement('button');name.textContent=LEVELS[work.level].name;date.textContent=new Date(work.date||Date.now()).toLocaleDateString('zh-CN');name.append(date);download.textContent='下载 ↗';download.setAttribute('aria-label',`下载${LEVELS[work.level].name}留影`);download.addEventListener('click',()=>{const link=document.createElement('a');link.href=work.image;link.download=`借光-${LEVELS[work.level].name}.webp`;link.click();});caption.append(name,download);figure.append(image,caption);root.append(figure);}}
+function renderWorks(){
+  const root=$('works-grid');root.replaceChildren();$('empty-collection').hidden=!!progress.works.length;
+  const workCount=progress.works.length+document.querySelectorAll('#composition-works figure').length;
+  $('collection-count').textContent=workCount;$('works-count').textContent=String(workCount).padStart(2,'0');
+  for(const work of progress.works){
+    const title=LEVELS[work.level].name,figure=document.createElement('figure');figure.className='work-item';
+    const image=document.createElement('img');image.src=work.image;image.alt=`${title}留影`;
+    const caption=document.createElement('figcaption'),name=document.createElement('span'),date=document.createElement('small');
+    name.textContent=title;date.textContent=new Date(work.date||Date.now()).toLocaleDateString('zh-CN');name.append(date);
+    const actions=createWorkActions({title,onDownload:()=>{
+      const link=document.createElement('a');link.href=work.image;link.download=`借光-${title}.webp`;link.click();
+    },onDelete:()=>{
+      try{progress=deleteSavedWork(localStorage,'borrow-light-v1',progress,work);renderWorks();toast('留影已删除');return true;}
+      catch{toast('删除未能保存，请重试。');return false;}
+    }});
+    caption.append(name,actions);figure.append(image,caption);root.append(figure);
+  }
+}
 function completeLevel(){
   if(completing||completedCurrent||!playing)return;completing=true;completedCurrent=true;direct.enabled=false;direct.cancel();setView(false);document.body.classList.add('is-performing');
   const image=stage.capturePoster(state.level);progress.completed=[...new Set([...progress.completed,state.level])];progress.works=[{id:Date.now(),date:new Date().toISOString(),level:state.level,image},...progress.works.filter(w=>w.level!==state.level)];saveProgress();renderWorks();renderChapters();
