@@ -1,0 +1,195 @@
+{
+  "date": "2026-11-10",
+  "automatedTests": {
+    "passed": 72,
+    "failed": 0
+  },
+  "playing": {
+    "cabinetAnimation": {
+      "amount": 1,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": false,
+      "playing": true,
+      "reduced": false,
+      "seconds": 6.09
+    },
+    "calls": 58,
+    "canvas": [
+      1126,
+      1514
+    ],
+    "errors": [],
+    "fps": 59.9,
+    "motionFps": 60,
+    "motionMax": 26.80000001192093,
+    "motionP95": 18.5,
+    "motionSamples": 126,
+    "p95": 20.900000035762787,
+    "pixelRatio": 2,
+    "progress": 0.74,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 49210
+  },
+  "pausedBefore": {
+    "cabinetAnimation": {
+      "amount": 1,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": true,
+      "playing": false,
+      "reduced": false,
+      "seconds": 6.716
+    },
+    "calls": 58,
+    "canvas": [
+      1126,
+      1514
+    ],
+    "errors": [],
+    "fps": 60,
+    "motionFps": 60,
+    "motionMax": 26.80000001192093,
+    "motionP95": 18.5,
+    "motionSamples": 126,
+    "p95": 19.69999998807907,
+    "pixelRatio": 2,
+    "progress": 0.74,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 49210
+  },
+  "pausedAfter": {
+    "cabinetAnimation": {
+      "amount": 1,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": true,
+      "playing": false,
+      "reduced": false,
+      "seconds": 6.716
+    },
+    "calls": 58,
+    "canvas": [
+      1126,
+      1514
+    ],
+    "errors": [],
+    "fps": 60,
+    "motionFps": 60,
+    "motionMax": 26.80000001192093,
+    "motionP95": 18.5,
+    "motionSamples": 126,
+    "p95": 20.899999976158146,
+    "pixelRatio": 2,
+    "progress": 0.74,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 49210
+  },
+  "reading": {
+    "cabinetAnimation": {
+      "amount": 1,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 90.34,
+      "paused": false,
+      "playing": false,
+      "reduced": false,
+      "seconds": 1.9
+    },
+    "calls": 58,
+    "canvas": [
+      1126,
+      1514
+    ],
+    "errors": [],
+    "fps": 60,
+    "motionFps": 60,
+    "motionMax": 26.80000001192093,
+    "motionP95": 18.5,
+    "motionSamples": 126,
+    "p95": 20.899999976158146,
+    "pixelRatio": 2,
+    "progress": 0.74,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 49210
+  },
+  "otherCabinet": {
+    "cabinetAnimation": {
+      "amount": 0,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": false,
+      "playing": false,
+      "reduced": false,
+      "seconds": 2.533
+    },
+    "calls": 57,
+    "canvas": [
+      1126,
+      1514
+    ],
+    "errors": [],
+    "fps": 60,
+    "motionFps": 60.1,
+    "motionMax": 26.80000001192093,
+    "motionP95": 18.600000023841854,
+    "motionSamples": 210,
+    "p95": 19.899999976158146,
+    "pixelRatio": 2,
+    "progress": 0.9198,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 49208
+  },
+  "final": {
+    "cabinetAnimation": {
+      "amount": 1,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": false,
+      "playing": true,
+      "reduced": false,
+      "seconds": 7.567
+    },
+    "calls": 58,
+    "canvas": [
+      1126,
+      1514
+    ],
+    "errors": [],
+    "fps": 60,
+    "motionFps": 60,
+    "motionMax": 26.80000001192093,
+    "motionP95": 18.799999952316284,
+    "motionSamples": 240,
+    "p95": 20.099999964237213,
+    "pixelRatio": 2,
+    "progress": 0.7402,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 49210
+  },
+  "consoleErrors": [],
+  "checks": {
+    "manualPauseHeld": true,
+    "readingStopsAnimation": true,
+    "otherCabinetStopsAnimation": true,
+    "returnedAndPlaying": true
+  },
+  "note": "Frame rate is from this browser and viewport; not a guarantee for every device. No viewport overrides were applied."
+}

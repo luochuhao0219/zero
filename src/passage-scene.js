@@ -1,4 +1,5 @@
 import {AdaptiveQuality} from './adaptive-quality.js';
+import {galleryRenderSettings} from './gallery-quality.js';
 import * as THREE from '../vendor/three.module.js';
 import {MuseumWorld} from './museum-world.js';
 import {MUSEUM_ENTRY,MUSEUM_STOPS} from './route-state.js';
@@ -34,7 +35,7 @@ function uvPlane(texture,rect,height,x,y,z){
 // screen opens into the other world. Inactive worlds stop rendering.
 export class PassageScene {
   constructor(canvas){
-    this.canvas=canvas;this.quality=new AdaptiveQuality();this.progress=0;this.targetProgress=0;this.visible=true;this.frames=0;
+    this.canvas=canvas;this.quality=new AdaptiveQuality({recoverAfter:9000});this.progress=0;this.targetProgress=0;this.visible=true;this.frames=0;
     this.pointer={x:0,y:0};this.smoothPointer={x:0,y:0};this.assetsLoaded=0;this.assetErrors=[];
     this.lanterns=[];this.drifting=[];this.sparkTime={value:0};
     // The interior render target resolves its own MSAA. The final canvas only
@@ -242,16 +243,13 @@ export class PassageScene {
   resize(){
     if(this.fallback)return;const {width,height}=this.canvas.parentElement.getBoundingClientRect();if(!width||!height)return;
     this.width=width;this.height=height;
-    // Keep high-density screens crisp, with a bounded total pixel budget.
-    // Spend the former duplicate reflection pass on real image detail. Preserve
-    // native density through the first quality step, then reduce it gradually.
-    this.basePixelRatio=Math.min(devicePixelRatio,2,Math.sqrt(6400000/(width*height)));
-    this.pixelRatio=Math.min(this.basePixelRatio,[Infinity,Infinity,1.6,1.3,.9][this.quality.tier]);
+    // Keep enough pixels and edge coverage for plaster grain and thin mouldings.
+    const settings=galleryRenderSettings(width,height,devicePixelRatio,this.quality.tier,this.renderer.capabilities.maxSamples);
+    this.basePixelRatio=settings.base;this.pixelRatio=settings.pixelRatio;
     this.renderer.setPixelRatio(this.pixelRatio);this.renderer.setSize(width,height,false);this.mobile=width<701;
-    const pixels=width*height*this.pixelRatio**2;
-    const samples=this.quality.tier>0||pixels>4500000?0:Math.min(this.renderer.capabilities.maxSamples,this.pixelRatio>=1.5||pixels>2600000?2:4);
+    const samples=settings.samples;
     if(this.targetG.samples!==samples){this.targetG.samples=samples;this.targetG.dispose();}
-    for(const camera of [this.cameraA,this.cameraG,this.cameraB]){camera.aspect=width/height;camera.fov=this.mobile?62:50;camera.updateProjectionMatrix();}
+    for(const camera of [this.cameraA,this.cameraG,this.cameraB]){camera.aspect=width/height;camera.fov=this.mobile?62:50;camera.userData.baseFov=camera.fov;camera.updateProjectionMatrix();}
     for(const target of [this.targetA,this.targetG,this.targetB])target.setSize(Math.round(width*this.pixelRatio),Math.round(height*this.pixelRatio));
     this.uniforms.aspect.value=width/height;
     this.world.backdrop.resize(width,height);
@@ -276,11 +274,12 @@ export class PassageScene {
     this.uniforms.interiorExposure.value=this.route==='public'?mix(.5,1,smooth(.45,.88,this.routeProgress)):1;
     const px=reduced?0:this.smoothPointer.x,py=reduced?0:this.smoothPointer.y;
     if(reduced&&this.lastRenderedProgress===p&&this.lastRouteProgress===this.routeProgress&&!this.routeTransition&&!this.interactionDirty&&!this.resizeDirty&&this.frames>0){this.quality.resetClock();return;}
-    if(this.quality.observe(performance.now())){
-      // Drop extra samples/reflections before reducing the image resolution.
-      if(this.quality.tier===1){this.targetG.samples=0;this.targetG.dispose();}
-      this.resize();
-    }
+    // A visible preview can be throttled while focus is in the editor/chat.
+    // Those one-second callbacks must not permanently downgrade a sharp scene.
+    const focused=document.hasFocus();
+    if(focused!==this.qualityFocused){this.quality.resetClock();this.lastDrawAt=null;this.frameTimes=[];this.qualityFocused=focused;}
+    if(focused){if(this.quality.observe(performance.now()))this.resize();}
+    else this.quality.resetClock();
     const frameNow=performance.now();
     if(this.lastDrawAt!==null&&this.lastDrawAt!==undefined){
       const elapsed=frameNow-this.lastDrawAt;
@@ -312,15 +311,20 @@ export class PassageScene {
     this.projectedPoint.copy(this.doorPoint).project(this.cameraA);this.uniforms.doorCenter.value.set(this.projectedPoint.x*.5+.5,this.projectedPoint.y*.5+.5);
     const doorFrustum=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*az;
     this.uniforms.doorHalf.value.set(3.4*this.matteScale/doorFrustum,3.78*this.matteScale/doorFrustum);
-    this.uniforms.doorReveal.value=smooth(.065,.095,p);this.uniforms.doorFull.value=smooth(.195,.226,p);
+    this.uniforms.doorReveal.value=smooth(.065,.095,p);this.uniforms.doorFull.value=this.routeTransition?.autoplay?1:smooth(.195,.226,p);
     if(this.route==='game')this.portalPoint.set(this.world.gameOrigin==='museum'?-9:4.4,3,this.world.gameOrigin==='museum'?-94:-5);
     const linen=this.world.backdrop.theaterRect;
     this.uniforms.center.value.set(linen.x+linen.width/2,1-linen.y-linen.height/2);
     const portalDistance=Math.max(.3,this.cameraG.position.distanceTo(this.portalPoint));
     let radius=2.15/(2*Math.tan(THREE.MathUtils.degToRad(this.cameraG.fov/2))*portalDistance)*smooth(.12,.22,this.routeProgress);
     if(this.routeProgress>.22)radius=mix(radius,3,smooth(.22,.25,this.routeProgress));
+    if(this.routeTransition?.autoplay){
+      radius=Math.min(linen.width*this.cameraG.aspect,linen.height)*.43*mix(.06,1,smooth(.145,.205,this.routeProgress));
+      radius=mix(radius,3,smooth(.205,.27,this.routeProgress));
+    }
     this.uniforms.radius.value=this.route==='game'?radius:0;
-    this.uniforms.reveal.value=this.route==='game'?smooth(.12,.14,this.routeProgress):0;
+    const portalStart=this.routeTransition?.autoplay ? .145 : .12,portalOpen=this.routeTransition?.autoplay ? .17 : .14;
+    this.uniforms.reveal.value=this.route==='game'?smooth(portalStart,portalOpen,this.routeProgress):0;
     if(p<.228){this.renderer.setRenderTarget(this.targetA);this.renderer.render(this.campus,this.cameraA);}
     if(p>.065&&(this.route!=='game'||this.routeProgress<.27)){this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);}
     if(p>.27){this.renderer.setRenderTarget(this.targetB);this.renderer.render(this.market,this.cameraB);}
@@ -337,7 +341,7 @@ export class PassageScene {
       this.lastStatsAt=performance.now();
       const sorted=[...this.frameTimes].sort((a,b)=>a-b),mean=sorted.reduce((a,b)=>a+b,0)/Math.max(1,sorted.length);
       const motion=[...this.motionFrameTimes].sort((a,b)=>a-b),motionMean=motion.reduce((a,b)=>a+b,0)/Math.max(1,motion.length);
-      document.documentElement.dataset.journeyRender=JSON.stringify({route:this.route,progress:+this.routeProgress.toFixed(4),fps:+(1000/Math.max(1,mean)).toFixed(1),p95:sorted[Math.floor(sorted.length*.95)]||0,samples:sorted.length,motionFps:motion.length?+(1000/Math.max(1,motionMean)).toFixed(1):null,motionP95:motion[Math.floor(motion.length*.95)]||0,motionMax:motion.at(-1)||0,motionSamples:motion.length,tier:this.quality.tier,pixelRatio:this.pixelRatio,canvas:[this.canvas.width,this.canvas.height],calls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,errors:this.assetErrors});
+      document.documentElement.dataset.journeyRender=JSON.stringify({route:this.route,progress:+this.routeProgress.toFixed(4),fps:+(1000/Math.max(1,mean)).toFixed(1),p95:sorted[Math.floor(sorted.length*.95)]||0,samples:sorted.length,motionFps:motion.length?+(1000/Math.max(1,motionMean)).toFixed(1):null,motionP95:motion[Math.floor(motion.length*.95)]||0,motionMax:motion.at(-1)||0,motionSamples:motion.length,tier:this.quality.tier,pixelRatio:this.pixelRatio,canvas:[this.canvas.width,this.canvas.height],calls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,errors:this.assetErrors,cabinetAnimation:this.world.walk.vignette.diagnostics(),focused:this.qualityFocused,aaSamples:this.targetG.samples,wallTexture:[this.world.walk.materials.wall.map.image?.width,this.world.walk.materials.wall.map.image?.height],galleryLights:this.world.walk.cabinetLights.flat().filter(light=>light.visible).length});
     }
   }
   diagnostics(){return{qualityTier:this.quality.tier,memory:this.renderer?{...this.renderer.info.memory,programs:this.renderer.info.programs.length}:null,compositeMode:this.compositeMode,fallback:!!this.fallback,loaded:!!this.loaded,assetErrors:[...this.assetErrors],assetsLoaded:this.assetsLoaded,visible:this.visible,frames:this.frames,progress:this.progress,route:this.route,routeProgress:this.routeProgress,targetProgress:this.targetProgress,worldReady:!!this.world?.prepared,campusZ:this.cameraA?.position.z,galleryZ:this.cameraG?.position.z,doorReveal:this.uniforms?.doorReveal.value,marketZ:this.cameraB?.position.z,pointer:{...this.smoothPointer},cameraX:this.cameraA?.position.x,portalRadius:this.uniforms?.radius.value,pixelRatio:this.pixelRatio};}

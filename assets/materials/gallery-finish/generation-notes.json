@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-10",
+  "method": "built-in image_gen.imagegen",
+  "assets": [
+    {
+      "file": "floor-inlay.png",
+      "nativeSize": [
+        1254,
+        1254
+      ],
+      "use": "Decorative inset tile borders in the walking gallery floor.",
+      "source": "/Users/luochuhao/.codex/generated_images/01a1b911-138b-7bf2-9f30-659975d36dfa/exec-4f9f71e4-0754-454a-a51a-48abd53f9e46.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: seamless square architectural floor tile albedo texture for an old Chinese heritage museum, viewed perfectly flat from directly above. Create a single elegant historic encaustic stone/cement tile repeat, 1:1 square composition, full bleed. Warm ivory limestone and muted celadon/stone-blue geometric inlay, a restrained cinnabar and antique-ochre floral knot at the center, thin dark tea-brown geometric lines, an eight-petal lotus/rosette within a symmetrical diamond medallion. Corners complete the repeating lattice with neighboring tiles. Refined and rich like a carefully restored Republican-era Chinese cultural hall, not a palace, not European baroque. Subtle mineral speckles, worn pigment, tiny pores and hairline scratches, smooth walking surface, fine crisp texture, moderate contrast. Pattern occupies the whole tile, no extra frame outside it. EXACT seamless edge continuity top/bottom and left/right for repeated tiling, uniform diffuse neutral illumination, flat color/albedo only; no baked highlights, cast shadows, perspective, room, objects, grout surrounding an isolated product, text or watermark. Highest available square resolution; aim for 2048 x 2048. This will be repeated as a narrow decorative stone border beside a larger natural stone floor, so keep the palette coordinated and the ornamental detail clear."
+    },
+    {
+      "file": "painted-frieze.png",
+      "nativeSize": [
+        2172,
+        724
+      ],
+      "use": "Painted timber beam faces, column collars and wall dado/cornice bands.",
+      "source": "/Users/luochuhao/.codex/generated_images/01a1b911-138b-7bf2-9f30-659975d36dfa/exec-8bc97e87-691a-43eb-99ea-db2865229b77.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: seamlessly repeating painted architectural timber frieze texture, flat orthographic albedo, landscape 3:1. An exquisite restrained Chinese heritage-building painted beam surface: deep jade/teal lacquer ground, flowing lotus and peony tendrils in muted antique gold and warm ivory, small cinnabar flower centers, slender ochre border lines along the top and bottom. Subtle authentic old wood grain and fine lacquer crazing visible through the pigment, gently worn edges in the paint, skilled hand-painted ornament. Graceful continuous scrollwork with breathing room, rich but not loud or shiny. Material realism and crisp detail, suitable for narrow beam faces, column collars and wall dado rails. Fill the whole image edge to edge. Left and right edges MUST join seamlessly with matching motifs; the top and bottom stay straight and uniform. No room scene, no 3D model, no object perspective, no cast shadows, no reflections or baked lighting, no external frame, no paper margin, no lettering, symbols, logo, numbers, characters or watermark. Highest available detail, target 3072 by 1024 canvas."
+    }
+  ],
+  "scanSources": "Existing local CC0 scans in aged-wood, aged-plaster and aged-masonry; original author and download metadata are in ../interior-scan-manifest.json.",
+  "processing": "Generated PNGs copied without resampling. Texture repeat and box-face UVs use room-unit scales. Scan color/normal/roughness maps share UVs, wood grain follows each member, and custom paint tint retains the scanned microtexture. The floor has procedural fine joints over the scan and separate patterned tile borders.",
+  "note": "Original digital decoration, not a historical reconstruction. Requested generation resolutions differ from actual native sizes; the actual dimensions are recorded above."
+}

@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-10",
+  "durationMs": 5600,
+  "tests": {
+    "passed": 83,
+    "failed": 0
+  },
+  "wide": {
+    "entry": "complete",
+    "progress": "12",
+    "render": {
+      "aaSamples": 2,
+      "cabinetAnimation": {
+        "amount": 0,
+        "bow": 0,
+        "cabinet": 4,
+        "front": 35,
+        "paused": false,
+        "playing": false,
+        "reduced": false,
+        "seconds": 0
+      },
+      "calls": 214,
+      "canvas": [
+        2560,
+        1440
+      ],
+      "errors": [],
+      "focused": true,
+      "fps": 60,
+      "galleryLights": 6,
+      "motionFps": 60,
+      "motionMax": 19.19999998807907,
+      "motionP95": 18.200000047683716,
+      "motionSamples": 240,
+      "p95": 17.400000035762787,
+      "pixelRatio": 2,
+      "progress": 0.12,
+      "route": "museum",
+      "samples": 180,
+      "tier": 0,
+      "triangles": 84186,
+      "wallTexture": [
+        4096,
+        4096
+      ]
+    }
+  },
+  "narrow": {
+    "entry": "complete",
+    "progress": "12",
+    "render": {
+      "aaSamples": 2,
+      "cabinetAnimation": {
+        "amount": 0,
+        "bow": 0,
+        "cabinet": 4,
+        "front": 35,
+        "paused": false,
+        "playing": false,
+        "reduced": false,
+        "seconds": 0
+      },
+      "calls": 204,
+      "canvas": [
+        1126,
+        1514
+      ],
+      "errors": [],
+      "focused": true,
+      "fps": 60,
+      "galleryLights": 6,
+      "motionFps": 60,
+      "motionMax": 23.100000023841854,
+      "motionP95": 18.69999998807907,
+      "motionSamples": 240,
+      "p95": 20.30000001192093,
+      "pixelRatio": 2,
+      "progress": 0.12,
+      "route": "museum",
+      "samples": 180,
+      "tier": 0,
+      "triangles": 81626,
+      "wallTexture": [
+        4096,
+        4096
+      ]
+    },
+    "uiBusy": "false"
+  },
+  "interactionChecks": {
+    "pageDownDuringEntryEndsAt12Percent": true,
+    "firstCabinetSelectable": true,
+    "overviewOpacity": 1,
+    "overviewInteractive": true,
+    "returnHall": true,
+    "escapeDuringEntryReturnsHall": true
+  },
+  "preview": "http://127.0.0.1:4173/?inspect=1&view=continuous-entry-v3#hall"
+}

@@ -1,0 +1,98 @@
+{
+  "date": "2026-11-10",
+  "automatedTests": {
+    "passed": 68,
+    "failed": 0
+  },
+  "wideOverview": {
+    "render": {
+      "calls": 214,
+      "canvas": [
+        1152,
+        648
+      ],
+      "errors": [],
+      "fps": 59.7,
+      "motionFps": 41.4,
+      "motionMax": 83.19999998807907,
+      "motionP95": 33.30000001192093,
+      "motionSamples": 21,
+      "p95": 21,
+      "pixelRatio": 0.9,
+      "progress": 0.1111,
+      "route": "museum",
+      "samples": 180,
+      "tier": 4,
+      "triangles": 84184
+    },
+    "viewport": [
+      1280,
+      720
+    ]
+  },
+  "wideCabinet": {
+    "render": {
+      "calls": 57,
+      "canvas": [
+        1152,
+        648
+      ],
+      "errors": [],
+      "fps": 44.2,
+      "motionFps": 53.7,
+      "motionMax": 83.19999998807907,
+      "motionP95": 31.5,
+      "motionSamples": 81,
+      "p95": 34.39999997615814,
+      "pixelRatio": 0.9,
+      "progress": 0.1999,
+      "route": "museum",
+      "samples": 180,
+      "tier": 4,
+      "triangles": 49208
+    },
+    "viewport": [
+      1280,
+      720
+    ]
+  },
+  "nativeOverview": {
+    "render": {
+      "calls": 215,
+      "canvas": [
+        506,
+        681
+      ],
+      "errors": [],
+      "fps": 60,
+      "motionFps": 42.9,
+      "motionMax": 621.1999999880791,
+      "motionP95": 33.19999998807907,
+      "motionSamples": 240,
+      "p95": 17.600000023841858,
+      "pixelRatio": 0.9,
+      "progress": 0.1,
+      "route": "museum",
+      "samples": 180,
+      "tier": 4,
+      "triangles": 84186
+    },
+    "viewport": [
+      563,
+      757
+    ]
+  },
+  "consoleErrors": {
+    "wide": [],
+    "native": []
+  },
+  "verified": [
+    "New floor tile borders and physically scaled stone texture",
+    "Wall plaster, timber dado and painted frieze",
+    "Lacquered posts, stone bases and decorated beams",
+    "Full ceiling above right aisle",
+    "Cabinet approach and readable exhibit sign",
+    "Return to corridor overview"
+  ],
+  "note": "Observed render counters include loading and two-tab QA; they are diagnostics, not a promise of constant frame rate."
+}

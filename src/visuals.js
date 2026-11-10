@@ -171,6 +171,15 @@ export function createPostProcessing(stage){
     }`});composer.addPass(finish);
   let direct=false, multisampled=true;
   return {composer,bloom,finish,
+    prepareEntrance(){
+      if(direct)return;
+      // Reserve the frame budget for the moving camera, with edge coverage
+      // intact. The lanterns already have authored emissive light and halos.
+      if(multisampled&&composer.renderTarget1.samples>2){
+        const replacement=composer.renderTarget1.clone();replacement.samples=2;composer.reset(replacement);
+      }
+      bloom.enabled=false;
+    },
     setQuality(tier){
       if(tier>=1&&multisampled){
         const replacement=composer.renderTarget1.clone();replacement.samples=0;

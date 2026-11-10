@@ -1,0 +1,151 @@
+{
+  "date": "2026-11-10",
+  "checks": {
+    "fullSuitePassed": 77,
+    "qualityChecksPassedAfterFinalAdjustment": 10,
+    "consoleErrors": []
+  },
+  "before": {
+    "viewport": [
+      563,
+      757
+    ],
+    "density": 2,
+    "pixelRatio": 0.9,
+    "canvas": [
+      506,
+      681
+    ],
+    "tier": 4
+  },
+  "overview": {
+    "aaSamples": 2,
+    "cabinetAnimation": {
+      "amount": 0,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": false,
+      "playing": false,
+      "reduced": false,
+      "seconds": 0
+    },
+    "calls": 215,
+    "canvas": [
+      923,
+      1241
+    ],
+    "errors": [],
+    "focused": true,
+    "fps": 28.8,
+    "galleryLights": 6,
+    "motionFps": 23.8,
+    "motionMax": 91.9000000357628,
+    "motionP95": 91.9000000357628,
+    "motionSamples": 14,
+    "p95": 49.69999998807907,
+    "pixelRatio": 1.64,
+    "progress": 0.1111,
+    "route": "museum",
+    "samples": 180,
+    "tier": 3,
+    "triangles": 84186,
+    "wallTexture": [
+      4096,
+      4096
+    ]
+  },
+  "cabinet": {
+    "aaSamples": 2,
+    "cabinetAnimation": {
+      "amount": 1,
+      "bow": -0.0006,
+      "cabinet": 4,
+      "front": 80.86,
+      "paused": false,
+      "playing": true,
+      "reduced": false,
+      "seconds": 4.58
+    },
+    "calls": 58,
+    "canvas": [
+      810,
+      1090
+    ],
+    "errors": [],
+    "focused": true,
+    "fps": 28.1,
+    "galleryLights": 6,
+    "motionFps": 28.8,
+    "motionMax": 91.9000000357628,
+    "motionP95": 64.39999997615814,
+    "motionSamples": 65,
+    "p95": 54.39999997615814,
+    "pixelRatio": 1.44,
+    "progress": 0.74,
+    "route": "museum",
+    "samples": 180,
+    "tier": 4,
+    "triangles": 49210,
+    "wallTexture": [
+      4096,
+      4096
+    ]
+  },
+  "final": {
+    "density": 2,
+    "render": {
+      "aaSamples": 2,
+      "cabinetAnimation": {
+        "amount": 0,
+        "bow": 0,
+        "cabinet": 4,
+        "front": 35,
+        "paused": false,
+        "playing": false,
+        "reduced": false,
+        "seconds": 4.842
+      },
+      "calls": 160,
+      "canvas": [
+        1126,
+        1514
+      ],
+      "errors": [],
+      "focused": true,
+      "fps": 60,
+      "galleryLights": 6,
+      "motionFps": 59.9,
+      "motionMax": 23.5,
+      "motionP95": 17.69999998807907,
+      "motionSamples": 240,
+      "p95": 17.5,
+      "pixelRatio": 2,
+      "progress": 0.2862,
+      "route": "museum",
+      "samples": 180,
+      "tier": 0,
+      "triangles": 71382,
+      "wallTexture": [
+        4096,
+        4096
+      ]
+    },
+    "viewport": [
+      563,
+      757
+    ]
+  },
+  "materials": {
+    "plasterColor": [
+      4096,
+      4096
+    ],
+    "plasterNormal": [
+      2048,
+      2048
+    ],
+    "wallMetersPerRepeat": 1.8
+  },
+  "note": "Preserved the natural viewport. Frame-rate readings reflect current machine load and are not an all-device performance guarantee. Recovery, pixel limits and edge sampling are covered by regression checks."
+}

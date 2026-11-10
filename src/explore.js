@@ -1,7 +1,8 @@
-import {museumStop} from './route-state.js';
+import {museumStop,smooth} from './route-state.js';
 import {ROOMS,SOURCES,museumRoomId} from './museum-content.js';
 import {galleryJourney} from './museum-gallery.js';
 import {FreePlayStudio} from './compose-studio.js';
+import {ANIMATED_CABINET} from './cabinet-motion.js';
 const $=id=>document.getElementById(id);
 
 /** One physical cabinet per topic, along the museum's left-hand corridor. */
@@ -21,6 +22,7 @@ export class Exploration {
       <div class="museum-cabinet-pins" aria-label="长廊中的展柜">${ROOMS.map(r=>`<button class="museum-cabinet-pin" data-cabinet="${r.id}" aria-label="走近第 ${r.no} 柜，${r.name}"><b>${r.no}</b><span>${r.name}</span></button>`).join('')}</div>
       <button id="museum-overview" class="museum-overview-return">← 长廊全览</button>
       <button id="museum-sign" class="museum-sign-hotspot" aria-label="打开当前展柜讲解栏">查看讲解 ↗</button>
+      <button id="museum-motion" class="museum-motion" hidden aria-label="暂停画中小戏"><span class="museum-motion-icon" aria-hidden="true"></span><span id="museum-motion-label">画中小戏 · 暂停</span></button>
       <aside class="museum-tools museum-reading museum-placard" aria-label="当前展柜的完整展签"><div class="museum-tool-heading"><span id="ex-room-caption"></span><button id="museum-expand" aria-expanded="false" aria-controls="museum-article">关闭展签 ×</button></div>
         <h2 id="ex-title"></h2><p id="ex-intro" class="museum-case-intro"></p>
         <article id="museum-article" aria-labelledby="ex-title"><p id="museum-article-text"></p><div id="museum-sections"></div><div id="museum-sources" class="museum-sources"></div></article>
@@ -46,6 +48,10 @@ export class Exploration {
     });
     $('museum-expand').addEventListener('click',()=>this.expandReading(false));
     $('museum-sign').addEventListener('click',()=>this.expandReading(true));
+    $('museum-motion').addEventListener('click',()=>{
+      const vignette=this.journey.intro.world.walk.vignette;
+      vignette.setPaused(!vignette.paused);this.journey.intro.interactionDirty=true;this.syncMotionControl();
+    });
     window.addEventListener('journey:frame',event=>this.updateRoute(event.detail));
   }
   open(id){this.expandReading(false);this.journey.openMuseum(museumRoomId(id));}
@@ -53,22 +59,28 @@ export class Exploration {
   selectRoom(id){this.open(id);}
   updateDiscovery(){}
   expandReading(expanded){
+    this.journey.intro.world.walk.vignette.reading=expanded;
     this.dialog.querySelector('.museum-reading').classList.toggle('is-expanded',expanded);
     this.dialog.classList.toggle('paper-open',expanded);$('museum-sign').hidden=expanded;
     $('museum-expand').setAttribute('aria-expanded',String(expanded));
     if(expanded)this.dialog.querySelector('.museum-reading').scrollTop=0;
   }
-  updateRoute({route,progress,transition}){
-    const visible=route==='museum'&&!transition&&!this.journey.gameActive;
+  updateRoute({route,progress,transition,entrance}){
+    const visible=route==='museum'&&(!transition||entrance)&&!this.journey.gameActive;
     this.dialog.hidden=!visible;document.body.classList.toggle('in-museum',visible);
     if(!visible){if(this.wasVisible)this.journey.intro.canvas.setAttribute('aria-label',this.originalCanvasLabel);this.wasVisible=false;return;}
     const entering=!this.wasVisible;this.wasVisible=true;
     const view=galleryJourney(progress),overview=view.overview>.5;
-    this.dialog.style.visibility=progress<.10?'hidden':'visible';
+    const arrival=entrance?smooth(.09,.12,progress):smooth(.085,.10,progress);
+    this.dialog.style.opacity=String(arrival);this.dialog.style.visibility=arrival>.002?'visible':'hidden';
+    this.dialog.inert=entrance||arrival<.9;
+    this.dialog.setAttribute('aria-busy',String(!!entrance));
     if(view.reading<.5&&this.dialog.classList.contains('paper-open'))this.expandReading(false);
     const room=ROOMS.find(r=>r.id===museumStop(progress).id);
     const changed=!this.contentReady||this.active!==room.id||this.overview!==overview;
     this.active=room.id;this.overview=overview;
+    $('museum-motion').hidden=room.id!==ANIMATED_CABINET||view.reading<.9||this.dialog.classList.contains('paper-open');
+    this.syncMotionControl();
     const signPoint=this.journey.intro.world.backdrop.signPositions?.[ROOMS.indexOf(room)];
     const sign=$('museum-sign');sign.hidden=!signPoint||!signPoint[2]||view.reading<.65||this.dialog.classList.contains('paper-open');
     if(signPoint){sign.style.left=`${signPoint[0]*100}%`;sign.style.top=`${signPoint[1]*100}%`;}
@@ -96,6 +108,14 @@ export class Exploration {
     $('ex-prev').textContent=overview?'↶ 返回内厅':i===0?'← 长廊全览':`← 第 ${ROOMS[i-1].no} 柜`;
     $('ex-next').textContent=overview?'从第一柜开始 →':i===ROOMS.length-1?'参观完毕 · 返回内厅 ↗':`走向第 ${ROOMS[i+1].no} 柜 →`;
     this.renderArticle(room);reading.scrollTop=0;
+  }
+  syncMotionControl(){
+    const {paused,reduced}=this.journey.intro.world.walk.vignette;
+    const state=reduced?'reduced':paused?'paused':'playing';if(this.motionState===state)return;
+    this.motionState=state;const button=$('museum-motion');
+    button.dataset.state=state;button.disabled=reduced;
+    button.setAttribute('aria-label',reduced?'画中小戏已跟随系统减少动态效果':paused?'播放画中小戏':'暂停画中小戏');
+    $('museum-motion-label').textContent=reduced?'画中小戏 · 静态':paused?'画中小戏 · 播放':'画中小戏 · 暂停';
   }
   renderArticle(room){
     $('museum-article-text').textContent=room.overview;

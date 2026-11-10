@@ -12,7 +12,9 @@ let progress=readProgress(localStorage),undoStack=[],grabSnapshot=null,autoTimer
 let audio=null,travelSound=null,soundEnabled=false,lastSound=0;const audioGains=[];
 const stage=new ShadowStage($('stage'));
 const direct=new DirectControls(stage,{onGrab:beginGrab,onChange:applyChange,onRelease:endGrab,onCancel:()=>{grabSnapshot=null;},onHover:updateHint});
-const journey=new Journey({stage,onEnter:index=>enterGame(index ?? nextIncomplete()),onLeave:exitGame,onCollection:()=>openSheet('collection-dialog'),onProgress:(p)=>travelSound?.set(p,soundEnabled,playing)});
+const journey=new Journey({stage,onEnter:(index,options)=>enterGame(index ?? nextIncomplete(),options),onLeave:exitGame,
+ onStagePrepare:prepareStageEntry,onStageCancel:cancelStageEntry,
+ onCollection:()=>openSheet('collection-dialog'),onProgress:(p)=>travelSound?.set(p,soundEnabled,playing)});
 const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 const instructions=[
   [['拖住灯','上下左右移动，观察影子往哪边走。'],['推拉影人','抓住影人的身体，沿幕布前后移动。离幕越远，影子越大。']],
@@ -36,7 +38,22 @@ function renderChapters(){document.querySelectorAll('[data-level]').forEach(butt
 function renderHelp(){$('help-instructions').replaceChildren();instructions[state.level].forEach(([title,description],i)=>{const row=document.createElement('div');row.className='help-step';const number=document.createElement('span');number.textContent=String(i+1);const text=document.createElement('div'),heading=document.createElement('strong'),p=document.createElement('p');heading.textContent=title;p.textContent=description;text.append(heading,p);row.append(number,text);$('help-instructions').append(row);});}
 function cancelPerformance(){clearTimeout(autoTimer);clearTimeout(completionTimer);completing=false;document.body.classList.remove('is-performing');stage.celebration=-1;direct.enabled=!anySheetOpen();direct.reset();grabSnapshot=null;}
 function loadLevel(index){cancelPerformance();state=initialState(index);completedCurrent=false;undoStack=[];stage.transitionStart=stage.time;$('level-number').textContent=`${String(index+1).padStart(2,'0')} / 03`;$('level-title').textContent=LEVELS[index].name;$('level-description').textContent=LEVELS[index].description;sync();renderChapters();renderHelp();setView(index<2);if(!reduced())document.querySelector('.game-heading').animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:500,easing:'ease-out'});}
-function enterGame(index=0){if(playing||completing)return;if(!journey.canPlay()){journey.requestPlay(index);return;}if(stage.fallback){toast('当前设备不能运行三维操作，请在新版 Chrome 或 Safari 中打开。');return;}journey.setGameActive(true);moveStage(()=>{playing=true;document.body.classList.add('is-playing');travelSound?.set(1,soundEnabled,true);$('game-interface').hidden=false;stage.setPlaying(true);loadLevel(index);});$('stage').focus({preventScroll:true});}
+function prepareStageEntry(index=nextIncomplete()){
+ loadLevel(index);stage.setPlaying(true);stage.setView(index<2);direct.enabled=false;return index;
+}
+function cancelStageEntry(){stage.setPlaying(false);stage.setState(state,false);setView(false);direct.enabled=!anySheetOpen();}
+function enterGame(index=0,{fromEntrance=false}={}){
+ if(playing||completing)return;if(!journey.canPlay()){journey.requestPlay(index);return;}
+ if(stage.fallback){toast('当前设备不能运行三维操作，请在新版 Chrome 或 Safari 中打开。');return;}
+ journey.setGameActive(true);
+ const activate=()=>{playing=true;document.body.classList.add('is-playing');travelSound?.set(1,soundEnabled,true);$('game-interface').hidden=false;
+  if(!fromEntrance){stage.setPlaying(true);loadLevel(index);}else{direct.enabled=!anySheetOpen();renderChapters();}
+ };
+ // The entrance already uses the playable canvas, layout and exact final pose.
+ // Keep all three in place instead of starting another layout/view transition.
+ if(fromEntrance)activate();else moveStage(activate);
+ $('stage').focus({preventScroll:true});
+}
 function exitGame({memories=false}={}){
  cancelPerformance();$('complete-dialog').close();
  const leave=()=>{playing=false;document.body.classList.remove('is-playing');$('game-interface').hidden=true;stage.setPlaying(false);stage.setState(state,false);setView(false);journey.setGameActive(false);travelSound?.set(1,soundEnabled,false);renderChapters();};

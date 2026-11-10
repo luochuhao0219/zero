@@ -1,0 +1,8 @@
+{
+  "date": "2026-11-10",
+  "method": "built-in image_gen",
+  "asset": "window-dusk.png",
+  "use": "Exterior foliage behind modeled wooden museum window mullions; original generated illustration, not documentary campus photography.",
+  "reference": "User-provided old museum corridor: warm stone, dark wood, amber lanterns and cool blue windows.",
+  "prompt": "Use case: photorealistic-natural. Asset type: high resolution photographic texture of the outdoor view behind old museum window panes in a real-time 3D architectural corridor. Create ONLY the outside view, no window frame, no mullions, no walls, no interior, no border, no text. Portrait 2:3 composition, richly detailed camphor tree foliage and a few fine natural branches at blue hour on a historic Wuhan university campus. Muted deep petrol blue and blue-green leaves with pale cool blue sky showing through small gaps, gently lit dusk atmosphere, crisp individual leaf shapes and subtle depth. Darker foliage around sides and lower half, more soft sky behind foliage in the upper center. This image will be divided by real wooden window bars in the website, so it must look like a believable quiet exterior photograph seen from indoors. Natural photography, delicate tonal variation, restrained colors, no saturated electric cyan, no teal film effect, no bokeh, no blur, no cartoon, no 3D render. Aim for the cool window views that contrast with warm amber hanging lamps inside an old stone and dark wood museum corridor."
+}

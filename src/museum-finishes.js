@@ -2,7 +2,7 @@ import * as THREE from '../vendor/three.module.js';
 
 // Keep the photographed pores, scratches and mineral variation. Adjust the
 // stone's albedo towards the entrance's grey limestone, not its light response.
-export function agedSurface(material, saturation = 1, gain = 1, footWear = 0, pigment = null) {
+export function agedSurface(material, saturation = 1, gain = 1, footWear = 0, pigment = null, contrast = 1) {
   const paint = pigment ? new THREE.Color(pigment) : null;
   material.onBeforeCompile = shader => {
     shader.vertexShader = 'varying vec3 agedPosition;\n' + shader.vertexShader;
@@ -10,6 +10,7 @@ export function agedSurface(material, saturation = 1, gain = 1, footWear = 0, pi
     shader.fragmentShader = 'varying vec3 agedPosition;\n' + shader.fragmentShader;
     shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `vec3 surfaceTint = diffuseColor.rgb;
       #include <map_fragment>
+      sampledDiffuseColor.rgb = mix(vec3(.075), sampledDiffuseColor.rgb, ${contrast.toFixed(3)});
       float mineralLuma = dot(sampledDiffuseColor.rgb, vec3(.2126,.7152,.0722));
       diffuseColor.rgb = surfaceTint * mix(vec3(mineralLuma), sampledDiffuseColor.rgb, ${saturation.toFixed(3)}) * ${gain.toFixed(3)};
       ${paint ? `vec3 oldPigment = vec3(${paint.r.toFixed(5)},${paint.g.toFixed(5)},${paint.b.toFixed(5)});
@@ -19,7 +20,7 @@ export function agedSurface(material, saturation = 1, gain = 1, footWear = 0, pi
       diffuseColor.rgb *= 1.0 - baseAge;
     `);
   };
-  material.customProgramCacheKey = () => `aged-${saturation}-${gain}-${footWear}-${pigment}`;
+  material.customProgramCacheKey = () => `aged-${saturation}-${gain}-${footWear}-${pigment}-${contrast}`;
   return material;
 }
 

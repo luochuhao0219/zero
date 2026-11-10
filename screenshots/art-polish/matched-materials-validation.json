@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-10",
+  "url": "http://127.0.0.1:4173/?inspect=1&view=matte-lime-final#museum",
+  "render": {
+    "aaSamples": 2,
+    "cabinetAnimation": {
+      "amount": 0,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": false,
+      "playing": false,
+      "reduced": false,
+      "seconds": 2.201
+    },
+    "calls": 59,
+    "canvas": [
+      1126,
+      1514
+    ],
+    "errors": [],
+    "focused": true,
+    "fps": 60,
+    "galleryLights": 4,
+    "motionFps": 60,
+    "motionMax": 20.399999976158146,
+    "motionP95": 17.5,
+    "motionSamples": 240,
+    "p95": 17.69999998807907,
+    "pixelRatio": 2,
+    "progress": 0.1,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 72852,
+    "wallTexture": [
+      4096,
+      4096
+    ]
+  },
+  "checks": {
+    "testsPassed": 84,
+    "syntax": "passed",
+    "diffWhitespace": "passed",
+    "entrance": "continuous 5.6 second passage verified",
+    "fourthCabinet": "animation played; pause and resume verified",
+    "wall": "4K plaster with matte finish, two scales of relief and anti-shimmer fade",
+    "viewport": "natural browser size; no override"
+  },
+  "console": [
+    {
+      "level": "warn",
+      "message": "sigmaRadians, 0.06, is too large and will clip, as it requested 30 samples when the maximum is set to 20",
+      "timestamp": "2026-11-10T12:55:54.519Z",
+      "url": "http://127.0.0.1:4173/vendor/three.module.js"
+    },
+    {
+      "level": "warn",
+      "message": "sigmaRadians, 0.06, is too large and will clip, as it requested 30 samples when the maximum is set to 20",
+      "timestamp": "2026-11-10T12:55:54.521Z",
+      "url": "http://127.0.0.1:4173/vendor/three.module.js"
+    },
+    {
+      "level": "warn",
+      "message": "THREE.WebGLRenderer: Texture marked for update but no image data found.",
+      "timestamp": "2026-11-10T12:55:54.742Z",
+      "url": "http://127.0.0.1:4173/vendor/three.module.js"
+    },
+    {
+      "level": "warn",
+      "message": "THREE.WebGLRenderer: Texture marked for update but no image data found.",
+      "timestamp": "2026-11-10T12:55:54.742Z",
+      "url": "http://127.0.0.1:4173/vendor/three.module.js"
+    }
+  ]
+}

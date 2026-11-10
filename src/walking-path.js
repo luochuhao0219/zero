@@ -1,7 +1,8 @@
 import * as THREE from '../vendor/three.module.js';
 import {MUSEUM_ENTRY,MUSEUM_STOPS,clamp,smooth} from './route-state.js';
+import {CABINET_SPACING} from './gallery-layout.js';
 const V=(...p)=>new THREE.Vector3(...p);
-export const cabinetZ=i=>-8-i*13;
+export const cabinetZ=i=>-8-i*CABINET_SPACING;
 // Arrival is perpendicular to the glazing. Walking and turning use zero-slope
 // easing at every stop; sampling the same path backwards is exactly reversible.
 export function walkingPose(p){

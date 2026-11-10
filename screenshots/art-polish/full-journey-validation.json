@@ -1,0 +1,378 @@
+{
+  "date": "2026-11-10",
+  "route": [
+    "right doorway",
+    "indoor screen",
+    "crossing the screen",
+    "lantern market",
+    "stage arrival",
+    "playable backstage"
+  ],
+  "durationMs": 14800,
+  "narrow": [
+    {
+      "entry": {
+        "active": true,
+        "angle": 2.581592653589793,
+        "camera": {
+          "x": 12.156234492714828,
+          "y": 6.15,
+          "z": -20.089494389995888
+        },
+        "fraction": 0.2138445945929837,
+        "frames": 12002,
+        "median": 17.10000002384504,
+        "p95": 17.10000002384504,
+        "paused": true,
+        "phase": "screen",
+        "pixelRatio": 1.25,
+        "playing": false,
+        "post": {
+          "bloom": false,
+          "mode": "composer",
+          "samples": 2
+        },
+        "progress": 0.12134993102952596
+      },
+      "passage": {
+        "aaSamples": 2,
+        "cabinetAnimation": {
+          "amount": 0,
+          "bow": 0,
+          "cabinet": 4,
+          "front": 35,
+          "paused": false,
+          "playing": false,
+          "reduced": false,
+          "seconds": 0
+        },
+        "calls": 43,
+        "canvas": [
+          1126,
+          1514
+        ],
+        "errors": [],
+        "focused": true,
+        "fps": 60,
+        "galleryLights": 4,
+        "motionFps": 60,
+        "motionMax": 19.399999976158146,
+        "motionP95": 17.599999964237213,
+        "motionSamples": 240,
+        "p95": 17.5,
+        "pixelRatio": 2,
+        "progress": 0.1077,
+        "route": "game",
+        "samples": 180,
+        "tier": 0,
+        "triangles": 16920,
+        "wallTexture": [
+          4096,
+          4096
+        ]
+      },
+      "phase": "screen"
+    },
+    {
+      "entry": {
+        "active": true,
+        "angle": 2.581592653589793,
+        "camera": {
+          "x": 12.156234492714828,
+          "y": 6.15,
+          "z": -20.089494389995888
+        },
+        "fraction": 0.31518918918999467,
+        "frames": 12002,
+        "median": 17.10000002384504,
+        "p95": 17.10000002384504,
+        "paused": true,
+        "phase": "crossing",
+        "pixelRatio": 1.25,
+        "playing": false,
+        "post": {
+          "bloom": false,
+          "mode": "composer",
+          "samples": 2
+        },
+        "progress": 0.1678425977732428
+      },
+      "passage": {
+        "aaSamples": 2,
+        "cabinetAnimation": {
+          "amount": 0,
+          "bow": 0,
+          "cabinet": 4,
+          "front": 35,
+          "paused": false,
+          "playing": false,
+          "reduced": false,
+          "seconds": 0
+        },
+        "calls": 42,
+        "canvas": [
+          1126,
+          1514
+        ],
+        "errors": [],
+        "focused": true,
+        "fps": 60,
+        "galleryLights": 4,
+        "motionFps": 60,
+        "motionMax": 18.80000001192093,
+        "motionP95": 17.599999964237213,
+        "motionSamples": 240,
+        "p95": 17.69999998807907,
+        "pixelRatio": 2,
+        "progress": 0.1572,
+        "route": "game",
+        "samples": 180,
+        "tier": 0,
+        "triangles": 16920,
+        "wallTexture": [
+          4096,
+          4096
+        ]
+      },
+      "phase": "crossing"
+    },
+    {
+      "entry": {
+        "active": true,
+        "angle": 2.581592653589793,
+        "camera": {
+          "x": 12.156234492714828,
+          "y": 6.15,
+          "z": -20.089494389995888
+        },
+        "fraction": 0.46385135135135136,
+        "frames": 12002,
+        "median": 17.10000002384504,
+        "p95": 17.10000002384504,
+        "paused": true,
+        "phase": "market",
+        "pixelRatio": 1.25,
+        "playing": false,
+        "post": {
+          "bloom": false,
+          "mode": "composer",
+          "samples": 2
+        },
+        "progress": 0.272618028880411
+      },
+      "passage": {
+        "aaSamples": 2,
+        "cabinetAnimation": {
+          "amount": 0,
+          "bow": 0,
+          "cabinet": 4,
+          "front": 35,
+          "paused": false,
+          "playing": false,
+          "reduced": false,
+          "seconds": 0
+        },
+        "calls": 29,
+        "canvas": [
+          1126,
+          1514
+        ],
+        "errors": [],
+        "focused": true,
+        "fps": 60,
+        "galleryLights": 4,
+        "motionFps": 60,
+        "motionMax": 18.400000035762787,
+        "motionP95": 17.400000035762787,
+        "motionSamples": 240,
+        "p95": 17.400000035762787,
+        "pixelRatio": 2,
+        "progress": 0.2673,
+        "route": "game",
+        "samples": 180,
+        "tier": 0,
+        "triangles": 16894,
+        "wallTexture": [
+          4096,
+          4096
+        ]
+      },
+      "phase": "market"
+    },
+    {
+      "entry": {
+        "active": true,
+        "angle": 0.03934572167946783,
+        "camera": {
+          "x": 1.2291274711674427,
+          "y": 5.979530550691249,
+          "z": 30.52304251455622
+        },
+        "fraction": 0.6463851351351352,
+        "frames": 12029,
+        "median": 16.699999988077252,
+        "p95": 17.60000002386164,
+        "paused": false,
+        "phase": "arrival",
+        "pixelRatio": 1.25,
+        "playing": false,
+        "post": {
+          "bloom": false,
+          "mode": "composer",
+          "samples": 2
+        },
+        "progress": 0.49737705385728515
+      },
+      "phase": "arrival"
+    },
+    {
+      "entry": {
+        "active": false,
+        "angle": 2.581592653589793,
+        "camera": {
+          "x": 12.156234492714828,
+          "y": 6.15,
+          "z": -20.089494389995888
+        },
+        "fraction": 1,
+        "frames": 12344,
+        "median": 16.699999988077252,
+        "p95": 17.499999999984084,
+        "paused": false,
+        "phase": "backstage",
+        "pixelRatio": 1.25,
+        "playing": true,
+        "post": {
+          "bloom": false,
+          "mode": "composer",
+          "samples": 2
+        },
+        "progress": 0.82
+      },
+      "phase": "complete",
+      "viewport": [
+        563,
+        757
+      ]
+    }
+  ],
+  "wide": [
+    {
+      "phase": "crossing",
+      "render": {
+        "aaSamples": 2,
+        "cabinetAnimation": {
+          "amount": 0,
+          "bow": 0,
+          "cabinet": 4,
+          "front": 35,
+          "paused": false,
+          "playing": false,
+          "reduced": false,
+          "seconds": 0
+        },
+        "calls": 42,
+        "canvas": [
+          2560,
+          1440
+        ],
+        "errors": [],
+        "focused": true,
+        "fps": 60,
+        "galleryLights": 4,
+        "motionFps": 60,
+        "motionMax": 17.80000001192093,
+        "motionP95": 17.19999998807907,
+        "motionSamples": 240,
+        "p95": 17.299999952316284,
+        "pixelRatio": 2,
+        "progress": 0.2213,
+        "route": "game",
+        "samples": 180,
+        "tier": 0,
+        "triangles": 16920,
+        "wallTexture": [
+          4096,
+          4096
+        ]
+      }
+    },
+    {
+      "phase": "market",
+      "render": {
+        "aaSamples": 2,
+        "cabinetAnimation": {
+          "amount": 0,
+          "bow": 0,
+          "cabinet": 4,
+          "front": 35,
+          "paused": false,
+          "playing": false,
+          "reduced": false,
+          "seconds": 0
+        },
+        "calls": 21,
+        "canvas": [
+          2560,
+          1440
+        ],
+        "errors": [],
+        "focused": true,
+        "fps": 60,
+        "galleryLights": 4,
+        "motionFps": 60,
+        "motionMax": 24.600000023841854,
+        "motionP95": 17.5,
+        "motionSamples": 240,
+        "p95": 17.69999998807907,
+        "pixelRatio": 2,
+        "progress": 0.3221,
+        "route": "game",
+        "samples": 180,
+        "tier": 0,
+        "triangles": 16878,
+        "wallTexture": [
+          4096,
+          4096
+        ]
+      }
+    },
+    {
+      "entry": {
+        "active": false,
+        "angle": 2.581592653589793,
+        "camera": {
+          "x": 11.473621894147644,
+          "y": 6.150000005231841,
+          "z": -19.00071042828547
+        },
+        "fraction": 1,
+        "frames": 343,
+        "median": 16.699999988077252,
+        "p95": 18.900000035763753,
+        "paused": false,
+        "phase": "backstage",
+        "pixelRatio": 1.25,
+        "playing": true,
+        "post": {
+          "bloom": false,
+          "mode": "composer",
+          "samples": 2
+        },
+        "progress": 0.82
+      },
+      "phase": "complete",
+      "viewport": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "keyboardControl": true,
+  "escapeFromScreenReturnsToHall": true,
+  "automatedTests": {
+    "passed": 88,
+    "failed": 0
+  },
+  "consoleErrors": []
+}

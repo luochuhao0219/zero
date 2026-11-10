@@ -6,6 +6,7 @@ import {puppetCanvas,puppetRigAssets,outlineCanvas,bridgeCanvas,gateCanvas,branc
 import {LEVELS,projectPoint} from './game.js';
 import {createMaterials,createLighting,buildArchitecture,createCourtyard,createPostProcessing} from './visuals.js';
 import {createNeighborhood} from './neighborhood.js';
+import {stageEntrancePose} from './stage-entrance.js';
 
 const SW=10.25,SH=5.55,SY=3.25;
 const rad=d=>d*Math.PI/180;
@@ -34,7 +35,7 @@ export class ShadowStage{
     this.visibilityObserver=new IntersectionObserver(entries=>{this.onStage=entries[0].isIntersecting;},{threshold:0});this.visibilityObserver.observe(canvas.parentElement);
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{this.reduced=e.matches;this.dirty=true;});
   }
-  finishLoading(){this.storyDirty=true;document.getElementById('stage-loading').classList.add('loaded');document.getElementById('stage-container').dataset.ready='true';document.body.classList.add('scene-ready');}
+  finishLoading(){this.assetsReady=true;this.storyDirty=true;document.getElementById('stage-loading').classList.add('loaded');document.getElementById('stage-container').dataset.ready='true';document.body.classList.add('scene-ready');}
   texture(canvas){const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,this.renderer.capabilities.getMaxAnisotropy());this.textureUploads++;return t;}
   box(w,h,d,x,y,z,mat=this.wood){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;this.root.add(m);return m;}
   cylinder(r,h,x,y,z,mat=this.wood){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,32),mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;this.root.add(m);return m;}
@@ -97,6 +98,21 @@ export class ShadowStage{
     if(resume){this.backstage=false;this.viewTween=null;this.targetAngle=.2;}
     if(this.storyVisible!==visible)this.storyDirty=true;
     this.storyProgress=progress;this.storyVisible=visible;
+  }
+  beginEntrance(){
+    this.entryReady=false;this.entryActive=true;
+    this.pixelRatio=Math.min(qualityPixelRatio(this.basePixelRatio,this.quality.tier),1.25);
+    this.renderer.setPixelRatio(this.pixelRatio);this.post.prepareEntrance();this.quality.resetClock();this.frameTimes=[];
+    this.groundReflection.visible=false;
+    this.time=Math.max(this.time,2.5);this.transitionStart=-10;this.viewTween=null;
+    this.pointer.x=this.pointer.y=this.pointerSmooth.x=this.pointerSmooth.y=0;
+    this.storyVisible=true;this.setPaused('route',false);this.resize();
+  }
+  finishEntrance(){this.entryActive=false;this.angle=this.targetAngle;this.viewTween=null;this.storyDirty=true;}
+  cancelEntrance(){this.entryActive=false;this.entryReady=false;}
+  entranceCamera(fitted){
+    const pose=stageEntrancePose(this.storyProgress??.59,fitted,this.targetAngle);
+    this.angle=pose.angle;this.camera.position.fromArray(pose.position);this.camera.lookAt(...pose.look);
   }
   storyCamera(fitted){
     const keys=[
@@ -172,8 +188,12 @@ export class ShadowStage{
     const idle=this.reduced||this.playing||this.inputActive?0:Math.sin(now*.28)*.045+this.pointerSmooth.x*.03;
     const fitted=Math.max(this.playing?21.6:21.6,14.1/(2*Math.tan(rad(this.camera.fov/2))*this.camera.aspect));
     const radius=fitted+arc*2.1+(1-intro)*4;const cameraY=(this.playing?6.15:5.1)+arc*.6+(this.reduced||this.playing||this.inputActive?0:this.pointerSmooth.y*.12+Math.sin(now*.23)*.035);this.camera.position.set(Math.sin(this.angle+idle+(1-intro)*.16)*radius,cameraY,Math.cos(this.angle+idle+(1-intro)*.16)*radius-.7);this.camera.lookAt(this.lookAt);
-    if(!this.playing&&this.storyProgress!==undefined&&!this.storyManual)this.storyCamera(fitted);
-    this.camera.updateMatrixWorld();this.neighborhood.update(now,this.reduced);this.onFrame?.();this.renderer.info.reset();this.renderer.shadowMap.needsUpdate=this.frames===1||this.curtainOpen<.999||this.frames%15===0;this.post.finish.uniforms.time.value=this.reduced?0:now;this.post.render(dt);
+    if(this.entryActive)this.entranceCamera(fitted);
+    else if(!this.playing&&this.storyProgress!==undefined&&!this.storyManual)this.storyCamera(fitted);
+    this.camera.updateMatrixWorld();this.neighborhood.update(now,this.reduced);this.onFrame?.();this.renderer.info.reset();
+    this.renderer.shadowMap.needsUpdate=this.entryActive?!this.entryReady:this.frames===1||this.curtainOpen<.999||this.frames%15===0;
+    this.post.finish.uniforms.time.value=this.reduced?0:now;this.post.render(dt);
+    if(this.entryActive)this.entryReady=true;
     // Observe rendered foreground frames only; emergency stalls have a bounded time window.
     if(this.quality.observe(realTime*1000)){
       const tier=this.quality.tier;

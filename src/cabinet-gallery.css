@@ -1,5 +1,6 @@
 /* A cabinet-by-cabinet museum walk: an open aisle, objects, then a small label. */
-.museum-cabinet-route{--gallery-overview:1}
+.museum-cabinet-route{--gallery-overview:1;animation:none!important}
+#hall-ui[data-entering=true]{animation:none}
 .museum-gallery-intro{position:absolute;right:5%;top:23%;width:292px;max-width:30vw;padding:25px 27px;color:#f1e4c6;background:linear-gradient(115deg,#1d2c25f0,#17251ee6);border-left:2px solid #c7a36a;box-shadow:0 14px 40px #11160d24;opacity:var(--gallery-overview);pointer-events:auto}
 .museum-gallery-intro>p:first-child{font-size:8px;letter-spacing:.17em;color:#bfa77b;margin:0 0 18px}
 .museum-gallery-intro h2{font:43px/1.17 'Zhi Mang Xing',serif;margin:0 0 19px}
@@ -117,3 +118,13 @@
 @media(max-width:760px){.museum-cabinet-route.paper-open .museum-tools.museum-placard{max-height:76svh;width:calc(100vw - 24px);padding:22px 23px;bottom:auto}.museum-cabinet-route .museum-sign-hotspot{width:84px;height:56px;font-size:10px}}
 
 .museum-cabinet-route.paper-open .museum-tool-heading{position:sticky;top:-30px;z-index:2;background:#f1e5c9;padding:10px 0}
+
+/* A quiet playback control belongs only to the fourth cabinet's small scene. */
+.museum-motion{position:absolute;left:4%;bottom:132px;display:flex;align-items:center;gap:10px;min-height:40px;padding:10px 15px;border:1px solid #c5a97788;border-radius:3px;background:#20392eea;color:#f0deba;font-family:inherit;font-size:11px;line-height:1.4;letter-spacing:.05em;pointer-events:auto;cursor:pointer;box-shadow:0 3px 12px #07110c26}
+.museum-motion:hover{background:#314a3c}.museum-motion:focus-visible{outline:2px solid #ffe5ab;outline-offset:4px}
+.museum-motion-icon{width:9px;height:11px;border-left:3px solid currentColor;border-right:3px solid currentColor;box-sizing:border-box;opacity:.85}
+.museum-motion[data-state=paused] .museum-motion-icon{width:0;height:0;border:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:8px solid currentColor}
+.museum-motion[data-state=reduced] .museum-motion-icon{width:8px;height:8px;border:0;background:currentColor}
+.paper-open .museum-motion{display:none}
+@media(max-width:760px){.museum-motion{bottom:136px;padding:9px 12px;font-size:10px}}
+@media(max-height:500px) and (min-width:761px){.museum-motion{bottom:103px}}

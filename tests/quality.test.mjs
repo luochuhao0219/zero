@@ -48,3 +48,37 @@ test('isolated stalls and interrupted slow samples do not degrade quality',()=>{
   q.observe(now+=1000);
   assert.equal(q.tier,0);
 });
+
+test('gallery quality recovers gradually after sustained healthy foreground frames',()=>{
+  const q=new AdaptiveQuality({recoverAfter:9000});let now=0;q.observe(now);
+  for(let i=0;i<600;i++)q.observe(now+=40);
+  assert.equal(q.tier,4);
+  for(let i=0;i<300;i++)q.observe(now+=16.67);
+  assert.equal(q.tier,4,'a short fast interval cannot cause quality oscillation');
+  for(let i=0;i<900;i++)q.observe(now+=16.67);
+  assert.equal(q.tier,3,'restore one step only after the cooldown');
+  for(let i=0;i<1800;i++)q.observe(now+=16.67);
+  assert.equal(q.tier,0);
+  for(let i=0;i<600;i++)q.observe(now+=16.67);
+  assert.equal(q.tier,0);
+});
+
+test('marginal frame rates and background interruptions do not trigger recovery',()=>{
+  const q=new AdaptiveQuality({recoverAfter:9000});let now=0;q.observe(now);
+  for(let i=0;i<150;i++)q.observe(now+=40);
+  assert.equal(q.tier,1);
+  for(let i=0;i<1200;i++)q.observe(now+=21);
+  assert.equal(q.tier,1);
+  for(let run=0;run<4;run++){
+    for(let i=0;i<300;i++)q.observe(now+=16.67);
+    q.resetClock();q.observe(now+=10000);
+  }
+  assert.equal(q.tier,1);
+});
+
+test('the game keeps its existing one-way quality policy unless recovery is requested',()=>{
+  const q=new AdaptiveQuality();let now=0;q.observe(now);
+  for(let i=0;i<150;i++)q.observe(now+=40);
+  for(let i=0;i<2000;i++)q.observe(now+=16.67);
+  assert.equal(q.tier,1);
+});
