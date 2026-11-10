@@ -10,13 +10,14 @@ export function deleteSavedWork(storage,key,data,work){
 }
 
 /** Shared download/delete controls, including an inline confirmation for each work. */
-export function createWorkActions({title,onDownload,onDelete}){
+export function createWorkActions({title,onDownload,onDelete,extraActions=[]}){
   const actions=document.createElement('div');actions.className='work-actions';
   const download=document.createElement('button'),remove=document.createElement('button');
   download.type=remove.type='button';download.textContent='下载 ↗';download.setAttribute('aria-label',`下载留影：${title}`);
   remove.textContent='删除';remove.className='work-delete';remove.dataset.deleteWork='';remove.setAttribute('aria-label',`删除留影：${title}`);
   download.addEventListener('click',onDownload);
-  const restore=()=>{actions.replaceChildren(download,remove);remove.focus({preventScroll:true});};
+  const extras=extraActions.map(({label,onClick})=>{const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('aria-label',`${label}：${title}`);button.addEventListener('click',onClick);return button;});
+  const restore=()=>{actions.replaceChildren(...extras,download,remove);remove.focus({preventScroll:true});};
   remove.addEventListener('click',()=>{
     const question=document.createElement('span'),cancel=document.createElement('button'),confirm=document.createElement('button');
     question.className='work-delete-question';question.textContent='删除这张留影？';question.setAttribute('role','status');
@@ -30,5 +31,5 @@ export function createWorkActions({title,onDownload,onDelete}){
     });
     actions.replaceChildren(question,cancel,confirm);cancel.focus({preventScroll:true});
   });
-  actions.append(download,remove);return actions;
+  actions.append(...extras,download,remove);return actions;
 }
