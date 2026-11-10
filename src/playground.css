@@ -14,3 +14,7 @@
 @media(max-height:650px){.stage-container,.is-playing .stage-container{min-height:0}}
 .site-header{transition:none}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Geometric close icons stay centered independently of text-font baselines. */
+:is(#about-dialog,#collection-dialog) .close-sheet{padding:0;line-height:1}
+:is(#about-dialog,#collection-dialog) .close-sheet svg{display:block;width:16px;height:16px;pointer-events:none}
