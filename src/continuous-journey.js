@@ -2,8 +2,9 @@ import {CabinetVisit} from './cabinet-visit.js';
 import {PassageScene} from './passage-scene.js';
 import {RouteState, ROUTE_HEIGHTS, MUSEUM_ENTRY, MUSEUM_STOPS, museumStop, clamp, smooth} from './route-state.js';
 import {museumRoomId} from './museum-content.js';
-import {MuseumEntrance,MUSEUM_ARRIVAL,MUSEUM_ENTRANCE_MS} from './museum-entrance.js';
-import {StageEntrance,STAGE_ENTRANCE_MS,entranceEase,stageTravelPhase} from './stage-entrance.js';
+import {MUSEUM_ARRIVAL} from './museum-entrance.js';
+import {entranceEase,stageTravelPhase,stageTravelProgress} from './stage-entrance.js';
+import {ScrollEntrance} from './scroll-entrance.js';
 import {FoyerEntrance,FOYER_AUTO_START} from './foyer-entrance.js';
 
 const phases = [
@@ -40,24 +41,31 @@ export class Journey {
     const hall = document.createElement('section'); hall.id = 'hall-ui'; hall.hidden = true;
     hall.setAttribute('aria-label','历史馆入口');
     hall.innerHTML = `<h2 class="hall-title-only">历史馆 · 开门入馆</h2>
-      <button id="choose-museum" class="hall-floor-button" data-branch="museum" aria-label="进入历史馆"><span class="hall-entry-surface"><span>开门入馆</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg></span></button>
-      <p class="hall-instruction">沿着五柜慢慢看 · 皮影戏台在长廊尽头</p>`;
+      <div id="choose-museum" class="threshold-cue hall-threshold-cue" tabindex="-1" role="note" aria-label="向下滚动，开门进入历史馆"><span class="threshold-ink" data-ink="推门入馆">推门入馆</span><span class="threshold-whisper">向下轻滚</span></div>`;
     document.body.append(hall); this.hall = hall;
     const back = document.createElement('button'); back.id = 'return-hall'; back.className = 'route-return';
     back.textContent = '↶ 返回内厅'; back.hidden = true; back.addEventListener('click',()=>this.returnHall()); document.body.append(back);
     const status = document.createElement('span'); status.id = 'route-status'; status.className = 'sr-only'; status.setAttribute('role','status'); document.body.append(status);
-    for (const button of hall.querySelectorAll('[data-branch]')) {
-      button.addEventListener('click',()=>this.choose('museum'));
-      for (const event of ['pointerenter','focus']) button.addEventListener(event,()=>{if(this.intro.world)this.intro.world.hover=button.dataset.branch==='museum'?-1:1;this.intro.interactionDirty=true;});
-      for (const event of ['pointerleave','blur']) button.addEventListener(event,()=>{if(this.intro.world)this.intro.world.hover=0;this.intro.interactionDirty=true;});
-    }
+    const hint=document.createElement('div');hint.id='stage-entry-cue';hint.className='threshold-cue stage-threshold-cue';hint.hidden=true;
+    hint.tabIndex=-1;hint.setAttribute('role','note');hint.setAttribute('aria-label','向下滚动，拉开帷幕走入戏台');
+    hint.innerHTML='<span class="threshold-ink" data-ink="揭幕入戏">揭幕入戏</span><span class="threshold-whisper">向下轻滚</span>';
+    document.body.append(hint);this.scrollHint=hint;
   }
   bind() {
     window.addEventListener('scroll',()=>{this.dirty=true;},{passive:true});
     for(const type of ['wheel','pointerdown','touchstart'])window.addEventListener(type,()=>this.visit.interrupt(),{passive:true});
-    for(const type of ['wheel','touchmove'])window.addEventListener(type,event=>{
-      if(this.foyerEntrance||this.museumEntrance||this.stageEntrance)event.preventDefault();
+    window.addEventListener('wheel',event=>{
+      if(event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;
+      const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);
+      if(this.scrollEntrance(delta,event.target))event.preventDefault();
     },{passive:false});
+    window.addEventListener('touchstart',event=>{this.touchY=event.touches.length===1?event.touches[0].clientY:null;},{passive:true});
+    window.addEventListener('touchmove',event=>{
+      if(this.touchY===null||event.touches.length!==1)return;
+      const y=event.touches[0].clientY,delta=this.touchY-y;this.touchY=y;
+      if(this.scrollEntrance(delta,event.target))event.preventDefault();
+    },{passive:false});
+    window.addEventListener('touchend',()=>{this.touchY=null;},{passive:true});
     window.addEventListener('resize',()=>{if(!this.gameActive)this.resizeProgress=this.target;this.dirty=true;},{passive:true});
     document.addEventListener('visibilitychange',()=>{this.lastTime=performance.now();this.dirty=true;});
     this.media.addEventListener('change',()=>{this.intro.resizeDirty=true;});
@@ -70,8 +78,12 @@ export class Journey {
     $('story-collection').addEventListener('click',this.onCollection);
     window.addEventListener('hashchange',()=>this.goTo(location.hash.slice(1),true));
     document.addEventListener('keydown',e=>{
+      if(this.returning){e.preventDefault();return;}
       if(e.key==='Escape'&&this.foyerEntrance){e.preventDefault();this.stopFoyer();this.goPosition(0);$('route-status').textContent='已返回入口，可重新走入长廊。';return;}
-      if((this.foyerEntrance||this.museumEntrance||this.stageEntrance)&&['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(e.key)){e.preventDefault();return;}
+      const input=e.target.closest('input,select,textarea,button,a');
+      const step={ArrowDown:100,ArrowUp:-100,PageDown:innerHeight*.7,PageUp:-innerHeight*.7,' ':innerHeight*.7}[e.key];
+      if(!input&&step!==undefined&&this.scrollEntrance(e.shiftKey&&e.key===' '?-step:step,e.target)){e.preventDefault();return;}
+      if((this.foyerEntrance||this.museumEntrance||this.stageEntrance)&&['Home','End'].includes(e.key)){e.preventDefault();return;}
       if(['ArrowUp','ArrowDown','PageUp','PageDown',' '].includes(e.key))this.visit.interrupt();
       if(e.key==='Escape'&&!this.gameActive&&!document.querySelector('dialog[open]')&&this.state.route!=='public')this.returnHall();
       if((e.target.closest('input,select,textarea,button,a')||this.gameActive||document.querySelector('dialog[open]')))return;
@@ -82,6 +94,38 @@ export class Journey {
   setTrack() {
     this.opening.style.height = `${(ROUTE_HEIGHTS[this.state.route]+1)*100}svh`;
     document.body.dataset.route = this.state.route;
+  }
+  scrollEntrance(delta,target){
+    if(this.returning||this.foyerEntrance)return true;
+    if(this.gameActive||document.querySelector('dialog[open]')||target?.closest('.museum-reading,input,textarea,select'))return false;
+    const entrance=this.museumEntrance||this.stageEntrance;
+    if(entrance){entrance.move(delta);this.visit.interrupt();return true;}
+    if(delta<0&&this.state.route==='museum'&&this.progress<=.0001&&!this.state.transition){
+      this.entranceSource={route:'public',progress:1};this.cancelScrollEntrance();return true;
+    }
+    if(delta<=0||this.state.transition)return false;
+    if(this.state.route==='public'&&this.progress>=.999){
+      if(this.choose('museum'))this.museumEntrance.move(delta);
+      return true;
+    }
+    if(this.state.route==='museum'&&this.progress>=.999){
+      if(this.enterStage())this.stageEntrance.move(delta);
+      return true;
+    }
+    return false;
+  }
+  cancelScrollEntrance(){
+    const source=this.entranceSource;if(!source)return;
+    if(this.stageEntrance){this.stage.cancelEntrance();this.onStageCancel?.();}
+    this.museumEntrance=this.stageEntrance=null;this.entranceFraction=this.stageEntryFraction=0;this.directStage=false;
+    this.state.transition=null;this.state.interaction=null;this.state.route=source.route;
+    this.progress=this.target=source.progress;this.state.setProgress(this.progress);this.visit.reset();
+    this.afterTransition=undefined;this.queuedMuseum=null;this.entranceSource=null;this.resizeProgress=undefined;
+    document.body.classList.remove('stage-direct','is-entering-stage');document.body.style.removeProperty('--stage-entry-ui');
+    document.querySelector('.site-header').inert=false;this.scrollHint.hidden=true;
+    this.setTrack();this.goPosition(this.progress,true);
+    history.replaceState(null,'',source.route==='public'?'#hall':'#museum');
+    $('route-status').textContent=source.route==='public'?'已退回历史馆门前，可再次向下滚动入馆。':'已退回长廊尽头，可再次向下滚动拉开帷幕。';
   }
   goPosition(progress, instant=false) {
     if((this.foyerEntrance||this.museumEntrance||this.stageEntrance)&&!instant)return;
@@ -104,24 +148,39 @@ export class Journey {
     this.pendingFoyer=false;this.foyerEntrance=null;document.body.classList.remove('is-entering-foyer');
     document.querySelector('.site-header').inert=false;
   }
-  fadeReturn(options){
+  fadeReturn(options={}){
     if(this.returning)return false;
     this.returning=true;this.pendingPlay=undefined;
-    const veil=document.createElement('div');veil.className='hall-return-veil';veil.setAttribute('aria-label','返回大厅');document.body.append(veil);
-    const delay=this.media.matches?0:240;
-    requestAnimationFrame(()=>veil.classList.add('opaque'));
-    setTimeout(()=>{
+    document.body.classList.add('is-returning-hall');this.scrollHint.hidden=true;
+    const veil=document.createElement('div');veil.className='hall-return-veil';veil.setAttribute('aria-label','返回内厅');document.body.append(veil);
+    const outgoing=this.gameActive||this.stageOpacity>.5?$('stage-container'):this.intro.canvas;
+    const duration=this.media.matches?0:260;
+    const drift=outgoing.animate([{transform:'none'},{transform:'translateY(10px) scale(.975)'}],{duration,easing:'ease-in',fill:'forwards'});
+    const cover=veil.animate([{opacity:0},{opacity:1}],{duration,easing:'ease-in-out',fill:'forwards'});
+    const finish=async()=>{
+      await cover.finished.catch(()=>{});
       options?.beforeCommit?.();
       if(this.stageEntrance){this.stage.cancelEntrance();this.onStageCancel?.();}
-      this.stageEntrance=null;this.directStage=false;this.stageEntryFraction=0;
+      this.museumEntrance=this.stageEntrance=null;this.entranceFraction=this.stageEntryFraction=0;this.directStage=false;this.entranceSource=null;
       document.body.classList.remove('stage-direct','is-entering-stage');document.body.style.removeProperty('--stage-entry-ui');
       document.querySelector('.site-header').inert=false;
       this.state.transition=null;this.state.interaction=null;this.visit.reset();
-      this.choose('public',{...options,fadeCommit:true});
+      const destination=options.destination??this.afterTransition;this.afterTransition=undefined;
+      this.choose('public',{fadeCommit:true});
       this.state.transition=null;this.returnJourney=this.gameReturn=null;
-      this.intro.setRoute('public',1,null);this.dirty=true;
-      setTimeout(()=>{veil.classList.remove('opaque');setTimeout(()=>{veil.remove();this.returning=false;},delay);},80);
-    },delay);
+      this.intro.visible=true;this.intro.setRoute('public',1,null);this.intro.update(performance.now()/1000,0,this.media.matches);
+      this.lastCopyKey=null;this.syncCopy();this.dispatch();drift.cancel();
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const settle=this.intro.canvas.animate([{transform:'translateY(-8px) scale(1.035)'},{transform:'none'}],{duration:this.media.matches?0:380,easing:'cubic-bezier(.22,1,.36,1)',fill:'forwards'});
+      cover.cancel();
+      const reveal=veil.animate([{opacity:1},{opacity:0}],{duration:this.media.matches?0:380,easing:'ease-out',fill:'forwards'});
+      await reveal.finished.catch(()=>{});settle.cancel();veil.remove();
+      document.body.classList.remove('is-returning-hall');this.returning=false;this.dirty=true;
+      $('choose-museum').focus({preventScroll:true});
+      if(destination!==undefined&&destination!==1)this.goPosition(destination);
+      if(this.queuedMuseum){const room=this.queuedMuseum;this.queuedMuseum=null;this.openMuseum(room);}
+    };
+    void finish();
     return true;
   }
   choose(route,{destination,room,fadeCommit=false,directStage=false,level}={}) {
@@ -129,11 +188,12 @@ export class Journey {
     if(route==='public'&&!fadeCommit)return this.fadeReturn({destination,room});
     if(!this.intro.loaded||!this.intro.world?.prepared){
       $('route-status').className='route-notice';
-      $('route-status').textContent=this.intro.fallback?'当前浏览器无法创建三维场景，请启用 WebGL 2 后重新打开。':'场景正在准备，请稍候再选择入口。';
+      $('route-status').textContent=this.intro.fallback?'当前浏览器无法创建三维场景，请启用 WebGL 2 后重新打开。':'场景正在准备，请稍候再向下滚动。';
       return false;
     }
     $('route-status').className='sr-only';
     const from=this.state.route,now=performance.now();
+    const sourceProgress=this.progress;
     if(!this.state.begin(route,now))return false;
     this.museumEntrance=null;this.entranceFraction=0;
     this.entryPublicProgress=from==='public'?this.progress:null;
@@ -155,13 +215,15 @@ export class Journey {
       document.body.classList.add('stage-direct','is-entering-stage');
       document.querySelector('.site-header').inert=true;
       this.stage.beginEntrance();
-      this.stageEntrance=new StageEntrance(now);this.state.transition.duration=STAGE_ENTRANCE_MS;
+      this.stageEntrance=new ScrollEntrance(Math.max(2400,innerHeight*4.2),stageTravelProgress);
+      this.entranceSource={route:from,progress:sourceProgress};this.state.transition.scrollDriven=true;
       this.progress=this.target=0;this.hall.inert=true;
     }
     if(route==='museum'){
       this.entryPublicProgress=null;
       if(from==='public'){
-        this.museumEntrance=new MuseumEntrance(now);this.state.transition.duration=MUSEUM_ENTRANCE_MS;
+        this.museumEntrance=new ScrollEntrance(Math.max(650,innerHeight*1.2),fraction=>MUSEUM_ARRIVAL*fraction);
+        this.entranceSource={route:from,progress:1};this.state.transition.scrollDriven=true;
         this.hall.inert=true;this.hall.dataset.entering='true';
       }else{this.state.transition=null;this.progress=this.target=MUSEUM_ARRIVAL;}
     }
@@ -170,7 +232,7 @@ export class Journey {
     this.afterTransition=destination!==undefined?destination:room?MUSEUM_STOPS.find(s=>s.id===room)?.at:undefined;
     if(!this.state.transition&&this.afterTransition!==undefined){const p=this.afterTransition;this.afterTransition=undefined;this.goPosition(p);}
     history.replaceState(null,'',`#${route==='public'?'hall':route==='museum'?'museum':directStage?'play':'gate'}`);
-    $('route-status').textContent=route==='public'?'返回教学楼内厅':route==='museum'?'走进江汉皮影馆':directStage?'正在走入皮影戏台，抵达后即可操作。':'穿过影幕，前往灯市';
+    $('route-status').textContent=route==='public'?'已返回内厅，向下滚动可开门入馆。':route==='museum'?'向下滚动，推开木门走进历史馆。':directStage?'向下滚动拉开帷幕，穿幕走入皮影戏台。':'穿过影幕，前往灯市';
     this.dispatch();return true;
   }
   returnHall() {
@@ -213,10 +275,11 @@ export class Journey {
     if(this.gameActive||this.stageEntrance)return;
     if(this.state.route==='public'){
       if(this.progress<.94)this.startFoyer();else $('choose-museum').focus({preventScroll:true});
-      $('route-status').textContent='请先开门参观历史馆，皮影戏台在长廊尽头。';return;
+      $('route-status').textContent='向下滚动推门参观历史馆，皮影戏台在长廊尽头。';return;
     }
     if(this.state.route==='museum'){
-      if(this.progress>=.98)this.enterStage(index);else this.goPosition(1);
+      if(this.progress>=.98){$('route-status').textContent='继续向下滚动，拉开帷幕进入皮影戏台。';this.scrollHint.focus({preventScroll:true});}
+      else this.goPosition(1);
       return;
     }
     if(this.state.route==='game'&&!this.state.transition&&this.progress>=.77&&this.progress<=.92){this.onEnter(index);return;}
@@ -227,7 +290,7 @@ export class Journey {
     if(this.state.route!=='museum')return false;
     if(this.stageEntrance||this.state.transition||this.gameActive||this.returning)return false;
     if(this.stage.fallback||!this.stage.assetsReady){
-      $('route-status').className='route-notice';$('route-status').textContent=this.stage.fallback?'当前浏览器无法创建三维戏台。':'戏台正在准备，请稍候再选择入口。';return false;
+      $('route-status').className='route-notice';$('route-status').textContent=this.stage.fallback?'当前浏览器无法创建三维戏台。':'戏台正在准备，请稍候再向下滚动。';return false;
     }
     return this.choose('game',{directStage:true,level});
   }
@@ -270,7 +333,7 @@ export class Journey {
   syncCopy() {
     const route=this.state.route,p=route==='public'?this.progress*.23:route==='game'?.21+this.progress*.79:-1;
     const key=route+'/'+Math.round(this.progress*100000)+'/'+!!this.state.transition+'/'+!!this.foyerEntrance+'/'+Math.round(this.entranceFraction*1000)+'/'+Math.round((this.stageEntryFraction||0)*1000)+'/'+!!this.stage.entryReady;
-    if(this.lastCopyKey===key){if(!this.hall.hidden)this.positionDoors();return;}
+    if(this.lastCopyKey===key){if(!this.hall.hidden)this.positionDoors();this.syncStageCue();return;}
     this.lastCopyKey=key;
     // The campus needs a reading scrim; indoor materials already have their own
     // exposure and lighting. Fade it away as the camera enters the doorway.
@@ -289,11 +352,15 @@ export class Journey {
     this.layer(this.homeUI,entry);this.layer(this.chapters,entry);this.layer(this.credits,route==='game'?smooth(.965,.99,p):0);
     this.seam.style.opacity='0';this.play.style.setProperty('--stage-end-shade',this.directStage?'0':smooth(.89,1,p).toFixed(3));
     const atHall=route==='public'&&this.progress>.94&&!this.state.transition;
-    const hallOpacity=atHall?entranceEase(.94,.995,this.progress):this.museumEntrance?1-smooth(0,.18,this.entranceFraction):0;
+    const doorDissolve=this.museumEntrance?smooth(0,.18,this.entranceFraction):0;
+    if(doorDissolve===1)this.museumCueDismissed=true;
+    const hallOpacity=this.museumCueDismissed?0:atHall?entranceEase(.94,.995,this.progress):this.museumEntrance?1-doorDissolve:0;
+    $('choose-museum').style.setProperty('--cue-dissolve',String(doorDissolve));
     this.hall.dataset.entering=String(!!(this.museumEntrance||this.stageEntrance));
     this.hall.hidden=hallOpacity<=.002;this.layer(this.hall,hallOpacity);
     this.hall.inert=!!(this.foyerEntrance||this.museumEntrance||this.stageEntrance)||hallOpacity<.55;
     if(!this.hall.hidden)this.positionDoors();
+    this.syncStageCue();
     const returnOpacity=route==='public'||this.stageEntrance?0:this.museumEntrance?smooth(.09,.12,this.progress):this.state.transition?0:1;
     $('return-hall').hidden=returnOpacity<=.002;this.layer($('return-hall'),returnOpacity);
     $('return-hall').inert=!!this.museumEntrance||returnOpacity<.55;
@@ -307,19 +374,31 @@ export class Journey {
     this.onProgress(route==='public'?this.progress*.23:route==='museum'?.25:p);
   }
   positionDoors() {
-    if(this.intro.fallback||!this.intro.world?.backdrop?.doorPositions)return;
-    for(const [i,id] of ['choose-museum'].entries()) {
-      const point=this.intro.world.backdrop.doorPositions[i];
-      const half=$(id).offsetWidth/2+12;
-      $(id).style.left=`${clamp(point[0]*innerWidth,half,innerWidth-half)}px`;
-      $(id).style.top=`${clamp(point[1]*innerHeight,90,innerHeight-64)}px`;
+    const point=this.intro.world?.backdrop?.doorCuePosition;
+    if(this.intro.fallback||!point)return;
+    const cue=$('choose-museum'),half=cue.offsetWidth/2+12;
+    cue.style.left=`${clamp(point[0]*innerWidth,half,innerWidth-half)}px`;
+    cue.style.top=`${clamp(point[1]*innerHeight,120,innerHeight-100)}px`;
+  }
+  syncStageCue(){
+    const dissolve=this.stageEntrance?smooth(.025,.075,this.progress):0;
+    if(dissolve===1)this.stageCueDismissed=true;
+    const arrival=this.state.route==='museum'?entranceEase(.97,.995,this.progress):this.stageEntrance?1-dissolve:0;
+    const point=this.intro.world?.stagePortal?.cuePosition;
+    const visible=!this.returning&&!this.stageCueDismissed&&point?.[2]&&point[0]>.04&&point[0]<.96&&point[1]>.1&&point[1]<.9;
+    const opacity=visible?arrival:0;
+    this.scrollHint.hidden=opacity<=.002;this.layer(this.scrollHint,opacity);
+    this.scrollHint.style.setProperty('--cue-dissolve',String(dissolve));
+    if(opacity>.002){
+      this.scrollHint.style.left=`${point[0]*innerWidth}px`;
+      this.scrollHint.style.top=`${point[1]*innerHeight}px`;
     }
   }
   frame() {
     requestAnimationFrame(()=>this.frame());
     const now=performance.now(),dt=Math.min(.05,(now-this.lastTime)/1000);this.lastTime=now;
     if(document.hidden||this.gameActive)return;
-    const transition=this.state.transition;
+    let transition=this.state.transition;
     let entryStep=null,fraction;
     const entryKind=this.foyerEntrance?'foyer':this.stageEntrance?'stage':this.museumEntrance?'museum':null;
     if(this.foyerEntrance){
@@ -328,9 +407,9 @@ export class Journey {
       const top=this.opening.getBoundingClientRect().top+scrollY;
       scrollTo({top:top+this.progress*(this.opening.offsetHeight-innerHeight),behavior:'instant'});
       this.dirty=false;this.resizeProgress=undefined;
-      if(entryStep.done){this.stopFoyer();history.replaceState(null,'','#hall');$('route-status').textContent='已抵达历史馆，点击地面按钮开门入馆。';}
+      if(entryStep.done){this.stopFoyer();history.replaceState(null,'','#hall');$('route-status').textContent='已抵达历史馆，继续向下滚动开门入馆。';}
     }else if(this.stageEntrance){
-      entryStep=this.stageEntrance.advance(now,this.media.matches,this.stage.entryReady);fraction=entryStep.fraction;this.stageEntryFraction=fraction;
+      entryStep=this.stageEntrance.advance(dt,this.media.matches,this.stage.entryReady);fraction=entryStep.fraction;this.stageEntryFraction=fraction;
       this.progress=this.target=entryStep.progress;
       const top=this.opening.getBoundingClientRect().top+scrollY;
       scrollTo({top:top+this.progress*(this.opening.offsetHeight-innerHeight),behavior:'instant'});
@@ -338,7 +417,7 @@ export class Journey {
       document.body.style.setProperty('--stage-entry-ui',(1-entranceEase(0,.12,fraction)).toFixed(4));
       if(entryStep.done){this.stageEntrance=null;this.state.transition=null;}
     }else if(this.museumEntrance){
-      entryStep=this.museumEntrance.advance(now,this.media.matches);fraction=entryStep.fraction;this.entranceFraction=fraction;
+      entryStep=this.museumEntrance.advance(dt,this.media.matches);fraction=entryStep.fraction;this.entranceFraction=fraction;
       this.progress=this.target=entryStep.progress;
       const top=this.opening.getBoundingClientRect().top+scrollY;
       scrollTo({top:top+this.progress*(this.opening.offsetHeight-innerHeight),behavior:'instant'});
@@ -348,6 +427,7 @@ export class Journey {
         $('route-status').textContent='已进入江汉皮影馆，可滚动参观或选择展柜。';
       }
     }else fraction=this.state.advance(now,this.media.matches);
+    if(entryStep?.cancelled){this.cancelScrollEntrance();entryStep=null;transition=null;fraction=1;}
     if(transition&&!this.state.transition) {
       this.returnJourney=null;this.gameReturn=null;
       if(this.afterTransition!==undefined){const p=this.afterTransition;this.afterTransition=undefined;this.goPosition(p);}
@@ -409,7 +489,7 @@ export class Journey {
     if(this.viewLabelBackstage!==this.stage.backstage){this.viewLabelBackstage=this.stage.backstage;$('hero-view-toggle').firstChild.textContent=(this.stage.backstage?'回到幕前':'绕到幕后')+' ';}
     this.dispatch();
     if(entryStep?.done&&entryKind==='foyer')$('choose-museum').focus({preventScroll:true});
-    if(entryStep?.done&&entryKind==='museum')$('museum-start')?.focus({preventScroll:true});
+    if(entryStep?.done&&entryKind==='museum')document.querySelector('[data-cabinet="heritage"]')?.focus({preventScroll:true});
   }
   diagnostics() {
     return {route:this.state.route,active:this.active,gameActive:this.gameActive,scrollY,progress:this.progress,target:this.target,

@@ -59,8 +59,9 @@ function enterGame(index=0,{fromEntrance=false}={}){
  $('stage').focus({preventScroll:true});
 }
 function exitGame({memories=false}={}){
- if(studio?.active)studio.close();document.body.classList.remove('is-studio');cancelPerformance();$('complete-dialog').close();
- const leave=()=>{playing=false;document.body.classList.remove('is-playing');$('game-interface').hidden=true;stage.setPlaying(false);stage.setState(state,false);setView(false);journey.setGameActive(false);travelSound?.set(1,soundEnabled,false);renderChapters();};
+ if(journey.returning)return;
+ clearTimeout(autoTimer);clearTimeout(completionTimer);direct.cancel();direct.enabled=false;studio?.stopPerformance();studio?.controls?.cancel(true);$('complete-dialog').close();
+ const leave=()=>{if(studio?.active)studio.close();document.body.classList.remove('is-studio');cancelPerformance();playing=false;document.body.classList.remove('is-playing');$('game-interface').hidden=true;stage.setPlaying(false);stage.setState(state,false);setView(false);journey.setGameActive(false);travelSound?.set(1,soundEnabled,false);renderChapters();};
  if(memories){moveStage(()=>{leave();journey.goTo('memories');});}
  else {layoutAnimation?.cancel();journey.fadeReturn({beforeCommit:leave});}
 }
@@ -120,7 +121,7 @@ $('collection-start').addEventListener('click',()=>{$('collection-dialog').close
   openSheet('collection-dialog');
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(autoTimer);direct.cancel();travelSound?.set(journey.intro.progress,false,playing);audio?.suspend().catch(()=>{});}else{if(soundEnabled)audio?.resume().then(()=>travelSound?.set(journey.intro.progress,soundEnabled,playing)).catch(()=>{});if(playing)considerCompletion();}});
-document.addEventListener('keydown',e=>{if(anySheetOpen())return;if(studio?.active){if(e.key==='Escape'&&!e.target.closest('input,textarea'))exitGame();return;}if(e.code==='Space'&&playing&&!e.repeat&&!completing){e.preventDefault();setView(!stage.backstage);}if(e.key==='Escape'&&playing)exitGame();if(playing&&!completing&&(e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}if(playing&&!completing&&e.key.toLowerCase()==='r')loadLevel(state.level);});
+document.addEventListener('keydown',e=>{if(journey.returning||anySheetOpen())return;if(studio?.active){if(e.key==='Escape'&&!e.target.closest('input,textarea'))exitGame();return;}if(e.code==='Space'&&playing&&!e.repeat&&!completing){e.preventDefault();setView(!stage.backstage);}if(e.key==='Escape'&&playing)exitGame();if(playing&&!completing&&(e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}if(playing&&!completing&&e.key.toLowerCase()==='r')loadLevel(state.level);});
 const exploration=new Exploration({journey,toast,onPause:()=>{if(completing){toast('这幕演完，就能继续探索。');return false;}clearTimeout(autoTimer);direct.cancel();direct.enabled=false;return true;},onResume:()=>{direct.enabled=!studio?.active&&!completing&&!anySheetOpen();if(playing)considerCompletion();},onPlay:enterGame});
 studio=new StageStudio({stage,toast,onExit:exitGame,onAudio:active=>travelSound?.duck(active)});$('free-play-entry').addEventListener('click',enterStudio);$('resume-studio').addEventListener('click',enterStudio);
 renderWorks();renderChapters();renderHelp();stage.setState(state,false);if(stage.fallback)$('start-game').setAttribute('aria-disabled','true');

@@ -22,7 +22,7 @@ export class Exploration {
     document.querySelector('.header-actions').insertBefore(entry,$('collection-open'));
     const root=document.createElement('section');root.id='museum-ui';root.className='museum-route museum-editorial museum-cabinet-route';root.hidden=true;
     root.setAttribute('aria-label','江汉皮影馆，沿展柜参观');
-    root.innerHTML=`<header class="museum-gallery-intro"><p>JIANGHAN SHADOW PUPPET GALLERY</p><h2>沿着展柜，<br>慢慢看。</h2><p>从一方水土，走到一门手艺的传承。<br>五个柜子，五段故事。</p><button id="museum-start">走近第一柜 <span>→</span></button><small>滚动自由前行；到柜前自动对正，继续滚动即可离开。</small></header>
+    root.innerHTML=`<header class="museum-gallery-intro"><p>JIANGHAN SHADOW PUPPET GALLERY</p><h2>沿着展柜，<br>慢慢看。</h2><p>从一方水土，走到一门手艺的传承。<br>五个柜子，五段故事。</p></header>
       <div class="museum-cabinet-pins" aria-label="长廊中的展柜">${ROOMS.map(r=>`<button class="museum-cabinet-pin" data-cabinet="${r.id}" aria-label="走近第 ${r.no} 柜，${r.name}"><b>${r.no}</b><span>${r.name}</span></button>`).join('')}</div>
       <button id="museum-overview" class="museum-overview-return">← 长廊全览</button>
       <button id="museum-sign" class="museum-sign-hotspot" aria-label="打开当前展柜讲解" aria-controls="museum-article" aria-expanded="false"><span class="museum-sign-ring" aria-hidden="true"></span><span class="museum-sign-label">查看讲解</span></button>
@@ -40,7 +40,6 @@ export class Exploration {
     $('explore-open').addEventListener('click',()=>this.open());
     this.dialog.querySelectorAll('[data-room],[data-cabinet]').forEach(b=>b.addEventListener('click',()=>this.selectRoom(b.dataset.room||b.dataset.cabinet)));
     document.querySelectorAll('[data-explore]').forEach(b=>b.addEventListener('click',()=>this.open(b.dataset.explore)));
-    $('museum-start').addEventListener('click',()=>this.selectRoom('heritage'));
     $('museum-overview').addEventListener('click',()=>this.open());
     $('ex-prev').addEventListener('click',()=>{
       const i=ROOMS.findIndex(r=>r.id===this.active);
@@ -48,7 +47,8 @@ export class Exploration {
     });
     $('ex-next').addEventListener('click',()=>{
       const i=ROOMS.findIndex(r=>r.id===this.active);
-      if(this.atExit)this.journey.enterStage();else if(this.overview)this.selectRoom('heritage');else if(i===ROOMS.length-1)this.journey.goPosition(1);else this.selectRoom(ROOMS[i+1].id);
+      if(this.atExit)return;
+      if(this.overview)this.selectRoom('heritage');else if(i===ROOMS.length-1)this.journey.goPosition(1);else this.selectRoom(ROOMS[i+1].id);
     });
     $('museum-expand').addEventListener('click',()=>this.expandReading(false));
     $('museum-sign').addEventListener('click',()=>this.expandReading(true));
@@ -117,7 +117,8 @@ export class Exploration {
     this.dialog.querySelectorAll('[data-room]').forEach(b=>b.setAttribute('aria-pressed',String(!overview&&!atExit&&b.dataset.room===room.id)));
     const i=ROOMS.indexOf(room);
     $('ex-prev').textContent=atExit?'← 回看第五柜':overview?'↶ 返回内厅':i===0?'← 长廊全览':`← 第 ${ROOMS[i-1].no} 柜`;
-    $('ex-next').textContent=atExit?'拉开帷幕，进入戏台 →':overview?'从第一柜开始 →':i===ROOMS.length-1?'继续向前 · 皮影戏台 →':`走向第 ${ROOMS[i+1].no} 柜 →`;
+    $('ex-next').hidden=atExit;
+    $('ex-next').textContent=overview?'从第一柜开始 →':i===ROOMS.length-1?'继续向前 · 皮影戏台 →':`走向第 ${ROOMS[i+1].no} 柜 →`;
     this.renderArticle(room);reading.scrollTop=0;
   }
   syncMotionControl(){
@@ -147,6 +148,6 @@ export class Exploration {
   }
   updateCanvasLabel(){
     const room=ROOMS.find(r=>r.id===this.active);
-    this.journey.intro.canvas.setAttribute('aria-label',this.atExit?'历史馆长廊尽头，皮影戏台的绛红帷幕。点击拉开帷幕，继续走入戏台。':this.overview?'江汉皮影馆长廊，五个木玻璃展柜沿走道依次排列。点击编号或滚动走近展柜。':`第 ${room.no} 柜，${room.name}。${room.intro}`);
+    this.journey.intro.canvas.setAttribute('aria-label',this.atExit?'历史馆长廊尽头，皮影戏台的绛红帷幕。向下滚动拉开帷幕，继续走入戏台。':this.overview?'江汉皮影馆长廊，五个木玻璃展柜沿走道依次排列。点击编号或滚动走近展柜。':`第 ${room.no} 柜，${room.name}。${room.intro}`);
   }
 }

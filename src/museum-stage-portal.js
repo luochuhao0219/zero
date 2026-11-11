@@ -41,6 +41,7 @@ export class MuseumStagePortal{
   constructor(parent,materials,theater){
     this.theater=theater;this.group=new THREE.Group();parent.add(this.group);
     const {width,height,z}=STAGE_PORTAL;
+    this.cuePoint=new THREE.Vector3(0,height*.52,z+.24);this.projectedCue=new THREE.Vector3();
     this.crop={value:new THREE.Vector4(0,0,1,1)};
     const photoMaterial=new THREE.ShaderMaterial({uniforms:{image:{value:theater.map},crop:this.crop},
       vertexShader:'varying vec4 clipPoint;void main(){clipPoint=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_Position=clipPoint;}',
@@ -102,5 +103,7 @@ export class MuseumStagePortal{
   sync(camera,aspect,progress=0){
     const frame=curtainPhotoFrame(this.theater.aspect,aspect,camera,progress);
     this.crop.value.set(frame.x,frame.y,frame.width,frame.height);
+    const point=this.projectedCue.copy(this.cuePoint).project(camera);
+    this.cuePosition=[(point.x+1)/2,(1-point.y)/2,point.z>=-1&&point.z<=1];
   }
 }

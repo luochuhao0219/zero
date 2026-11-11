@@ -6,14 +6,13 @@
 .museum-gallery-intro h2{font:43px/1.17 'Zhi Mang Xing',serif;margin:0 0 19px}
 .museum-gallery-intro>p{font-size:13px;line-height:1.9;color:#ddd0b1;margin:0 0 20px}
 .museum-gallery-intro small{display:block;font-size:10px;line-height:1.7;color:#bdba9f;margin-top:13px}
-#museum-start{width:100%;padding:13px 16px;border:1px solid #d3b67d;background:#e2cfa8;color:#29392e;text-align:left;font-size:13px;cursor:pointer}#museum-start span{float:right}
 .museum-cabinet-pins{position:absolute;inset:0;opacity:var(--gallery-overview);pointer-events:none}
 .museum-cabinet-pin{position:absolute;transform:translate(-50%,-50%);width:42px;height:42px;padding:0;display:grid;place-items:center;pointer-events:auto;border:1px solid #f1d89e;background:#253e31e8;color:#ffedc9;border-radius:50%;box-shadow:0 0 0 5px #dfc08a20,0 5px 20px #0a130d70;cursor:pointer;transition:background .18s,box-shadow .18s}
 .museum-cabinet-pin b{font-size:12px;font-weight:400;letter-spacing:.05em}
 .museum-cabinet-pin span{position:absolute;top:50px;left:50%;transform:translateX(-50%);padding:6px 10px;background:#23362ded;border:1px solid #d3b47a66;border-radius:2px;white-space:nowrap;font-size:11px;display:none}
 .museum-cabinet-pin[data-cabinet=heritage] span,.museum-cabinet-pin:hover span,.museum-cabinet-pin:focus-visible span{display:block}
 .museum-cabinet-pin:hover{background:#655035;box-shadow:0 0 0 7px #dfc08a25,0 5px 20px #0a130d70}
-.museum-cabinet-pin:focus-visible,#museum-start:focus-visible,.museum-overview-return:focus-visible{outline:2px solid #ffe5ab;outline-offset:5px}
+.museum-cabinet-pin:focus-visible,.museum-overview-return:focus-visible{outline:2px solid #ffe5ab;outline-offset:5px}
 .museum-overview-return{position:absolute;left:4%;top:100px;pointer-events:auto;font-size:11px;color:#e8d9b8;background:#24392ce8;border:1px solid #bb9f6a66;border-radius:24px;padding:10px 16px;cursor:pointer}
 .museum-cabinet-route[data-overview=true] .museum-overview-return{display:none}
 .museum-cabinet-route .museum-tools.museum-placard{right:4%;left:auto;top:50%;bottom:auto;transform:translateY(-50%);box-sizing:border-box;width:300px;max-width:28vw;max-height:calc(100svh - 250px);height:auto;overflow-y:auto;padding:23px 25px;background:linear-gradient(120deg,#f2e7cfee,#e8d9baf5),repeating-linear-gradient(0deg,#96805a12 0 1px,transparent 1px 3px);color:#374337;border:1px solid #c6ae7e;border-radius:2px;box-shadow:0 12px 32px #10180d33,0 1px 0 #fffa inset;overscroll-behavior:contain}
@@ -43,11 +42,10 @@
 .museum-cabinet-route .museum-route-footer button{font-size:11px;padding:9px 12px;border:1px solid #d0b57e33;border-radius:2px;background:#21382bc7}
 #museum-walk-hint{font-size:10px;letter-spacing:.08em;color:#d4c7a6}
 @media(max-width:760px){
-  .museum-gallery-intro{right:4%;left:4%;top:auto;bottom:128px;width:auto;max-width:none;padding:17px 20px;display:grid;grid-template-columns:1fr auto;gap:5px 18px}
+  .museum-gallery-intro{right:4%;left:4%;top:auto;bottom:128px;width:auto;max-width:none;padding:17px 20px;display:grid;grid-template-columns:1fr;gap:5px 18px}
   .museum-gallery-intro>p:first-child{grid-column:1/-1;font-size:7px;margin:0 0 5px}
   .museum-gallery-intro h2{font-size:30px;margin:0;grid-column:1}.museum-gallery-intro h2 br{display:none}
   .museum-gallery-intro>p{font-size:11px;margin:5px 0 0;grid-column:1}.museum-gallery-intro>p br{display:none}
-  #museum-start{grid-column:2;grid-row:2/4;align-self:center;width:130px;font-size:11px;padding:12px}
   .museum-gallery-intro small{grid-column:1/-1;font-size:9px;margin-top:4px}
   .museum-overview-return{left:15px;top:75px;font-size:10px;padding:9px 11px}
   .museum-cabinet-pin{width:38px;height:38px}.museum-cabinet-pin span{font-size:10px;top:46px}
@@ -68,7 +66,7 @@
   .museum-cabinet-route .museum-route-footer button{font-size:10px;padding:9px}
 }
 @media(max-width:480px){
-  .museum-gallery-intro{column-gap:10px;padding:16px}.museum-gallery-intro h2{font-size:27px}#museum-start{width:112px;padding:10px}
+  .museum-gallery-intro{column-gap:10px;padding:16px}.museum-gallery-intro h2{font-size:27px}
   .museum-cabinet-route .museum-cabinet-trail button{flex-direction:column;gap:3px;font-size:9px;padding:3px 2px;flex:1}
   .museum-cabinet-route .museum-cabinet-trail{bottom:61px}
   #museum-walk-hint{display:none}
@@ -88,17 +86,17 @@
 .museum-cabinet-pin[aria-pressed=true] span{display:block;color:#f5e2b9}
 @media(min-width:761px){.museum-cabinet-route[data-align=left] .museum-tools.museum-placard{left:4%;right:auto}}
 @media(min-width:761px) and (min-height:501px){
-  .museum-gallery-intro{right:4%;top:auto;bottom:137px;width:440px;max-width:45vw;padding:17px 22px;display:grid;grid-template-columns:1fr auto;gap:5px 16px}
+  .museum-gallery-intro{right:4%;top:auto;bottom:137px;width:440px;max-width:45vw;padding:17px 22px;display:grid;grid-template-columns:1fr;gap:5px 16px}
   .museum-gallery-intro>p:first-child{grid-column:1/-1;margin:0 0 6px;font-size:7px}
   .museum-gallery-intro h2{grid-column:1;white-space:nowrap;font-size:30px;margin:0}.museum-gallery-intro h2 br{display:none}
   .museum-gallery-intro>p{grid-column:1;font-size:11px;line-height:1.7;margin:3px 0 0}.museum-gallery-intro>p br{display:none}
-  #museum-start{grid-column:2;grid-row:2/4;align-self:center;width:123px;padding:12px;font-size:11px}
   .museum-gallery-intro small{grid-column:1/-1;margin-top:4px;font-size:9px}
 }
 .museum-cabinet-route .museum-tools.museum-placard{background-color:#efe3c8}
 @media(min-width:761px){.museum-overview-return{left:auto;right:164px;top:90px}}
 /* The physical display remains clear; reading lives beside it. */
-.hall-return-veil{position:fixed;inset:0;z-index:100000;background:#14201d;opacity:0;transition:opacity .24s ease;pointer-events:all}.hall-return-veil.opaque{opacity:1}
+.hall-return-veil{position:fixed;inset:0;z-index:100000;background:radial-gradient(ellipse at 50% 45%,#27352c,#14201d 75%);opacity:0;pointer-events:all}
+.is-returning-hall .site-header,.is-returning-hall #museum-ui,.is-returning-hall .game-interface,.is-returning-hall #staging-root,.is-returning-hall #return-hall{pointer-events:none}
 .museum-cabinet-route button:disabled{opacity:.45;cursor:default}
 @media(min-width:761px){.museum-cabinet-route .museum-tools.museum-placard{left:auto!important;right:3%;width:300px;max-width:28vw}.museum-cabinet-route .museum-tools.is-expanded{max-height:calc(100svh - 220px)}}
 @media(max-width:760px){.museum-cabinet-route .museum-tools.museum-placard{max-height:215px}.museum-cabinet-route .museum-tools.is-expanded{max-height:58svh}}

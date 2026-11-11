@@ -10,6 +10,14 @@ const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t);};
 const mix=THREE.MathUtils.lerp;
 const damp=(a,b,dt,s=8)=>mix(a,b,1-Math.exp(-s*dt));
 const TAU=Math.PI*2;
+// Trace the clear opening in the 1536 × 1024 cover photograph. The timber
+// leaves narrow the opening below the arch and must stay in the foreground.
+const CAMPUS_DOOR={
+  arch:[646/1536,954/1536,400/1024,504/1024],
+  clear:[690/1536,902/1536,712/1024],
+  leaf:[428/1024,476/1024],
+  frame:[664/1536,400/1024,936/1536,712/1024],
+};
 // The interior photographs already contain their lighting and color balance.
 // Applying the old HDR/ACES grade a second time washed out their real texture.
 const interiorGrade=`
@@ -215,17 +223,29 @@ export class PassageScene {
   }
   makeComposite(){
     this.composite=new THREE.Scene();this.screenCamera=new THREE.OrthographicCamera(-1,1,1,-1,0,2);
-    this.uniforms={campus:{value:this.targetA.texture},gallery:{value:this.targetG.texture},market:{value:this.targetB.texture},center:{value:new THREE.Vector2(.5,.5)},doorCenter:{value:new THREE.Vector2(.5,.5)},doorHalf:{value:new THREE.Vector2(.1,.2)},doorReveal:{value:0},doorFull:{value:0},radius:{value:0},aspect:{value:1},reveal:{value:0}};
+    this.campusProjection=new THREE.Matrix4();
+    this.uniforms={campus:{value:this.targetA.texture},gallery:{value:this.targetG.texture},market:{value:this.targetB.texture},center:{value:new THREE.Vector2(.5,.5)},campusImageFromClip:{value:new THREE.Matrix3()},doorArch:{value:new THREE.Vector4(...CAMPUS_DOOR.arch)},doorClear:{value:new THREE.Vector3(...CAMPUS_DOOR.clear)},doorLeaf:{value:new THREE.Vector2(...CAMPUS_DOOR.leaf)},doorReveal:{value:0},doorFull:{value:0},radius:{value:0},aspect:{value:1},reveal:{value:0}};
     this.uniforms.interiorExposure={value:1};
     const material=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,uniforms:this.uniforms,
       vertexShader:'varying vec2 uvp;void main(){uvp=uv;gl_Position=vec4(position.xy,0.,1.);}',
-      fragmentShader:`uniform sampler2D campus,gallery,market;uniform vec2 center,doorCenter,doorHalf;uniform float radius,aspect,reveal,doorReveal,doorFull,interiorExposure;varying vec2 uvp;
+      fragmentShader:`uniform sampler2D campus,gallery,market;uniform vec2 center,doorLeaf;uniform vec4 doorArch;uniform vec3 doorClear;uniform mat3 campusImageFromClip;uniform float radius,aspect,reveal,doorReveal,doorFull,interiorExposure;varying vec2 uvp;
       ${interiorGrade}
+      float campusDoorway(){
+        vec3 projected=campusImageFromClip*vec3(uvp*2.-1.,1.);
+        vec2 p=projected.xy/projected.z,aa=max(fwidth(p),vec2(.00001));
+        float centerX=(doorArch.x+doorArch.y)*.5,radiusX=(doorArch.y-doorArch.x)*.5;
+        float rise=doorArch.w-doorArch.z;
+        float archDistance=length(vec2((p.x-centerX)/radiusX,min(0.,p.y-doorArch.w)/rise));
+        float arcAA=max(aa.x/radiusX,aa.y/rise);
+        float roundTop=1.-smoothstep(1.-arcAA,1.+arcAA,archDistance);
+        float leafEdge=clamp((p.y-doorLeaf.x)/(doorLeaf.y-doorLeaf.x),0.,1.);
+        float left=mix(doorArch.x,doorClear.x,leafEdge),right=mix(doorArch.y,doorClear.y,leafEdge);
+        return roundTop*smoothstep(left-aa.x,left+aa.x,p.x)
+          *(1.-smoothstep(right-aa.x,right+aa.x,p.x))
+          *(1.-smoothstep(doorClear.z-aa.y,doorClear.z+aa.y,p.y));
+      }
       void main(){
-        vec2 q=(uvp-doorCenter)*vec2(aspect,1.);float rise=doorHalf.x*.62;float shoulder=doorHalf.y-rise;
-        float doorEdge=max(abs(q.x)-doorHalf.x,-q.y-doorHalf.y);
-        if(q.y>shoulder)doorEdge=max(doorEdge,(length(vec2(q.x/doorHalf.x,(q.y-shoulder)/rise))-1.)*doorHalf.x);
-        float throughDoor=mix((1.-smoothstep(-.005,.005,doorEdge))*doorReveal,1.,doorFull);
+        float throughDoor=mix(campusDoorway()*doorReveal,1.,doorFull);
         vec3 color=mix(texture2D(campus,uvp).rgb,film(texture2D(gallery,uvp).rgb),throughDoor);
         vec2 p=(uvp-center)*vec2(aspect,.88);float angle=atan(p.y,p.x);float edge=radius*(1.+.045*cos(angle*8.)+.018*sin(angle*13.));float d=length(p);
         float inside=radius>=2.9?1.:(1.-smoothstep(edge-.0025,edge+.0025,d))*reveal;
@@ -266,14 +286,6 @@ export class PassageScene {
     this.world.hallDistanceOffset=Math.max(0,7.3/(Math.tan(THREE.MathUtils.degToRad(this.cameraG.fov/2))*this.cameraG.aspect)-12);
     const coverHeight=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*28;
     this.matteScale=Math.max(1,coverHeight/26.667*1.04,coverHeight*(width/height)/40*1.04);
-    // Match the loading photograph to the initial camera's crop, including
-    // its small vertical offset, instead of jumping from CSS cover to WebGL.
-    const poster=this.canvas.parentElement.querySelector('.passage-fallback');
-    if(poster){
-      const posterWidth=40*this.matteScale/coverHeight*height,posterHeight=26.667*this.matteScale/coverHeight*height;
-      poster.style.backgroundSize=`${posterWidth}px ${posterHeight}px`;
-      poster.style.backgroundPosition=`${(width-posterWidth)/2}px ${(height-posterHeight)/2-.2/coverHeight*height}px`;
-    }
     this.campusBackdrop.scale.setScalar(this.matteScale);this.galleryBackdrop.scale.setScalar(this.matteScale);
     this.doorPoint.set((800/1536-.5)*40*this.matteScale,3+(.5-560/1024)*26.667*this.matteScale,0);
     this.portalPoint.set(0,2.8+(.5-402/1024)*26.667*this.matteScale,0);
@@ -289,7 +301,7 @@ export class PassageScene {
     if(this.fallback||!this.visible||!this.loaded){this.quality.resetClock();this.lastDrawAt=null;return;}
     const p=this.route==='public'?publicCampusProgress(this.routeProgress):this.progress;this.smoothPointer.x=damp(this.smoothPointer.x,this.pointer.x,dt,4);this.smoothPointer.y=damp(this.smoothPointer.y,this.pointer.y,dt,4);
     this.uniforms.interiorExposure.value=this.route==='public'?mix(.8,1,smooth(.24,.46,this.routeProgress)):1;
-    const px=reduced?0:this.smoothPointer.x,py=reduced?0:this.smoothPointer.y;
+    const px=reduced||!this.presented?0:this.smoothPointer.x,py=reduced||!this.presented?0:this.smoothPointer.y;
     if(reduced&&this.lastRenderedProgress===p&&this.lastRouteProgress===this.routeProgress&&!this.routeTransition&&!this.interactionDirty&&!this.resizeDirty&&this.frames>0){this.quality.resetClock();return;}
     // A visible preview can be throttled while focus is in the editor/chat.
     // Those one-second callbacks must not permanently downgrade a sharp scene.
@@ -306,14 +318,23 @@ export class PassageScene {
     this.lastDrawAt=frameNow;this.renderer.info.reset();this.world.qualityTier=this.quality.tier;
     this.lastRenderedProgress=p;this.lastRouteProgress=this.routeProgress;this.interactionDirty=false;this.resizeDirty=false;this.frames++;this.sparkTime.value=reduced?0:time;
     const approach=smooth(0,.22,p),az=mix(28,.35,approach),ax=this.doorPoint.x*approach;
-    const ay=mix(2.8,this.doorPoint.y,smooth(.02,.18,p)),idle=reduced?0:Math.sin(time*.55)*.014;
+    this.sceneStartedAt??=time;
+    const ay=mix(2.8,this.doorPoint.y,smooth(.02,.18,p)),idle=reduced?0:Math.sin((time-this.sceneStartedAt)*.55)*.014;
     this.cameraA.position.set(ax+px*.2,ay-py*.08+idle,az);this.cameraA.lookAt(ax+px*.06,ay,-40);this.cameraA.updateMatrixWorld();
-    this.projectedPoint.copy(this.doorPoint).project(this.cameraA);
-    this.uniforms.doorCenter.value.set(this.projectedPoint.x*.5+.5,this.projectedPoint.y*.5+.5);
-    const doorFrustum=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*az;
-    this.uniforms.doorHalf.value.set(3.4*this.matteScale/doorFrustum,3.78*this.matteScale/doorFrustum);
-    const dc=this.uniforms.doorCenter.value,dh=this.uniforms.doorHalf.value;
-    this.world.backdrop.frontDoorRect={x:dc.x-dh.x/this.cameraA.aspect,y:1-dc.y-dh.y,width:dh.x*2/this.cameraA.aspect,height:dh.y*2};
+    // Project the mask through the same camera as the cover, so pointer motion
+    // and the forward walk cannot slide the corridor over the wooden doors.
+    this.campusProjection.multiplyMatrices(this.cameraA.projectionMatrix,this.cameraA.matrixWorldInverse);
+    const m=this.campusProjection.elements,w=40*this.matteScale,h=26.667*this.matteScale,left=-w/2,top=3+h/2;
+    this.uniforms.campusImageFromClip.value.set(
+      m[0]*w,-m[4]*h,m[0]*left+m[4]*top+m[12],
+      m[1]*w,-m[5]*h,m[1]*left+m[5]*top+m[13],
+      m[3]*w,-m[7]*h,m[3]*left+m[7]*top+m[15]
+    ).invert();
+    const bounds=CAMPUS_DOOR.frame;
+    this.projectedPoint.set((bounds[0]-.5)*w,3+(.5-bounds[1])*h,0).project(this.cameraA);
+    const doorX=(this.projectedPoint.x+1)/2,doorY=(1-this.projectedPoint.y)/2;
+    this.projectedPoint.set((bounds[2]-.5)*w,3+(.5-bounds[3])*h,0).project(this.cameraA);
+    this.world.backdrop.frontDoorRect={x:doorX,y:doorY,width:(this.projectedPoint.x+1)/2-doorX,height:(1-this.projectedPoint.y)/2-doorY};
     if(this.route==='public'||this.route==='game'&&this.routeProgress<.12)
       this.world.preview.prepare(this.cameraG,this.width,this.height,this.pixelRatio,this.targetG.samples);
     const pose=this.world.update(this.route,this.route==='game'?smooth(0,.25,this.routeProgress):this.routeProgress,time,reduced,this.routeTransition);
@@ -328,7 +349,10 @@ export class PassageScene {
     this.cameraB.position.set(Math.sin(smooth(.42,.63,p)*Math.PI)*.4+px*.24,2.9-py*.1+idle,bz);this.cameraB.lookAt(0,3.4,-70);this.cameraB.updateMatrixWorld();
     this.screenPuppet.rotation.z=reduced?0:Math.sin(time*.65)*.03;this.screenPuppet.position.x=reduced?0:Math.sin(time*.5)*.1;
     this.finalPuppet.rotation.z=reduced?0:Math.sin(time*.75)*.028;
-    this.drifting.forEach((tree,i)=>tree.rotation.z=reduced?0:Math.sin(time*.27+i)*.006);
+    // The first live frame keeps the poster's canopy; foreground parallax joins
+    // only when walking starts, so loading does not replace the visible trees.
+    const foliage=smooth(0,.035,p);
+    this.drifting.forEach((tree,i)=>{tree.visible=foliage>0;tree.material.opacity=foliage;tree.rotation.z=reduced?0:Math.sin(time*.27+i)*.006;});
     this.updateLanterns(time,reduced);
     this.steam.forEach(({mesh,k,base})=>{const t=reduced?k/8:(time*.12+k/8)%1;mesh.position.copy(base);mesh.position.y+=t*2.3;mesh.position.x+=Math.sin(t*5+k)*.18;mesh.scale.setScalar(.35+t);mesh.material.opacity=Math.sin(t*Math.PI)*.05;mesh.quaternion.copy(this.cameraB.quaternion);});
     // Keep the same live corridor behind the entrance from the first frame.

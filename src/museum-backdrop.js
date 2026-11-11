@@ -158,6 +158,7 @@ export class MuseumBackdrop {
     }
     const layout=HALL_SIGN_LAYOUT[narrow?'narrow':'wide'];
     const galleryOpening=HALL_OPENINGS[narrow?'narrow':'wide'];
+    this.doorCuePosition=photoPoint([(galleryOpening.clear[0]+galleryOpening.clear[1])*.5,(galleryOpening.outer[2]+galleryOpening.clear[2])*.5],fa);
     this.uniforms.galleryArch.value.fromArray(galleryOpening.outer);this.uniforms.galleryClear.value.fromArray(galleryOpening.clear);this.uniforms.galleryLeaf.value.fromArray(galleryOpening.leaf);
     this.doorPositions=layout.floor.map(point=>photoPoint(point,fa));
     this.uniforms.signLeft.value.fromArray(layout.signs[0]);
