@@ -5,17 +5,16 @@ import {galleryMaterials,contactTexture} from './gallery-materials.js';
 import {galleryWallArt} from './gallery-wall-art.js';
 import {galleryArchitecture} from './gallery-architecture.js';
 import {surfaceUV} from './surface-uv.js';
-import {CabinetVignette} from './cabinet-vignette.js';
-import {ANIMATED_CABINET} from './cabinet-motion.js';
+import {performanceMaterial,MuseumPerformances,loadPuppetAtlas,createPicturePerformance} from './museum-animation.js';
+import {marbleMaterial,inscriptionMaterial} from './museum-marble.js';
 import {smooth} from './route-state.js';
 import {ROOMS} from './museum-content.js';
-import {puppetCanvas} from './art.js';
 const V=(...p)=>new THREE.Vector3(...p);
 import {cabinetZ} from './walking-path.js';
 export {walkingPose} from './walking-path.js';
 export class WalkingGallery {
   constructor(scene,renderer){
-    this.group=new THREE.Group();scene.add(this.group);this.points=[];this.signPoints=[];this.cabinetLights=[];
+    this.group=new THREE.Group();scene.add(this.group);this.points=[];this.signPoints=[];this.cabinetLights=[];this.performances=[];
     this.materials=galleryMaterials(renderer,scene);this.ready=this.materials.ready;this.errors=this.materials.errors;
     const {wood,brass,glass}=this.materials;
     const box=(w,h,d,x,y,z,m,parent=this.group)=>{
@@ -27,15 +26,15 @@ export class WalkingGallery {
     this.group.add(new THREE.HemisphereLight('#d6d3c4','#4f3928',.48));
     const sun=new THREE.DirectionalLight('#ffe0b1',.65);sun.position.set(-3,7,6);this.group.add(sun);
     const fill=new THREE.DirectionalLight('#a5c8e2',.38);fill.position.set(8,4,-32);this.group.add(fill);
-    const signPaper=new THREE.MeshStandardMaterial({color:'#dcc399',roughness:.88});
     const shadowMap=contactTexture();
-    const puppetMap=new THREE.CanvasTexture(puppetCanvas(35,0));puppetMap.colorSpace=THREE.SRGBColorSpace;
-    const muralLoads=[];
-    const murals=['shadow-backdrop','river-mural','craft-mural','troupe-mural','innovation-mural'].map(name=>{
-      const url='./assets/museum/'+name+'.png';let done;muralLoads.push(new Promise(resolve=>{done=resolve;}));
-      const texture=new THREE.TextureLoader().load(url,done,undefined,()=>{this.errors.push(url);done();});
+    const marble=marbleMaterial(renderer,this.errors),atlas=loadPuppetAtlas(renderer,this.errors),pending=[marble.userData.ready,atlas.ready];
+    const murals=['origins-stage','river-mural','craft-mural','troupe-mural','innovation-stage'].map(name=>{
+      let done;pending.push(new Promise(resolve=>done=resolve));
+      const url='./assets/museum/'+name+'.png';
+      const texture=new THREE.TextureLoader().load(url,()=>done(),undefined,()=>{this.errors.push(url);done();});
       texture.colorSpace=THREE.SRGBColorSpace;return texture;
     });
+    this.ready=Promise.all([this.materials.ready,...pending]);
     ROOMS.forEach((room,i)=>{
       const z=cabinetZ(i),cab=new THREE.Group();cab.position.set(-5,0,z);this.group.add(cab);
       box(1.2,.75,6,0,.375,0,wood,cab);box(.15,3.3,6,-.5,2.35,0,wood,cab);box(1.3,.2,6,0,4.1,0,wood,cab);
@@ -54,23 +53,22 @@ export class WalkingGallery {
       this.cabinetLights.push(lights);
       const strip=new THREE.Mesh(new THREE.BoxGeometry(.04,.025,5.5),new THREE.MeshBasicMaterial({color:'#e8b16e'}));strip.position.set(.08,3.96,0);cab.add(strip);
       const glazing=new THREE.Mesh(new THREE.PlaneGeometry(5.75,3.05),glass);glazing.rotation.y=Math.PI/2;glazing.position.set(.72,2.34,0);cab.add(glazing);
-      const mural=new THREE.Mesh(new THREE.PlaneGeometry(6,3.45),new THREE.MeshBasicMaterial({map:murals[i],color:'#f6dab0',side:THREE.DoubleSide}));mural.rotation.y=Math.PI/2;mural.position.set(-.31,2.4,0);cab.add(mural);
-      // The wall mural is fully visible; detailed labels live in the reading panel.
-      // Objects are real shallow reliefs in the cabinet, not a replacement photograph.
-      if(room.id===ANIMATED_CABINET)this.vignette=new CabinetVignette(cab,mural,renderer);
-      else{
-        const figure=new THREE.Mesh(new THREE.PlaneGeometry(1.05,1.8),new THREE.MeshStandardMaterial({map:puppetMap,transparent:true,alphaTest:.15,side:THREE.DoubleSide,roughness:.7,metalness:.05}));figure.rotation.y=Math.PI/2;figure.position.set(.3,1.85,-1.65);cab.add(figure);
-      }
-      // A freestanding museum label sits beside the case, outside its sightline.
-      const sign=new THREE.Group();sign.position.set(1.8,0,2.9);cab.add(sign);
-      box(.08,1.13,.08,0,.565,0,brass,sign);box(.56,.08,.38,0,.055,0,wood,sign);
-      const plaque=box(.12,.83,.72,0,1.28,0,wood,sign);plaque.rotation.z=-.18;
-      box(.015,.7,.61,.065,1.28,0,signPaper,sign).rotation.z=-.18;
-      this.signPoints.push(V(-3.12,1.28,z+2.9));
+      const mural=new THREE.Mesh(new THREE.PlaneGeometry(6,3.45),performanceMaterial(murals[i],i));mural.rotation.y=Math.PI/2;mural.position.set(-.31,2.4,0);cab.add(mural);
+      this.performances.push(createPicturePerformance(mural,atlas.map,i,renderer));
+      // A three-unit (half-case-width) low marble slab, facing 45 degrees up.
+      // Its highest corner is .62, below the mural's lower edge at .675.
+      const sign=new THREE.Group();sign.position.set(1.25,.33,0);sign.rotation.z=Math.PI/4;cab.add(sign);
+      box(.10,.72,3,0,0,0,marble,sign);
+      box(.78,.06,3.08,1.25,.03,0,marble,cab);
+      const inscription=new THREE.Mesh(new THREE.PlaneGeometry(2.82,.66),inscriptionMaterial(room));
+      inscription.rotation.y=Math.PI/2;inscription.position.set(.075,0,0);sign.add(inscription);
+      // Project the invitation just beyond the marble's upper right corner.
+      this.signPoints.push(V(-3.85,.91,z-1.72));
       // Restrained glass edge and ceiling light preserve legibility.
       box(.04,.035,5.8,.67,3.9,0,brass,cab);box(.04,.035,5.8,.67,.8,0,brass,cab);
       this.points.push(V(-4.3,3.8,z));
     });
+    this.vignette=new MuseumPerformances(this.performances);
     this.updateLocalLights(2);
     const wallArt=galleryWallArt(this.group,renderer,this.materials);
     this.ready=Promise.all([this.ready,wallArt.ready,...muralLoads]).then(()=>{this.errors.push(...wallArt.errors);});
