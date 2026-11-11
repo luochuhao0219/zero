@@ -46,6 +46,16 @@ python3 server.py --open
 
 建筑、影人关节、互动和页面布局由项目实现。部分场景、皮影部件、窗景和材质视觉使用生成图像辅助制作；木材、石板等表面贴图包含 Poly Haven 的 CC0 素材；展柜讲解中的五张照片由项目组提供，原图水印保留。**素材来源与许可**见 [文化与设计参考](docs/REFERENCES.md)、[材质来源](docs/MATERIAL-SOURCES.md) 和 [展馆修改记录](docs/江汉展馆修改-2026-11-11.md)。作品使用江汉平原皮影戏作为文化参考，不宣称数字造型是馆藏扫描件或传统剧目的完整复原。
 
+### 非自行编写的功能库及用途
+
+| 库或模块 | 来源及许可 | 在项目中的用途 |
+| --- | --- | --- |
+| Three.js 0.180.0 | 官方发行版，MIT；本地存放于 `vendor/` | WebGL 三维场景、相机、灯光、材质、纹理、关节层级与交互射线 |
+| Three.js 官方附加模块：RoundedBoxGeometry、BufferGeometryUtils | 随 Three.js 发行，MIT | 圆角建筑构件与静态网格合并 |
+| Three.js 官方附加模块：Reflector、EffectComposer、RenderPass、ShaderPass、UnrealBloomPass、OutputPass | 随 Three.js 发行，MIT | 地面反射与戏台的后期画面处理 |
+
+以上附加模块的间接依赖也随 Three.js 保存在 `vendor/addons/`。页面没有使用 Bootstrap、Element UI 或其他预设样式库；字体、材质与照片属于素材，其来源与许可见上述文档。
+
 ## 验证与项目文件
 
 运行自动检查需要 Node.js：
