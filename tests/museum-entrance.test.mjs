@@ -28,12 +28,12 @@ test('hidden-tab gaps do not skip the doorway and reduced motion arrives immedia
   assert.deepEqual(clock.advance(2048,true),{fraction:1,progress:MUSEUM_ARRIVAL,done:true});
 });
 
-test('the first entrance frame exactly preserves the hall photo at every layout',()=>{
+test('the first entrance frame preserves the hall framing and immediately shows the same real room',()=>{
   for(const aspect of [.46,.744,1,1.14,1.15,16/9,2.4]){
     const imageAspect=aspect<1.15?1030/1526:1672/941;
     const entrance=museumEntranceFrame(imageAspect,aspect,0);
     assert.deepEqual(entrance.frame,photoFrame(imageAspect,aspect,HALL_ZOOM));
-    assert.equal(entrance.reveal,0);
+    assert.equal(entrance.reveal,1);
   }
 });
 

@@ -30,7 +30,12 @@ export class WalkingGallery {
     const signPaper=new THREE.MeshStandardMaterial({color:'#dcc399',roughness:.88});
     const shadowMap=contactTexture();
     const puppetMap=new THREE.CanvasTexture(puppetCanvas(35,0));puppetMap.colorSpace=THREE.SRGBColorSpace;
-    const murals=['shadow-backdrop','river-mural','craft-mural','troupe-mural','innovation-mural'].map(name=>{const texture=new THREE.TextureLoader().load('./assets/museum/'+name+'.png');texture.colorSpace=THREE.SRGBColorSpace;return texture;});
+    const muralLoads=[];
+    const murals=['shadow-backdrop','river-mural','craft-mural','troupe-mural','innovation-mural'].map(name=>{
+      const url='./assets/museum/'+name+'.png';let done;muralLoads.push(new Promise(resolve=>{done=resolve;}));
+      const texture=new THREE.TextureLoader().load(url,done,undefined,()=>{this.errors.push(url);done();});
+      texture.colorSpace=THREE.SRGBColorSpace;return texture;
+    });
     ROOMS.forEach((room,i)=>{
       const z=cabinetZ(i),cab=new THREE.Group();cab.position.set(-5,0,z);this.group.add(cab);
       box(1.2,.75,6,0,.375,0,wood,cab);box(.15,3.3,6,-.5,2.35,0,wood,cab);box(1.3,.2,6,0,4.1,0,wood,cab);
@@ -68,7 +73,7 @@ export class WalkingGallery {
     });
     this.updateLocalLights(2);
     const wallArt=galleryWallArt(this.group,renderer,this.materials);
-    this.ready=Promise.all([this.ready,wallArt.ready]).then(()=>{this.errors.push(...wallArt.errors);});
+    this.ready=Promise.all([this.ready,wallArt.ready,...muralLoads]).then(()=>{this.errors.push(...wallArt.errors);});
     this.batchFurniture();
   }
   batchFurniture(){

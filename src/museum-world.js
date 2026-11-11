@@ -4,18 +4,20 @@ import {WalkingGallery} from './walking-gallery.js';
 import {MuseumBackdrop} from './museum-backdrop.js';
 import {sampleCameraPath,MUSEUM_CAMERA} from './camera-path.js';
 import {MUSEUM_ARRIVAL,museumEntrancePose,syncGalleryCamera} from './museum-entrance.js';
+import {GalleryPreview} from './gallery-preview.js';
 export {MUSEUM_CAMERA} from './camera-path.js';
 const mix=THREE.MathUtils.lerp;
 const V=(x,y,z)=>new THREE.Vector3(x,y,z);
 export function sampleCamera(keys,progress){const p=sampleCameraPath(keys,progress);return {position:V(...p.position),look:V(...p.look)};}
 
-// One photographic corridor keeps the hall's stone, wood and light continuous.
-// Each cabinet has its own focus position along the reversible native scroll.
+// The hall's doorway and the walk share one physical gallery. Each cabinet has
+// its own focus position along the reversible native scroll.
 export class MuseumWorld {
   constructor(renderer){
     this.renderer=renderer;this.scene=new THREE.Scene();this.backdrop=new MuseumBackdrop(this.scene,renderer);
     this.ready=this.backdrop.ready;this.errors=this.backdrop.errors;
     this.walk=new WalkingGallery(this.scene,renderer);this.ready=Promise.all([this.backdrop.ready,this.walk.ready]);this.errors=this.backdrop.errors;this.walk.ready.then(()=>this.errors.push(...this.walk.errors));this.currentPose=this.hallPose(1);this.prepared=true;
+    this.preview=new GalleryPreview(renderer,this.scene,this.walk,this.backdrop);
   }
   hallPose(progress){
     const z=mix(41,12,smooth(.30,1,progress))+(this.hallDistanceOffset||0);

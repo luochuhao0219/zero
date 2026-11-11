@@ -1,0 +1,105 @@
+{
+  "wide": {
+    "aaSamples": 4,
+    "cabinetAnimation": {
+      "amount": 0,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": false,
+      "playing": false,
+      "reduced": false,
+      "seconds": 0
+    },
+    "calls": 57,
+    "canvas": [
+      1280,
+      720
+    ],
+    "errors": [],
+    "focused": true,
+    "fps": 60,
+    "galleryLights": 4,
+    "motionFps": 60,
+    "motionMax": 18,
+    "motionP95": 17.599999964237213,
+    "motionSamples": 240,
+    "p95": 17.30000001192093,
+    "pixelRatio": 1,
+    "progress": 0.12,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 72850,
+    "wallTexture": [
+      4096,
+      4096
+    ]
+  },
+  "narrow": {
+    "aaSamples": 4,
+    "cabinetAnimation": {
+      "amount": 0,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": false,
+      "playing": false,
+      "reduced": false,
+      "seconds": 0
+    },
+    "calls": 57,
+    "canvas": [
+      360,
+      780
+    ],
+    "errors": [],
+    "focused": true,
+    "fps": 60,
+    "galleryLights": 4,
+    "motionFps": 60,
+    "motionMax": 18.100000023841854,
+    "motionP95": 17.099999964237213,
+    "motionSamples": 240,
+    "p95": 17.599999964237213,
+    "pixelRatio": 1,
+    "progress": 0.12,
+    "route": "museum",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 72850,
+    "wallTexture": [
+      4096,
+      4096
+    ]
+  },
+  "stage": {
+    "phase": "complete",
+    "render": {
+      "active": false,
+      "angle": 2.581592653589793,
+      "camera": {
+        "x": 11.47362189712848,
+        "y": 6.150000006050208,
+        "z": -19.000710433039977
+      },
+      "fraction": 1,
+      "frames": 343,
+      "median": 16.699999988077252,
+      "p95": 17.49999999992724,
+      "paused": false,
+      "phase": "backstage",
+      "pixelRatio": 1.25,
+      "playing": true,
+      "post": {
+        "bloom": false,
+        "mode": "composer",
+        "samples": 2
+      },
+      "progress": 0.82
+    }
+  },
+  "consoleErrors": [],
+  "testsPassed": 95,
+  "paperCrossingPreserved": true
+}

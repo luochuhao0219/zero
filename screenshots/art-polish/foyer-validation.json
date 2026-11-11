@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-11",
+  "route": [
+    "exterior",
+    "front doorway",
+    "single connecting corridor",
+    "inner archway",
+    "two-door hall"
+  ],
+  "wide": {
+    "autoplay": false,
+    "hallVisible": true,
+    "phase": "hall",
+    "progress": "100",
+    "render": {
+      "aaSamples": 2,
+      "cabinetAnimation": {
+        "amount": 0,
+        "bow": 0,
+        "cabinet": 4,
+        "front": 35,
+        "paused": false,
+        "playing": false,
+        "reduced": false,
+        "seconds": 0
+      },
+      "calls": 3,
+      "canvas": [
+        2560,
+        1440
+      ],
+      "errors": [],
+      "focused": true,
+      "fps": 60,
+      "galleryLights": 4,
+      "motionFps": 60,
+      "motionMax": 24.100000023841854,
+      "motionP95": 18.69999998807907,
+      "motionSamples": 240,
+      "p95": 18.80000001192093,
+      "pixelRatio": 2,
+      "progress": 0.9991,
+      "route": "public",
+      "samples": 180,
+      "tier": 0,
+      "triangles": 4,
+      "wallTexture": [
+        4096,
+        4096
+      ]
+    }
+  },
+  "narrow": {
+    "autoplay": false,
+    "hallVisible": true,
+    "render": {
+      "aaSamples": 4,
+      "cabinetAnimation": {
+        "amount": 0,
+        "bow": 0,
+        "cabinet": 4,
+        "front": 35,
+        "paused": false,
+        "playing": false,
+        "reduced": false,
+        "seconds": 0
+      },
+      "calls": 3,
+      "canvas": [
+        430,
+        850
+      ],
+      "errors": [],
+      "focused": true,
+      "fps": 60,
+      "galleryLights": 4,
+      "motionFps": 60,
+      "motionMax": 19.19999998807907,
+      "motionP95": 18.5,
+      "motionSamples": 240,
+      "p95": 18.400000035762787,
+      "pixelRatio": 1,
+      "progress": 1,
+      "route": "public",
+      "samples": 180,
+      "tier": 0,
+      "triangles": 4,
+      "wallTexture": [
+        4096,
+        4096
+      ]
+    },
+    "viewport": [
+      430,
+      850
+    ]
+  },
+  "checks": {
+    "testsPassed": 92,
+    "clickPlaysWholeWalk": true,
+    "scrollApproachStartsWalk": true,
+    "escapeReturnsToOpening": true,
+    "leftMuseumEntry": true,
+    "rightScreenCrossingAndMarketAndGame": true,
+    "viewportReset": true
+  },
+  "consoleErrors": []
+}

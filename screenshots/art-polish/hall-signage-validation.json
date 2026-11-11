@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-11",
+  "automaticChecksPassed": 92,
+  "checkedViewports": [
+    [
+      1280,
+      720
+    ],
+    [
+      360,
+      780
+    ]
+  ],
+  "museumPointerEntry": "complete",
+  "stageKeyboardEntry": [
+    "screen",
+    "crossing",
+    "market",
+    "arrival",
+    "backstage",
+    "playing"
+  ],
+  "consoleErrors": [],
+  "buttons": [
+    {
+      "bounds": {
+        "bottom": 684.78125,
+        "height": 68,
+        "left": 297.4140625,
+        "right": 439.4140625,
+        "top": 616.78125,
+        "width": 142,
+        "x": 297.4140625,
+        "y": 616.78125
+      },
+      "name": "进入历史馆"
+    },
+    {
+      "bounds": {
+        "bottom": 684.78125,
+        "height": 68,
+        "left": 827.3359375,
+        "right": 969.3359375,
+        "top": 616.78125,
+        "width": 142,
+        "x": 827.3359375,
+        "y": 616.78125
+      },
+      "name": "进入皮影戏台"
+    }
+  ],
+  "hallInteractive": true,
+  "render": {
+    "aaSamples": 2,
+    "cabinetAnimation": {
+      "amount": 0,
+      "bow": 0,
+      "cabinet": 4,
+      "front": 35,
+      "paused": false,
+      "playing": false,
+      "reduced": false,
+      "seconds": 0
+    },
+    "calls": 3,
+    "canvas": [
+      2560,
+      1440
+    ],
+    "errors": [],
+    "focused": true,
+    "fps": 60,
+    "galleryLights": 4,
+    "motionFps": 60,
+    "motionMax": 20.19999998807907,
+    "motionP95": 17.599999964237213,
+    "motionSamples": 240,
+    "p95": 17.69999998807907,
+    "pixelRatio": 2,
+    "progress": 1,
+    "route": "public",
+    "samples": 180,
+    "tier": 0,
+    "triangles": 4,
+    "wallTexture": [
+      4096,
+      4096
+    ]
+  }
+}

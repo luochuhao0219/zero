@@ -30,16 +30,16 @@ export function museumEntranceFrame(imageAspect,viewportAspect,progress){
   const pan=smooth(0,.56,t),zoom=HALL_ZOOM*Math.exp(Math.log(8/HALL_ZOOM)*smooth(0,1,t));
   const focus=[.5+(opening.focus[0]-.5)*pan,.5+(opening.focus[1]-.5)*pan];
   const frame=photoFrame(imageAspect,viewportAspect,zoom,focus);
-  // Resolve the room while it still occupies the small doorway, before the
-  // forward push magnifies it. The stone arch and door leaves never dissolve.
-  return {t,opening,frame,reveal:smooth(.015,.24,t),alignment:1-smooth(.32,.82,t),vanish:photoPoint(opening.vanish,frame)};
+  // The hall already shows this room's entrance view through the door. Resume
+  // the live scene immediately, retaining the same arch and camera alignment.
+  return {t,opening,frame,reveal:1,alignment:1-smooth(.32,.82,t),vanish:photoPoint(opening.vanish,frame)};
 }
 
 /** Finish on the exact camera path used by subsequent forward/backward scroll. */
 export function museumEntrancePose(progress){
   const walking=walkingPose(progress);
   if(progress>=MUSEUM_ARRIVAL)return walking;
-  const t=clamp(progress/MUSEUM_ARRIVAL),z=10-8*smooth(0,1,t),blend=smooth(.065,MUSEUM_ARRIVAL,progress);
+  const t=clamp(progress/MUSEUM_ARRIVAL),z=4-2*smooth(0,1,t),blend=smooth(.065,MUSEUM_ARRIVAL,progress);
   const position=walking.position.clone().set(0,2.15,z).lerp(walking.position,blend);
   const look=walking.look.clone().set(0,2,z-8).lerp(walking.look,blend);
   return {position,look};
@@ -51,11 +51,18 @@ export function syncGalleryCamera(camera,pose,aspect,entrance){
   const maxDistance=GALLERY_SHELL.right-.55+4.9;
   const requiredFov=2*Math.atan(6.5/(2*maxDistance*aspect))*180/Math.PI;
   camera.fov=Math.min(85,Math.max(camera.userData.baseFov||(aspect<1.15?62:50),requiredFov));
+  // A doorway is narrower than the eventual room view. Start near its left
+  // aisle with a wider lens so the first cabinet is visible through the leaves,
+  // then settle into the normal gallery camera while walking across the sill.
+  const entryWeight=entrance?1-smooth(0,.88,entrance.t):0;
+  const entryFov=Math.max(camera.fov,85-35*smooth(1,1.6,aspect));
+  camera.fov+=(entryFov-camera.fov)*entryWeight;
   const vertical=aspect<1.15?.16:0;
   if(vertical)camera.setViewOffset(aspect,1,0,vertical,aspect,1);
   else camera.clearViewOffset();
   const distance=Math.min(maxDistance,Math.max(6.6,6.5/(2*Math.tan(camera.fov*Math.PI/360)*aspect)));
   camera.position.copy(pose.position);camera.position.x+=distance-4.9;
+  camera.position.x+=(-1.8-camera.position.x)*entryWeight;
   camera.lookAt(pose.look);camera.updateMatrixWorld();
   if(entrance?.alignment>0){
     const axis=pose.position.clone().set(0,2.15,-2000).project(camera);

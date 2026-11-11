@@ -3,6 +3,7 @@ import {galleryRenderSettings} from './gallery-quality.js';
 import * as THREE from '../vendor/three.module.js';
 import {MuseumWorld} from './museum-world.js';
 import {MUSEUM_ENTRY,MUSEUM_STOPS} from './route-state.js';
+import {publicCampusProgress,foyerPhase} from './foyer-entrance.js';
 
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t);};
@@ -57,7 +58,7 @@ export class PassageScene {
     this.targetG=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true,type:THREE.HalfFloatType,samples:Math.min(4,this.renderer.capabilities.maxSamples)});
     this.targetB=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true});
     this.promises=[];this.loader=new THREE.TextureLoader();
-    this.campusMap=this.load('./assets/passage/campus-entrance.png');
+    this.campusMap=this.load('./assets/passage/campus-entrance-connected.png');
     this.portalMap=this.load('./assets/passage/shadow-gate.png');
     this.galleryMap=this.load('./assets/passage/interior-gallery.png');
     this.puppetMap=this.load('./assets/story/puppet-hero.png');
@@ -76,7 +77,7 @@ export class PassageScene {
         await this.renderer.compileAsync(this.market,this.cameraB);
         await this.warmup();
       }catch(error){this.assetErrors.push('shader preparation: '+error.message);}
-      this.loaded=true;document.body.classList.add('passage-ready');
+      this.loaded=true;
       window.dispatchEvent(new Event('passage:ready'));
     });
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(canvas.parentElement);this.resize();
@@ -89,7 +90,8 @@ export class PassageScene {
   async warmup(){
     // Program compilation alone does not upload maps or allocate shadow targets.
     // Prime the actual render paths while the loading cover is still visible.
-    for(const [route,progress] of [['public',1],['museum',MUSEUM_ENTRY],...MUSEUM_STOPS.map(stop=>['museum',stop.at])]){
+    this.world.preview.prepare(this.cameraG,this.width,this.height,this.pixelRatio,this.targetG.samples);
+    for(const [route,progress] of [['public',.50],['public',1],['museum',MUSEUM_ENTRY],...MUSEUM_STOPS.map(stop=>['museum',stop.at])]){
       const pose=this.world.update(route,progress,0,true,null);
       this.cameraG.position.copy(pose.position);this.cameraG.lookAt(pose.look);this.cameraG.updateMatrixWorld();
       this.world.syncCamera(this.cameraG);
@@ -100,10 +102,17 @@ export class PassageScene {
     this.renderer.setRenderTarget(this.targetA);this.renderer.render(this.campus,this.cameraA);
     this.cameraB.position.set(0,2.9,29);this.cameraB.lookAt(0,3.4,-70);
     this.renderer.setRenderTarget(this.targetB);this.renderer.render(this.market,this.cameraB);
-    for(const material of [this.portalMaterial,this.singleMaterial]){
-      this.compositeQuad.material=material;
-      await this.renderer.compileAsync(this.composite,this.screenCamera);
-      this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);
+    // Compile/upload the final passes offscreen too. None of the preparation
+    // views may reach the canvas before the requested route has been rendered.
+    const scratch=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});
+    try{
+      for(const material of [this.portalMaterial,this.singleMaterial]){
+        this.compositeQuad.material=material;
+        await this.renderer.compileAsync(this.composite,this.screenCamera);
+        this.renderer.setRenderTarget(scratch);this.renderer.render(this.composite,this.screenCamera);
+      }
+    }finally{
+      this.renderer.setRenderTarget(null);scratch.dispose();
     }
     this.world.update('public',0,0,true,null);this.renderer.info.reset();
   }
@@ -257,6 +266,14 @@ export class PassageScene {
     this.world.hallDistanceOffset=Math.max(0,7.3/(Math.tan(THREE.MathUtils.degToRad(this.cameraG.fov/2))*this.cameraG.aspect)-12);
     const coverHeight=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*28;
     this.matteScale=Math.max(1,coverHeight/26.667*1.04,coverHeight*(width/height)/40*1.04);
+    // Match the loading photograph to the initial camera's crop, including
+    // its small vertical offset, instead of jumping from CSS cover to WebGL.
+    const poster=this.canvas.parentElement.querySelector('.passage-fallback');
+    if(poster){
+      const posterWidth=40*this.matteScale/coverHeight*height,posterHeight=26.667*this.matteScale/coverHeight*height;
+      poster.style.backgroundSize=`${posterWidth}px ${posterHeight}px`;
+      poster.style.backgroundPosition=`${(width-posterWidth)/2}px ${(height-posterHeight)/2-.2/coverHeight*height}px`;
+    }
     this.campusBackdrop.scale.setScalar(this.matteScale);this.galleryBackdrop.scale.setScalar(this.matteScale);
     this.doorPoint.set((800/1536-.5)*40*this.matteScale,3+(.5-560/1024)*26.667*this.matteScale,0);
     this.portalPoint.set(0,2.8+(.5-402/1024)*26.667*this.matteScale,0);
@@ -270,8 +287,8 @@ export class PassageScene {
   setPointer(x,y){this.pointer.x=clamp(x,-1,1);this.pointer.y=clamp(y,-1,1);}
   update(time,dt,reduced){
     if(this.fallback||!this.visible||!this.loaded){this.quality.resetClock();this.lastDrawAt=null;return;}
-    const p=this.progress;this.smoothPointer.x=damp(this.smoothPointer.x,this.pointer.x,dt,4);this.smoothPointer.y=damp(this.smoothPointer.y,this.pointer.y,dt,4);
-    this.uniforms.interiorExposure.value=this.route==='public'?mix(.5,1,smooth(.45,.88,this.routeProgress)):1;
+    const p=this.route==='public'?publicCampusProgress(this.routeProgress):this.progress;this.smoothPointer.x=damp(this.smoothPointer.x,this.pointer.x,dt,4);this.smoothPointer.y=damp(this.smoothPointer.y,this.pointer.y,dt,4);
+    this.uniforms.interiorExposure.value=this.route==='public'?mix(.8,1,smooth(.24,.46,this.routeProgress)):1;
     const px=reduced?0:this.smoothPointer.x,py=reduced?0:this.smoothPointer.y;
     if(reduced&&this.lastRenderedProgress===p&&this.lastRouteProgress===this.routeProgress&&!this.routeTransition&&!this.interactionDirty&&!this.resizeDirty&&this.frames>0){this.quality.resetClock();return;}
     // A visible preview can be throttled while focus is in the editor/chat.
@@ -288,6 +305,17 @@ export class PassageScene {
     }
     this.lastDrawAt=frameNow;this.renderer.info.reset();this.world.qualityTier=this.quality.tier;
     this.lastRenderedProgress=p;this.lastRouteProgress=this.routeProgress;this.interactionDirty=false;this.resizeDirty=false;this.frames++;this.sparkTime.value=reduced?0:time;
+    const approach=smooth(0,.22,p),az=mix(28,.35,approach),ax=this.doorPoint.x*approach;
+    const ay=mix(2.8,this.doorPoint.y,smooth(.02,.18,p)),idle=reduced?0:Math.sin(time*.55)*.014;
+    this.cameraA.position.set(ax+px*.2,ay-py*.08+idle,az);this.cameraA.lookAt(ax+px*.06,ay,-40);this.cameraA.updateMatrixWorld();
+    this.projectedPoint.copy(this.doorPoint).project(this.cameraA);
+    this.uniforms.doorCenter.value.set(this.projectedPoint.x*.5+.5,this.projectedPoint.y*.5+.5);
+    const doorFrustum=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*az;
+    this.uniforms.doorHalf.value.set(3.4*this.matteScale/doorFrustum,3.78*this.matteScale/doorFrustum);
+    const dc=this.uniforms.doorCenter.value,dh=this.uniforms.doorHalf.value;
+    this.world.backdrop.frontDoorRect={x:dc.x-dh.x/this.cameraA.aspect,y:1-dc.y-dh.y,width:dh.x*2/this.cameraA.aspect,height:dh.y*2};
+    if(this.route==='public'||this.route==='game'&&this.routeProgress<.12)
+      this.world.preview.prepare(this.cameraG,this.width,this.height,this.pixelRatio,this.targetG.samples);
     const pose=this.world.update(this.route,this.route==='game'?smooth(0,.25,this.routeProgress):this.routeProgress,time,reduced,this.routeTransition);
     this.cameraG.position.copy(pose.position);this.cameraG.lookAt(pose.look);this.cameraG.updateMatrixWorld();
     this.world.syncCamera(this.cameraG);
@@ -296,11 +324,6 @@ export class PassageScene {
       this.compositeQuad.material=this.singleMaterial;this.singleUniforms.image.value=this.targetG.texture;this.singleUniforms.grade.value=1;
       this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);this.finishFrame();return;
     }
-    const approach=smooth(0,.22,p),az=mix(28,.35,approach),ax=this.doorPoint.x*approach;
-    const ay=mix(2.8,this.doorPoint.y,smooth(.02,.18,p)),idle=reduced?0:Math.sin(time*.55)*.014;
-    this.cameraA.position.set(ax+px*.2,ay-py*.08+idle,az);this.cameraA.lookAt(ax+px*.06,ay,-40);this.cameraA.updateMatrixWorld();
-    const gz=mix(28,.35,smooth(.14,.4,p)),gy=mix(2.8,this.portalPoint.y,smooth(.14,.32,p));
-
     const bz=mix(29,-46,smooth(.32,.63,p));
     this.cameraB.position.set(Math.sin(smooth(.42,.63,p)*Math.PI)*.4+px*.24,2.9-py*.1+idle,bz);this.cameraB.lookAt(0,3.4,-70);this.cameraB.updateMatrixWorld();
     this.screenPuppet.rotation.z=reduced?0:Math.sin(time*.65)*.03;this.screenPuppet.position.x=reduced?0:Math.sin(time*.5)*.1;
@@ -308,10 +331,9 @@ export class PassageScene {
     this.drifting.forEach((tree,i)=>tree.rotation.z=reduced?0:Math.sin(time*.27+i)*.006);
     this.updateLanterns(time,reduced);
     this.steam.forEach(({mesh,k,base})=>{const t=reduced?k/8:(time*.12+k/8)%1;mesh.position.copy(base);mesh.position.y+=t*2.3;mesh.position.x+=Math.sin(t*5+k)*.18;mesh.scale.setScalar(.35+t);mesh.material.opacity=Math.sin(t*Math.PI)*.05;mesh.quaternion.copy(this.cameraB.quaternion);});
-    this.projectedPoint.copy(this.doorPoint).project(this.cameraA);this.uniforms.doorCenter.value.set(this.projectedPoint.x*.5+.5,this.projectedPoint.y*.5+.5);
-    const doorFrustum=2*Math.tan(THREE.MathUtils.degToRad(this.cameraA.fov/2))*az;
-    this.uniforms.doorHalf.value.set(3.4*this.matteScale/doorFrustum,3.78*this.matteScale/doorFrustum);
-    this.uniforms.doorReveal.value=smooth(.065,.095,p);this.uniforms.doorFull.value=this.routeTransition?.autoplay?1:smooth(.195,.226,p);
+    // Keep the same live corridor behind the entrance from the first frame.
+    // Fading from the cover's baked hallway while walking doubled the lanterns.
+    this.uniforms.doorReveal.value=this.route==='public'?1:smooth(.065,.095,p);this.uniforms.doorFull.value=this.routeTransition?.autoplay?1:smooth(.195,.226,p);
     if(this.route==='game')this.portalPoint.set(this.world.gameOrigin==='museum'?-9:4.4,3,this.world.gameOrigin==='museum'?-94:-5);
     const linen=this.world.backdrop.theaterRect;
     this.uniforms.center.value.set(linen.x+linen.width/2,1-linen.y-linen.height/2);
@@ -326,10 +348,10 @@ export class PassageScene {
     const portalStart=this.routeTransition?.autoplay ? .145 : .12,portalOpen=this.routeTransition?.autoplay ? .17 : .14;
     this.uniforms.reveal.value=this.route==='game'?smooth(portalStart,portalOpen,this.routeProgress):0;
     if(p<.228){this.renderer.setRenderTarget(this.targetA);this.renderer.render(this.campus,this.cameraA);}
-    if(p>.065&&(this.route!=='game'||this.routeProgress<.27)){this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);}
+    if((this.route==='public'||p>.065)&&(this.route!=='game'||this.routeProgress<.27)){this.renderer.setRenderTarget(this.targetG);this.renderer.render(this.gallery,this.cameraG);}
     if(p>.27){this.renderer.setRenderTarget(this.targetB);this.renderer.render(this.market,this.cameraB);}
     // Only portals need three texture reads and the angular/rim shader per pixel.
-    const single=p<=.065?this.targetA:this.route!=='game'&&p>=.228?this.targetG:this.route==='game'&&this.routeProgress>=.27?this.targetB:null;
+    const single=this.route!=='public'&&p<=.065?this.targetA:this.route!=='game'&&p>=.228?this.targetG:this.route==='game'&&this.routeProgress>=.27?this.targetB:null;
     this.compositeMode=single?'single':'portal';
     this.compositeQuad.material=single?this.singleMaterial:this.portalMaterial;
     if(single)this.singleUniforms.image.value=single.texture;
@@ -337,6 +359,11 @@ export class PassageScene {
     this.renderer.setRenderTarget(null);this.renderer.render(this.composite,this.screenCamera);this.finishFrame();
   }
   finishFrame(){
+    if(this.inspect&&this.route==='public')document.documentElement.dataset.foyerPhase=foyerPhase(this.routeProgress);
+    if(!this.presented){
+      this.presented=true;document.body.classList.add('passage-ready');
+      if(this.inspect)document.documentElement.dataset.passageFirstFrame=JSON.stringify({route:this.route,progress:this.routeProgress});
+    }
     if(this.inspect&&performance.now()-(this.lastStatsAt||0)>800){
       this.lastStatsAt=performance.now();
       const sorted=[...this.frameTimes].sort((a,b)=>a-b),mean=sorted.reduce((a,b)=>a+b,0)/Math.max(1,sorted.length);

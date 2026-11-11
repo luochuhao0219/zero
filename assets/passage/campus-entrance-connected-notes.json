@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-11",
+  "method": "built-in image_gen.imagegen",
+  "file": "campus-entrance-connected.png",
+  "nativeSize": [
+    1536,
+    1024
+  ],
+  "sha256": "e93369d5e149e6770a412e5f44f7f6009d61ea431efce8a34550372f05af5466",
+  "source": "/Users/luochuhao/.codex/generated_images/01a1b911-138b-7bf2-9f30-659975d36dfa/exec-c51e30b9-541a-400e-bb31-53954fcf1a8b.png",
+  "reference": [
+    "assets/passage/campus-entrance.png",
+    "assets/interior/connecting-corridor.png",
+    "assets/interior/hall-photo.jpg"
+  ],
+  "prompt": "Use case: precise-object-edit.\nAsset type: Photographic opening cover for a continuous architectural walk-through website.\nInput image 1 is the EDIT TARGET: preserve this exact old stone university building, exterior viewpoint and 3:2 composition. Input image 2 is the connecting corridor to insert behind its central entrance. Input image 3 is the destination vestibule, with two adjacent doorways, glimpsed very small through the far interior arch.\nPrimary request: change ONLY the scenery visible inside the open central front door of image 1. Replace the old dark tunnel with end-window by the same short straight corridor in image 2, seen from outside. The view must read as one coherent building, with the exterior doorway leading into that corridor and then into image 3's two-door vestibule.\nThe inserted corridor has aged matte warm-grey stone side walls, dark oak beams, three amber hanging lanterns on a single center line, narrow tall timber-framed side windows with cool blue dusk beyond, and worn stone flagstones continuing inward from the front steps. At its far end is the single stone arch from image 2; through it, show a tiny, distant glimpse of image 3's two adjacent arched doorways (left exhibition cabinets, right theater), not a yellow window or a blank wall. Correct depth, scale and perspective. Keep interior warm but gently visible, without overexposure.\nStrict invariants: keep the exterior facade, roof, tree branches, foliage, lamps, entrance arch, both open wooden door leaves, steps and path in their exact existing positions, colors and proportions. Keep the central door at its exact location and size, center x=52% and y=55% of image. Do not enlarge the door, crop, move the camera or zoom. Retain the full building exterior as the image, not a corridor closeup.\nPhotorealistic natural stone, aged wood and restrained warm/cool lighting; crisp real material detail. Highest available resolution, landscape 3:2. No text, people, signage, watermark, blur, stylized CGI, artificial bloom, frames or collage. Change the interior within the entrance only; preserve everything else in image 1.",
+  "use": "Opening cover and loading poster. Entrance now shows the same timber-beamed connecting corridor and a distant pair of museum/theater doors. Replaces the runtime reference to campus-entrance.png while retaining the original asset; fictional architectural art, not a photograph or historical reconstruction."
+}

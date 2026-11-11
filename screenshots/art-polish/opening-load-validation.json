@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-10",
+  "opening": {
+    "canvasOpacity": "1",
+    "firstFrame": {
+      "progress": 0,
+      "route": "public"
+    },
+    "oldOverlayPresent": false,
+    "poster": "url(\"http://127.0.0.1:4173/assets/passage/campus-entrance.png\")",
+    "preloadedImages": [
+      "./assets/passage/campus-entrance.png"
+    ],
+    "progress": "00"
+  },
+  "consoleErrors": [],
+  "checks": {
+    "automatedTestsPassed": 88,
+    "offscreenPreparation": true,
+    "preparationFailureCleanup": true,
+    "completeDoorScreenMarketStageRoute": true
+  }
+}

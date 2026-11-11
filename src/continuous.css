@@ -1,13 +1,14 @@
 /* One native scroll track owns every scene, including the stage and ending. */
 .has-continuous .passage{height:1180svh}
 .has-continuous #door{top:183.6svh}.has-continuous #gate{top:280.8svh}.has-continuous #market{top:507.6svh}
-.has-continuous .passage-fallback{background-image:url('../assets/passage/campus-entrance.png')}
 .passage-copy-door{left:6.4%;top:24%;max-width:39%}.passage-copy-door h2{font-size:clamp(62px,6.5vw,100px)}
 .has-continuous .passage-copy-gate{bottom:16%;width:29%}
 .has-continuous .passage-footer{position:fixed;z-index:24}
 .has-continuous .passage-track{position:fixed;z-index:24}
 .has-continuous .passage-directions{transition:opacity .3s}
 .has-continuous.at-journey-end .passage-directions{opacity:0}
+.is-entering-foyer .passage-directions{opacity:0}
+.is-entering-foyer .site-header{pointer-events:none}
 .has-continuous .play-section{position:fixed;inset:0;z-index:5;margin:0;padding:0;background:transparent;opacity:0;visibility:hidden;pointer-events:none}
 .has-continuous:not(.is-playing) .stage-container{position:absolute;inset:0;margin:0;width:100%;height:100%;min-height:0;border-radius:0;z-index:0}
 .has-continuous:not(.is-playing) #stage{pointer-events:none;touch-action:pan-y;cursor:default}
