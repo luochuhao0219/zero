@@ -46,7 +46,7 @@ export function galleryArchitecture(parent,m){
   // A restrained stone margin replaces the brightly patterned runner.
   for(const x of [left+.42,right-.42])box(.17,.012,length,x,.006,cz,m.stone);
 
-  function window(w,h,x,y,z,yaw){
+  function window(w,h,x,y,z,yaw,viewIndex){
     const t=new THREE.Matrix4().makeRotationY(yaw).setPosition(x,y,z);
     function part(geometry,material,px=0,py=0,pz=0){
       geometry.translate(px,py,pz).applyMatrix4(t);add(geometry,material,0,0,0);
@@ -58,7 +58,7 @@ export function galleryArchitecture(parent,m){
     }
     bar(w+.52,h+.48,.16,0,0,0,m.stone);
     bar(w+.19,h+.17,.20,0,0,.10,m.lacquer);
-    part(new THREE.PlaneGeometry(w,h),m.windowView,0,0,.215);
+    part(new THREE.PlaneGeometry(w,h),m.windowViews[viewIndex%m.windowViews.length],0,0,.215);
     for(const s of [-1,1]){
       bar(.095,h+.1,.10,s*w/2,0,.26,m.wood);
       bar(w+.15,.10,.10,0,s*h/2,.26,m.wood);
@@ -68,16 +68,16 @@ export function galleryArchitecture(parent,m){
     bar(w+.64,.16,.44,0,-h/2-.15,.12,m.stone);
     bar(w+.65,.12,.22,0,h/2+.19,.07,m.stone);
   }
-  for(const z of GALLERY_WINDOWS){
-    window(2.30,3.46,left+.18,3.18,z,Math.PI/2);
-    window(2.30,3.46,right-.18,3.18,z,-Math.PI/2);
+  for(const [i,z] of GALLERY_WINDOWS.entries()){
+    window(2.30,3.46,left+.18,3.18,z,Math.PI/2,2*i);
+    window(2.30,3.46,right-.18,3.18,z,-Math.PI/2,2*i+1);
     for(const x of [left+.18,right-.18])for(const side of [-1,1]){
       box(.26,5.1,.22,x,2.65,z+side*1.55,m.stone,true);
       box(.37,.14,.39,x,5.15,z+side*1.55,m.stone,true);
     }
   }
   // The cool end window anchors the same sightline as the entrance photograph.
-  window(3.4,4.35,cx+.65,2.78,back+.18,0);
+  window(3.4,4.35,cx+.65,2.78,back+.18,0,3);
 
   for(const z of GALLERY_LANTERNS){
     const x=-.25;

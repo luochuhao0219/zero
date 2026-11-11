@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three.module.js';
-import {createArticulatedPuppet,jointPose,MuseumPerformances} from '../src/museum-animation.js';
+import {createArticulatedPuppet,jointPose,stageMotion,MuseumPerformances} from '../src/museum-animation.js';
 import {syncGalleryCamera} from '../src/museum-entrance.js';
 import {walkingPose,cabinetZ} from '../src/walking-path.js';
 import {MUSEUM_STOPS} from '../src/route-state.js';
@@ -32,6 +32,17 @@ test('all eight joint rotations loop seamlessly and pause while reading',()=>{
  assert.deepEqual(pictures.map(([r])=>r.joints.frontElbow.rotation.z),angles);
  motion.reading=false;motion.setPaused(true);motion.update(.3,.3,false,true);
  assert.deepEqual(pictures.map(([r])=>r.joints.frontElbow.rotation.z),angles);
+});
+test('four later cabinets have distinct rigid gestures and repeatable stage paths',()=>{
+ const gestures=[1,2,3,4].map(index=>[jointPose(1.4,index,0),jointPose(4.1,index,0),stageMotion(1.4,index,0)]);
+ assert.equal(new Set(gestures.map(value=>JSON.stringify(value))).size,4);
+ for(let index=1;index<5;index++){
+  assert.deepEqual(jointPose(0,index,0),jointPose(8,index,0));
+  assert.deepEqual(stageMotion(0,index,0),stageMotion(8,index,0));
+  assert.deepEqual(stageMotion(3,index,0,true),{x:0,y:0,tilt:0});
+  assert.notDeepEqual(jointPose(1.4,index,0),jointPose(4.1,index,0));
+ }
+ assert.deepEqual(stageMotion(3,0),{x:0,y:0,tilt:0});
 });
 test('low 45 degree slabs stay below artwork and their click targets stay onscreen',()=>{
  assert.ok(.33+(.72+.1)*Math.SQRT1_2/2<2.4-3.45/2);
