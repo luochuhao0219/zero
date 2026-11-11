@@ -3,6 +3,13 @@ import {ROOMS,SOURCES,museumRoomId} from './museum-content.js';
 import {galleryJourney} from './museum-gallery.js';
 import {FreePlayStudio} from './compose-studio.js';
 const $=id=>document.getElementById(id);
+const ROOM_PHOTOS={
+  heritage:{file:'heritage-photo.jpg',alt:'艺人在幕前操纵两个人物皮影',caption:'皮影表演现场'},
+  craft:{file:'craft-photo.jpg',alt:'陈列着各式人物皮影的展铺',caption:'江汉皮影人物与作品陈列'},
+  voices:{file:'voices-photo.jpg',alt:'手艺人用刻刀制作皮影纹样',caption:'皮影纹样制作'},
+  people:{file:'people-photo.jpg',alt:'幕布上两个人物与马匹组成的皮影戏场景',caption:'皮影戏剧目场景'},
+  legacy:{file:'legacy-photo.jpg',alt:'孩子尝试操纵皮影人物',caption:'年轻一代体验皮影表演'},
+};
 
 /** One physical cabinet per topic, along the museum's left-hand corridor. */
 export class Exploration {
@@ -22,9 +29,9 @@ export class Exploration {
       <button id="museum-overview" class="museum-overview-return">← 长廊全览</button>
       <button id="museum-sign" class="museum-sign-hotspot" aria-label="打开当前展柜讲解" aria-controls="museum-article" aria-expanded="false"><span class="museum-sign-ring" aria-hidden="true"></span><span class="museum-sign-label">查看讲解</span></button>
       <button id="museum-motion" class="museum-motion" hidden aria-label="暂停画中小戏"><span class="museum-motion-icon" aria-hidden="true"></span><span id="museum-motion-label">画中小戏 · 暂停</span></button>
-      <aside class="museum-tools museum-reading museum-placard" aria-label="当前展柜的完整展签"><div class="museum-tool-heading"><span id="ex-room-caption"></span><button id="museum-expand" aria-expanded="false" aria-controls="museum-article">关闭展签 ×</button></div>
+      <aside class="museum-tools museum-reading museum-placard" aria-label="当前展柜的完整展签"><div class="museum-tool-heading"><span id="ex-room-caption"></span><button id="museum-expand" aria-label="关闭展签" aria-expanded="false" aria-controls="museum-article">×</button></div>
         <h2 id="ex-title"></h2><p id="ex-intro" class="museum-case-intro"></p>
-        <article id="museum-article" aria-labelledby="ex-title"><p id="museum-article-text"></p><div id="museum-sections"></div><div id="museum-sources" class="museum-sources"></div></article>
+        <article id="museum-article" aria-labelledby="ex-title"><figure id="museum-article-photo" class="museum-article-photo"><img id="museum-article-image" alt=""><figcaption id="museum-article-caption"></figcaption></figure><p id="museum-article-text"></p><div id="museum-sections"></div><div id="museum-sources" class="museum-sources"></div></article>
         <div class="museum-placard-foot"><span>江汉皮影 · 数字展陈</span><span id="ex-visited"></span></div>
       </aside>
       <nav class="museum-stops museum-cabinet-trail" aria-label="沿廊五柜">${ROOMS.map(r=>`<button data-room="${r.id}" aria-pressed="false" aria-label="走向第 ${r.no} 柜，${r.name}"><small>${r.no}</small><span>${r.name}</span></button>`).join('')}</nav>
@@ -124,6 +131,10 @@ export class Exploration {
     $('museum-motion-label').textContent=reduced?'画中小戏 · 静态':paused?'画中小戏 · 播放':'画中小戏 · 暂停';
   }
   renderArticle(room){
+    const photo=ROOM_PHOTOS[room.id];
+    $('museum-article-image').src=`./assets/museum/${photo.file}`;
+    $('museum-article-image').alt=photo.alt;
+    $('museum-article-caption').textContent=photo.caption;
     $('museum-article-text').textContent=room.overview;
     const sections=$('museum-sections');sections.replaceChildren();
     const used=new Set();

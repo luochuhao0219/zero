@@ -68,9 +68,11 @@ export function galleryMaterials(renderer,scene){
   const brass=new THREE.MeshStandardMaterial({color:'#917044',metalness:.72,roughness:.42,envMapIntensity:.85});
   const glass=new THREE.MeshPhysicalMaterial({color:'#c4e1df',metalness:.15,roughness:.12,clearcoat:1,clearcoatRoughness:.08,transparent:true,opacity:.075,depthWrite:false,envMapIntensity:1.1,side:THREE.DoubleSide});
   const linenNormal=map('linen','normal');
-  const windowMap=texture('./assets/materials/gallery-match/window-dusk.png',true);
-  windowMap.wrapS=windowMap.wrapT=THREE.ClampToEdgeWrapping;
-  const windowView=new THREE.MeshBasicMaterial({map:windowMap,color:'#8ca6a8'});
+  const windowViews=['window-dusk','window-bamboo-path','window-lotus-pond','window-courtyard'].map(name=>{
+    const windowMap=texture(`./assets/materials/gallery-match/${name}.png`,true);
+    windowMap.wrapS=windowMap.wrapT=THREE.ClampToEdgeWrapping;
+    return new THREE.MeshBasicMaterial({map:windowMap,color:'#8ca6a8'});
+  });
   const bronze=new THREE.MeshStandardMaterial({color:'#453224',roughness:.4,metalness:.78});
   const pane=document.createElement('canvas');pane.width=128;pane.height=256;
   const paint=pane.getContext('2d'),glow=paint.createRadialGradient(64,124,8,64,124,154);
@@ -84,6 +86,6 @@ export function galleryMaterials(renderer,scene){
     normalMap:map('aged-plaster','normal'),normalScale:new THREE.Vector2(.018,.018),envMapIntensity:1});
   const environment=interiorEnvironment(renderer,scene);
   return {wood,lacquer,wall,ceiling,beam,floor,stone,tile,paintedBeam,jade,brass,glass,linenNormal,
-    windowView,bronze,lampGlass,ceramic,environment,errors,ready:Promise.all(pending)};
+    windowViews,bronze,lampGlass,ceramic,environment,errors,ready:Promise.all(pending)};
 }
 export function contactTexture(){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,5,64,64,64);g.addColorStop(0,'rgba(15,12,8,.65)');g.addColorStop(.45,'rgba(15,12,8,.25)');g.addColorStop(1,'rgba(15,12,8,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);}

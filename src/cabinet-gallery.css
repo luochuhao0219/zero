@@ -135,14 +135,22 @@
 .museum-sign-label{position:absolute;left:53px;top:50%;transform:translateY(-50%);font:16px/1.4 "Songti SC",SimSun,serif;white-space:nowrap;color:#ffe6a7;text-shadow:0 1px 4px #23170a,0 0 8px #23170a}
 .museum-sign-hotspot:focus-visible{outline:2px solid #fff0ba;outline-offset:5px}
 @keyframes marble-beacon{0%,100%{opacity:.65;box-shadow:0 0 6px #eabd6470,inset 0 0 5px #eabd6440}50%{opacity:1;box-shadow:0 0 18px #fbd17d,inset 0 0 10px #eabd6480}}
-.museum-cabinet-route.paper-open .museum-tools.museum-placard{width:min(960px,calc(100vw - 32px))}
+.museum-cabinet-route.paper-open .museum-tools.museum-placard{top:calc(50% + 30px);width:min(1120px,calc(100vw - 32px));max-height:min(calc(100svh - 96px),960px)}
+.museum-cabinet-route.paper-open #museum-expand{display:grid;place-items:center;min-width:44px;min-height:44px;padding:0;font:30px/1 Arial,sans-serif;cursor:pointer}
+.museum-cabinet-route.paper-open #museum-article{display:flow-root}
+.museum-cabinet-route .museum-article-photo{display:none}
+.museum-cabinet-route.paper-open .museum-article-photo{display:block;float:left;width:44%;margin:18px 32px 16px 0;text-align:center}
+.museum-cabinet-route.paper-open .museum-article-photo img{display:block;width:100%;height:auto;max-height:480px;object-fit:contain;background:#d8c6a7;box-shadow:0 8px 22px #4c37282b}
+.museum-cabinet-route.paper-open .museum-article-photo figcaption{margin-top:9px;font:15px/1.5 "Songti SC","STSong","SimSun",serif;color:#695a45}
+.museum-cabinet-route.paper-open #museum-article-text{margin-top:10px}
+.museum-cabinet-route.paper-open #museum-sections{clear:both}
 .museum-cabinet-route.paper-open #museum-article-text,
 .museum-cabinet-route.paper-open #museum-sections p,
 .museum-cabinet-route.paper-open #museum-sections h3,
 .museum-cabinet-route.paper-open #ex-intro,
 .museum-cabinet-route.paper-open #ex-title{font-family:"Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;font-size:24pt;line-height:1.8;letter-spacing:0;color:#3c4036}
 .museum-cabinet-route.paper-open #ex-title{font-weight:700}
-@media(max-width:760px){.museum-cabinet-route.paper-open .museum-tools.museum-placard{padding:20px;max-height:76svh}.museum-sign-label{font-size:14px}}
+@media(max-width:760px){.museum-cabinet-route.paper-open .museum-tools.museum-placard{padding:20px;max-height:calc(100svh - 96px)}.museum-cabinet-route.paper-open .museum-article-photo{float:none;width:100%;margin:14px auto 20px}.museum-cabinet-route.paper-open .museum-article-photo img{max-height:42svh}.museum-sign-label{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.museum-sign-ring{animation:none}}
 
 /* Museum controls use one unframed, legible calligraphic treatment. */

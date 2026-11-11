@@ -5,7 +5,7 @@ import {galleryMaterials,contactTexture} from './gallery-materials.js';
 import {galleryWallArt} from './gallery-wall-art.js';
 import {galleryArchitecture} from './gallery-architecture.js';
 import {surfaceUV} from './surface-uv.js';
-import {performanceMaterial,MuseumPerformances,loadPuppetAtlas,createPicturePerformance} from './museum-animation.js';
+import {performanceMaterial,MuseumPerformances,loadPuppetAtlas,loadParasolTexture,createPicturePerformance} from './museum-animation.js';
 import {marbleMaterial,inscriptionMaterial} from './museum-marble.js';
 import {smooth} from './route-state.js';
 import {ROOMS} from './museum-content.js';
@@ -27,7 +27,7 @@ export class WalkingGallery {
     const sun=new THREE.DirectionalLight('#ffe0b1',.65);sun.position.set(-3,7,6);this.group.add(sun);
     const fill=new THREE.DirectionalLight('#a5c8e2',.38);fill.position.set(8,4,-32);this.group.add(fill);
     const shadowMap=contactTexture();
-    const marble=marbleMaterial(renderer,this.errors),atlas=loadPuppetAtlas(renderer,this.errors),pending=[marble.userData.ready,atlas.ready];
+    const marble=marbleMaterial(renderer,this.errors),atlas=loadPuppetAtlas(renderer,this.errors),parasol=loadParasolTexture(renderer,this.errors),pending=[marble.userData.ready,atlas.ready,parasol.ready];
     const murals=['origins-stage','river-mural','craft-mural','troupe-mural','innovation-stage'].map(name=>{
       let done;pending.push(new Promise(resolve=>done=resolve));
       const url='./assets/museum/'+name+'.png';
@@ -54,7 +54,7 @@ export class WalkingGallery {
       const strip=new THREE.Mesh(new THREE.BoxGeometry(.04,.025,5.5),new THREE.MeshBasicMaterial({color:'#e8b16e'}));strip.position.set(.08,3.96,0);cab.add(strip);
       const glazing=new THREE.Mesh(new THREE.PlaneGeometry(5.75,3.05),glass);glazing.rotation.y=Math.PI/2;glazing.position.set(.72,2.34,0);cab.add(glazing);
       const mural=new THREE.Mesh(new THREE.PlaneGeometry(6,3.45),performanceMaterial(murals[i],i));mural.rotation.y=Math.PI/2;mural.position.set(-.31,2.4,0);cab.add(mural);
-      this.performances.push(createPicturePerformance(mural,atlas.map,i,renderer));
+      this.performances.push(createPicturePerformance(mural,atlas.map,i,renderer,parasol.map));
       // A three-unit (half-case-width) low marble slab, facing 45 degrees up.
       // Its highest corner is .62, below the mural's lower edge at .675.
       const sign=new THREE.Group();sign.position.set(1.25,.33,0);sign.rotation.z=Math.PI/4;cab.add(sign);
