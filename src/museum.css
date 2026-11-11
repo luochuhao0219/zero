@@ -79,16 +79,6 @@ body[data-route=museum] .passage-footer{visibility:hidden}
 .museum-editorial .museum-visit-count{font-size:10px;color:#9eaa92;margin:18px 0 0;letter-spacing:.08em}
 .museum-reading.is-expanded{max-height:calc(100svh - 215px)}
 .museum-editorial .museum-stops button{font-size:12px}
-#studio-dialog{width:min(1100px,calc(100vw - 48px));max-width:none;max-height:calc(100svh - 48px);box-sizing:border-box;padding:30px;background:#eee3cc;color:#314235;border:1px solid #a99871;--ex-line:#a69d7855}
-#studio-dialog .studio-header{display:flex;align-items:start;justify-content:space-between;gap:24px;border-bottom:1px solid var(--ex-line);padding-bottom:20px;margin-bottom:24px}
-#studio-dialog .studio-header h2{font:42px 'Zhi Mang Xing',serif;margin:8px 0}
-#studio-dialog .studio-header p{font-size:13px;color:#69715d;margin:0}
-#studio-close{flex-shrink:0;background:#29473a;color:#f0e5ca;border:1px solid #667154;padding:10px 14px;border-radius:3px;font-size:12px;cursor:pointer}
-#studio-dialog .ex-room{padding:0;margin:0}
-#studio-dialog canvas{width:100%;height:auto;display:block;border:1px solid #a8997455}
-#studio-dialog button:focus-visible,#studio-dialog canvas:focus-visible{outline:2px solid #8a4c30;outline-offset:3px}
-#studio-dialog .ex-composer-stage{top:0}
-#studio-dialog .ex-personal-grid img{max-width:100%}
 @media(max-width:760px){
   .museum-editorial .museum-tools{left:4%;right:4%;width:auto;height:28vh;max-height:28vh;bottom:115px;padding:12px 16px}
   .museum-reading .museum-tool-heading{position:sticky;top:-12px;background:#202b27;padding:8px 0;margin-top:-5px;z-index:1}
@@ -98,10 +88,5 @@ body[data-route=museum] .passage-footer{visibility:hidden}
   .museum-editorial .museum-stops button{font-size:10px;padding-inline:3px}
   .museum-reading.is-expanded{height:56svh;max-height:56svh}
   .museum-editorial .museum-heading h2{font-size:29px;line-height:1.2}
-  #studio-dialog{width:calc(100vw - 20px);max-height:calc(100svh - 20px);padding:20px;margin:auto}
-  #studio-dialog .studio-header{gap:12px;padding-bottom:15px;margin-bottom:18px}
-  #studio-dialog .studio-header h2{font-size:34px}
-  #studio-dialog .studio-header p{font-size:11px}
-  #studio-close{padding:9px;font-size:11px}
 }
 @media(max-height:500px) and (min-width:761px){.museum-editorial .museum-tools{width:260px;max-height:calc(100svh - 170px);bottom:75px;padding:14px}.museum-editorial .museum-heading h2{font-size:28px}}

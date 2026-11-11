@@ -1,3 +1,6 @@
+import {getJoints,blendActor} from './puppet-motion.js';
+import {compileMotionTimeline,sampleMotionTimeline} from './motion-timeline.js';
+import {sceneryDefault} from './studio-space.js';
 import {defaultDraft,sanitizeDraft} from './explore-data.js';
 export const PLAY_DURATION=12000;
 export const STORY_STARTERS=[
@@ -8,18 +11,23 @@ export const STORY_STARTERS=[
 ];
 export const POSES=[{name:'招手',pose:110},{name:'作揖',pose:45},{name:'指路',pose:85},{name:'回望',pose:25,turn:true},{name:'告别',pose:100}];
 export function starterDraft(id){
-  const d=defaultDraft(),s=STORY_STARTERS.find(s=>s.id===id);if(!s){d.title='无题小戏';return d;}
+  const d=defaultDraft(),s=STORY_STARTERS.find(s=>s.id===id);if(!s){d.title='无题小戏';d.frames.forEach(f=>f.actions=[]);return d;}
   Object.assign(d,{title:s.title,scene:s.scene,template:s.id,synopsis:s.prompt,light:s.scene==='moon'?'moon':'warm'});
-  d.frames.forEach((f,i)=>{f.line=s.lines[i];f.actors.forEach((a,j)=>{a.x=s.positions[i][j];a.pose=s.poses[i][j];});f.prop={kind:s.prop,x:50,y:60,holder:0};});
+  d.frames.forEach((f,i)=>{f.scenery=sceneryDefault(s.scene);f.line=s.lines[i];f.actors.forEach((a,j)=>{a.x=s.positions[i][j];a.pose=s.poses[i][j];a.joints=getJoints(a);});f.prop={kind:s.prop,x:50,y:60,holder:0};});
+  const sequences={garden:[[['walk',-1,2.8]],[['salute',-1,3]],[['wave',-1,2.6]]],lantern:[[['look',0,2]],[['offer',0,3.4]],[['walk',-1,3]]],farewell:[[['nod',-1,1.8]],[['offer',0,3.4],['salute',-1,3]],[['wave',-1,2.8]]],home:[[['walk',-1,3]],[['nod',-1,1.8]],[['bow',-1,2.8]]]};
+  d.frames.forEach((f,i)=>f.actions=sequences[id][i].map(([type,actor,duration])=>({type,actor,duration})));
   return d;
 }
 /** A playback snapshot never modifies the editable poses or stored draft. */
-export function samplePlay(draft,elapsed,reducedMotion=false){
+export function compilePlay(draft){return draft.frames.some(f=>Array.isArray(f.actions))?compileMotionTimeline(draft):null;}
+export function getPlayDuration(draft){return compilePlay(draft)?.duration||PLAY_DURATION;}
+export function samplePlay(draft,elapsed,reducedMotion=false,timeline=undefined){
+  const compiled=timeline===undefined?compilePlay(draft):timeline;if(compiled)return sampleMotionTimeline(compiled,elapsed,reducedMotion);
   const time=Math.max(0,Math.min(PLAY_DURATION,elapsed)),index=Math.min(2,Math.floor(time/4000)),next=Math.min(2,index+1);
   const from=draft.frames[index],to=draft.frames[next],raw=Math.max(0,Math.min(1,(time%4000-1000)/2500));
   const t=reducedMotion?0:raw*raw*(3-2*raw),lerp=(a,b)=>a+(b-a)*t;
-  const actors=from.actors.map((a,i)=>({...a,...(t>=.5?{flip:to.actors[i].flip}:{}),x:lerp(a.x,to.actors[i].x),y:lerp(a.y,to.actors[i].y),size:lerp(a.size,to.actors[i].size),pose:lerp(a.pose,to.actors[i].pose)}));
-  return {actors,line:from.line,prop:{...(t>=.5?to.prop:from.prop),x:lerp(from.prop.x,to.prop.x),y:lerp(from.prop.y,to.prop.y)},index,progress:time/PLAY_DURATION};
+  const actors=from.actors.map((a,i)=>blendActor(a,to.actors[i],t));
+  return {actors,line:from.line,...((t>=.5?to:from).scenery?{scenery:(t>=.5?to:from).scenery}:{}),prop:{...(t>=.5?to.prop:from.prop),x:lerp(from.prop.x,to.prop.x),y:lerp(from.prop.y,to.prop.y)},index,progress:time/PLAY_DURATION};
 }
 export function copySavedDraft(work,duplicate=false){
   if(!work.draft)return null;

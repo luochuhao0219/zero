@@ -15,7 +15,7 @@ export class DirectControls {
     if(stage.fallback)return;
     const geometry=new THREE.TorusGeometry(.09,.012,6,24);
     for(let i=0;i<6;i++){
-      const ring=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color:0xd9f58b,transparent:true,opacity:.85,depthTest:false,depthWrite:false}));ring.renderOrder=100;ring.visible=false;stage.scene.add(ring);this.rings.push(ring);
+      const ring=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color:0xd8bc82,transparent:true,opacity:.85,depthTest:false,depthWrite:false}));ring.renderOrder=100;ring.visible=false;stage.scene.add(ring);this.rings.push(ring);
       const label=document.createElement('div');label.className='object-label';label.innerHTML='<span></span>';this.layer.append(label);this.labels.push(label);
     }
     this.canvas.addEventListener('pointerdown',e=>this.down(e));this.canvas.addEventListener('pointermove',e=>this.move(e));
