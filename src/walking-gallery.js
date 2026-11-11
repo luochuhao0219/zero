@@ -71,7 +71,7 @@ export class WalkingGallery {
     this.vignette=new MuseumPerformances(this.performances);
     this.updateLocalLights(2);
     const wallArt=galleryWallArt(this.group,renderer,this.materials);
-    this.ready=Promise.all([this.ready,wallArt.ready,...muralLoads]).then(()=>{this.errors.push(...wallArt.errors);});
+    this.ready=Promise.all([this.ready,wallArt.ready]).then(()=>{this.errors.push(...wallArt.errors);});
     this.batchFurniture();
   }
   batchFurniture(){
