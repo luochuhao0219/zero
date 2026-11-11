@@ -128,3 +128,121 @@
 .paper-open .museum-motion{display:none}
 @media(max-width:760px){.museum-motion{bottom:136px;padding:9px 12px;font-size:10px}}
 @media(max-height:500px) and (min-width:761px){.museum-motion{bottom:103px}}
+
+/* The only active marker is projected onto the current cabinet's marble stele. */
+.museum-cabinet-route .museum-sign-hotspot{width:48px;height:48px;padding:0;border:0;border-radius:50%;background:none;box-shadow:none;color:#ffde85;touch-action:manipulation}
+.museum-sign-ring{display:block;position:absolute;inset:6px;border:2px solid #ffe09a;border-radius:50%;background:transparent;box-shadow:0 0 9px #eabd64, inset 0 0 7px #eabd6470;animation:marble-beacon 2.4s ease-in-out infinite}
+.museum-sign-label{position:absolute;left:53px;top:50%;transform:translateY(-50%);font:16px/1.4 "Songti SC",SimSun,serif;white-space:nowrap;color:#ffe6a7;text-shadow:0 1px 4px #23170a,0 0 8px #23170a}
+.museum-sign-hotspot:focus-visible{outline:2px solid #fff0ba;outline-offset:5px}
+@keyframes marble-beacon{0%,100%{opacity:.65;box-shadow:0 0 6px #eabd6470,inset 0 0 5px #eabd6440}50%{opacity:1;box-shadow:0 0 18px #fbd17d,inset 0 0 10px #eabd6480}}
+.museum-cabinet-route.paper-open .museum-tools.museum-placard{width:min(960px,calc(100vw - 32px))}
+.museum-cabinet-route.paper-open #museum-article-text,
+.museum-cabinet-route.paper-open #museum-sections p,
+.museum-cabinet-route.paper-open #museum-sections h3,
+.museum-cabinet-route.paper-open #ex-intro,
+.museum-cabinet-route.paper-open #ex-title{font-family:"Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;font-size:24pt;line-height:1.8;letter-spacing:0;color:#3c4036}
+.museum-cabinet-route.paper-open #ex-title{font-weight:700}
+@media(max-width:760px){.museum-cabinet-route.paper-open .museum-tools.museum-placard{padding:20px;max-height:76svh}.museum-sign-label{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.museum-sign-ring{animation:none}}
+
+/* Museum controls use one unframed, legible calligraphic treatment. */
+.museum-cabinet-route .museum-motion,
+.museum-cabinet-route .museum-overview-return,
+.museum-cabinet-route .museum-cabinet-trail button,
+.museum-cabinet-route .museum-route-footer button,
+body.in-museum #return-hall{
+  font-family:"Kaiti SC","STKaiti",KaiTi,"Noto Serif CJK SC",serif;
+  font-size:18pt;
+  font-weight:400;
+  color:#ffe34a;
+  text-shadow:0 2px 5px #201808,0 0 12px #201808;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+.museum-cabinet-route .museum-motion:hover,
+.museum-cabinet-route .museum-overview-return:hover,
+.museum-cabinet-route .museum-cabinet-trail button:hover,
+.museum-cabinet-route .museum-route-footer button:hover{color:#fff69a;background:transparent}
+.museum-cabinet-route .museum-cabinet-trail{
+  max-width:calc(100vw - 24px);
+  overflow-x:auto;
+  scrollbar-width:thin;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+.museum-cabinet-route .museum-cabinet-trail small,
+.museum-cabinet-route .museum-cabinet-trail button[aria-pressed=true] small{
+  width:auto;height:auto;min-width:0;
+  font:inherit;color:inherit;
+  background:transparent;border:0;border-radius:0;
+}
+.museum-cabinet-route .museum-cabinet-trail button[aria-pressed=true]{color:#fff6a6}
+.museum-cabinet-route .museum-route-footer{background:transparent}
+body.in-museum #return-hall{border-radius:0;backdrop-filter:none}
+@media(min-width:761px){.museum-cabinet-route .museum-overview-return{right:285px}}
+.museum-cabinet-route .museum-motion{padding:10px 0}
+.museum-cabinet-route .museum-overview-return{padding:10px 0}
+.museum-cabinet-route .museum-sign-hotspot{transform:translate(-50%,-50%)}
+.museum-cabinet-route .museum-sign-ring{background:#30240a80}
+.museum-cabinet-route .museum-sign-label{
+  font-family:"Kaiti SC","STKaiti",KaiTi,serif;
+  font-size:18pt;
+  color:#ffe34a;
+  text-shadow:0 2px 5px #211709,0 0 10px #211709;
+}
+@media(max-width:760px){
+  .museum-cabinet-route .museum-cabinet-trail{justify-content:flex-start;width:calc(100vw - 24px)}
+  .museum-cabinet-route .museum-cabinet-trail button{flex:none;white-space:nowrap}
+  .museum-cabinet-route .museum-sign-hotspot{transform:translate(-50%,-50%)}
+  .museum-cabinet-route .museum-sign-label{font-size:18pt;left:auto;right:54px}
+}
+
+/* Keep the cabinet title plaque and restore the five-stop navigation frame. */
+.museum-cabinet-route .museum-cabinet-pin span,
+.museum-cabinet-route .museum-cabinet-pin[aria-pressed=true] span{
+  font-family:"Kaiti SC","STKaiti",KaiTi,"Noto Serif CJK SC",serif;
+  font-size:18pt;
+  font-weight:400;
+  color:#ffe34a;
+  text-shadow:0 1px 4px #1b160b;
+}
+.museum-cabinet-route .museum-cabinet-trail{
+  background:#1a2b22ed;
+  border:1px solid #bfa87a6b;
+  border-radius:3px;
+  box-shadow:0 8px 26px #040d0f35;
+}
+.museum-cabinet-route .museum-cabinet-trail small,
+.museum-cabinet-route .museum-cabinet-trail button[aria-pressed=true] small{
+  display:grid;place-items:center;
+  width:26px;height:26px;min-width:26px;
+  border:1px solid #b29e7188;border-radius:50%;
+  font-size:14px;
+}
+.museum-cabinet-route .museum-cabinet-trail button[aria-pressed=true] small{
+  background:#d1b17b;border-color:#d1b17b;color:#273b2d;text-shadow:none;
+}
+.museum-cabinet-route .museum-motion{font-size:14pt}
+.museum-cabinet-route .museum-overview-return,
+body.in-museum #return-hall{
+  right:30px;left:auto;
+  width:145px;
+  box-sizing:border-box;
+  text-align:right;
+  font-size:14pt;
+  color:#fff;
+}
+.museum-cabinet-route .museum-overview-return{top:88px}
+body.in-museum #return-hall{top:130px}
+.museum-cabinet-route .museum-overview-return:hover,
+body.in-museum #return-hall:hover{color:#fff}
+@media(max-width:760px){
+  .museum-cabinet-route .museum-overview-return,
+  body.in-museum #return-hall{right:15px;width:135px;font-size:14pt}
+  .museum-cabinet-route .museum-overview-return{top:78px}
+  body.in-museum #return-hall{top:117px}
+  .museum-cabinet-route .museum-cabinet-trail small,
+  .museum-cabinet-route .museum-cabinet-trail button[aria-pressed=true] small{width:24px;height:24px;min-width:24px}
+}

@@ -2,7 +2,6 @@ import {museumStop,smooth} from './route-state.js';
 import {ROOMS,SOURCES,museumRoomId} from './museum-content.js';
 import {galleryJourney} from './museum-gallery.js';
 import {FreePlayStudio} from './compose-studio.js';
-import {ANIMATED_CABINET} from './cabinet-motion.js';
 const $=id=>document.getElementById(id);
 
 /** One physical cabinet per topic, along the museum's left-hand corridor. */
@@ -21,7 +20,7 @@ export class Exploration {
     root.innerHTML=`<header class="museum-gallery-intro"><p>JIANGHAN SHADOW PUPPET GALLERY</p><h2>沿着展柜，<br>慢慢看。</h2><p>从一方水土，走到一门手艺的传承。<br>五个柜子，五段故事。</p><button id="museum-start">走近第一柜 <span>→</span></button><small>滚动自由前行；到柜前自动对正，继续滚动即可离开。</small></header>
       <div class="museum-cabinet-pins" aria-label="长廊中的展柜">${ROOMS.map(r=>`<button class="museum-cabinet-pin" data-cabinet="${r.id}" aria-label="走近第 ${r.no} 柜，${r.name}"><b>${r.no}</b><span>${r.name}</span></button>`).join('')}</div>
       <button id="museum-overview" class="museum-overview-return">← 长廊全览</button>
-      <button id="museum-sign" class="museum-sign-hotspot" aria-label="打开当前展柜讲解栏">查看讲解 ↗</button>
+      <button id="museum-sign" class="museum-sign-hotspot" aria-label="打开当前展柜讲解" aria-controls="museum-article" aria-expanded="false"><span class="museum-sign-ring" aria-hidden="true"></span><span class="museum-sign-label">查看讲解</span></button>
       <button id="museum-motion" class="museum-motion" hidden aria-label="暂停画中小戏"><span class="museum-motion-icon" aria-hidden="true"></span><span id="museum-motion-label">画中小戏 · 暂停</span></button>
       <aside class="museum-tools museum-reading museum-placard" aria-label="当前展柜的完整展签"><div class="museum-tool-heading"><span id="ex-room-caption"></span><button id="museum-expand" aria-expanded="false" aria-controls="museum-article">关闭展签 ×</button></div>
         <h2 id="ex-title"></h2><p id="ex-intro" class="museum-case-intro"></p>
@@ -52,6 +51,7 @@ export class Exploration {
       const vignette=this.journey.intro.world.walk.vignette;
       vignette.setPaused(!vignette.paused);this.journey.intro.interactionDirty=true;this.syncMotionControl();
     });
+    this.dialog.addEventListener('keydown',event=>{if(event.key==='Escape'&&this.dialog.classList.contains('paper-open')){this.expandReading(false);event.stopPropagation();}});
     window.addEventListener('journey:frame',event=>this.updateRoute(event.detail));
   }
   open(id){this.expandReading(false);this.journey.openMuseum(museumRoomId(id));}
@@ -63,7 +63,9 @@ export class Exploration {
     this.dialog.querySelector('.museum-reading').classList.toggle('is-expanded',expanded);
     this.dialog.classList.toggle('paper-open',expanded);$('museum-sign').hidden=expanded;
     $('museum-expand').setAttribute('aria-expanded',String(expanded));
-    if(expanded)this.dialog.querySelector('.museum-reading').scrollTop=0;
+    $('museum-sign').setAttribute('aria-expanded',String(expanded));
+    if(expanded){this.dialog.querySelector('.museum-reading').scrollTop=0;$('museum-expand').focus({preventScroll:true});}
+    else if(document.activeElement===$('museum-expand'))$('museum-sign').focus({preventScroll:true});
   }
   updateRoute({route,progress,transition,entrance}){
     const visible=route==='museum'&&(!transition||entrance)&&!this.journey.gameActive;
@@ -79,11 +81,14 @@ export class Exploration {
     const room=ROOMS.find(r=>r.id===museumStop(progress).id);
     const changed=!this.contentReady||this.active!==room.id||this.overview!==overview;
     this.active=room.id;this.overview=overview;
-    $('museum-motion').hidden=room.id!==ANIMATED_CABINET||view.reading<.9||this.dialog.classList.contains('paper-open');
+    $('museum-motion').hidden=overview||view.reading<.9||this.dialog.classList.contains('paper-open');
     this.syncMotionControl();
     const signPoint=this.journey.intro.world.backdrop.signPositions?.[ROOMS.indexOf(room)];
-    const sign=$('museum-sign');sign.hidden=!signPoint||!signPoint[2]||view.reading<.65||this.dialog.classList.contains('paper-open');
-    if(signPoint){sign.style.left=`${signPoint[0]*100}%`;sign.style.top=`${signPoint[1]*100}%`;}
+    const sign=$('museum-sign');sign.hidden=!signPoint||!signPoint[2]||overview||signPoint[0]<.02||signPoint[0]>.98||signPoint[1]<.06||signPoint[1]>.90||this.dialog.classList.contains('paper-open');
+    if(signPoint){
+      sign.style.left=`${Math.max(.08,Math.min(.88,signPoint[0]))*100}%`;
+      sign.style.top=`${Math.max(.12,Math.min(.84,signPoint[1]))*100}%`;
+    }
     const reading=this.dialog.querySelector('.museum-reading');
     reading.style.opacity=String(view.reading);reading.inert=view.reading<.5;
     this.dialog.style.setProperty('--gallery-overview',String(view.overview));
