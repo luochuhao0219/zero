@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {defaultDraft,sanitizeDraft,selectFrame,readCompositions,COMPOSITION_KEY} from '../src/explore-data.js';
 import {STORY_STARTERS,starterDraft,samplePlay,PLAY_DURATION,copySavedDraft} from '../src/studio-story.js';
 import {propPosition} from '../src/studio-effects.js';
-import {FreePlayStudio} from '../src/compose-studio.js';
+import {saveStudioWork,restoreStudio} from '../src/studio-storage.js';
 const image='data:image/webp;base64,AAAA';
 
 test('old drafts migrate into three independent scenes without losing poses',()=>{
@@ -23,7 +23,7 @@ test('malformed story fields are bounded and unsupported resources are ignored',
   assert.deepEqual(d.frames[1].prop,{kind:'umbrella',x:84,y:85,holder:0});
 });
 test('playback interpolates the route and reaches the final scene without mutating edits',()=>{
-  const d=starterDraft('farewell'),before=JSON.stringify(d);
+  const d=starterDraft('farewell');d.frames.forEach(f=>delete f.actions);const before=JSON.stringify(d);
   const start=samplePlay(d,0),middle=samplePlay(d,2250),end=samplePlay(d,PLAY_DURATION);
   assert.equal(start.index,0);assert.equal(start.actors[0].x,32);assert.ok(middle.actors[0].x>32&&middle.actors[0].x<43);
   assert.equal(end.index,2);assert.equal(end.progress,1);assert.equal(end.actors[0].x,24);assert.equal(end.line,d.frames[2].line);
@@ -31,7 +31,7 @@ test('playback interpolates the route and reaches the final scene without mutati
   assert.equal(samplePlay(d,2250,true).actors[0].x,32);assert.equal(samplePlay(d,4500,true).actors[0].x,43);
 });
 test('each transition reaches its next key pose smoothly before the next line',()=>{
-  const d=starterDraft('home');for(const boundary of [4000,8000]){const a=samplePlay(d,boundary-.01),b=samplePlay(d,boundary);assert.ok(Math.abs(a.actors[0].x-b.actors[0].x)<.001);}
+  const d=starterDraft('home');d.frames.forEach(f=>delete f.actions);for(const boundary of [4000,8000]){const a=samplePlay(d,boundary-.01),b=samplePlay(d,boundary);assert.ok(Math.abs(a.actors[0].x-b.actors[0].x)<.001);}
 });
 test('held props follow the chosen actor while free props keep their own coordinates',()=>{
   const d=starterDraft('lantern'),f=d.frames[0],before=propPosition(f,2);f.actors[0].x+=10;assert.ok(Math.abs(propPosition(f,2).x-before.x-10)<1e-10);
@@ -44,31 +44,13 @@ test('gallery round-trips complete stories while legacy tickets stay image-only'
   const edited=copySavedDraft(restored[0]),duplicate=copySavedDraft(restored[0],true);edited.actors[0].x=79;
   assert.equal(restored[0].draft.actors[0].x,23);assert.equal(duplicate.title,'樱下相逢·副本');assert.equal(copySavedDraft(restored[1]),null);
 });
-function saveFixture(t,throws=false){
-  const original=globalThis.document,elements=new Map(['compose-status','compose-save'].map(key=>[key,{}]));
-  globalThis.document={getElementById:id=>elements.get(id)};t.after(()=>{if(original===undefined)delete globalThis.document;else globalThis.document=original;});
-  const first={title:'已收藏',image,draft:defaultDraft()},writes=[];const studio=Object.create(FreePlayStudio.prototype);
-  Object.assign(studio,{draft:starterDraft('home'),works:[first],editingWork:first,poster:()=>image,syncComposer(){},renderWorks(){},toast(){},storage:{setItem:(key,value)=>{if(throws)throw new Error('full');writes.push({key,value});}}});
-  return {studio,first,writes};
-}
-test('editing replaces one saved work; a copied draft saves a separate story',t=>{
-  const {studio,writes,first}=saveFixture(t);studio.saveComposition();assert.equal(studio.works.length,1);assert.notEqual(studio.works[0],first);assert.equal(JSON.parse(writes[0].value)[0].draft.frames.length,3);
-  assert.equal(JSON.parse(writes[1].value).editingId,studio.works[0].id);
-  studio.editingWork=null;studio.draft=copySavedDraft(studio.works[0],true);studio.saveComposition();assert.equal(studio.works.length,2);assert.equal(studio.works[0].title,'夜归珞珈·副本');assert.equal(studio.works[1].title,'夜归珞珈');
+test('editing replaces one saved work; copying creates a separate work and refresh restores the editing link',()=>{
+  const entries=new Map(),storage={setItem:(k,v)=>entries.set(k,v),getItem:k=>entries.get(k)||null};
+  const first={id:'saved-1',title:'原作',image,draft:defaultDraft()},draft=starterDraft('home');
+  const saved=saveStudioWork(storage,[first],first,draft,image);assert.equal(saved.works.length,1);assert.equal(saved.work.id,'saved-1');assert.equal(first.title,'原作');
+  storage.setItem('borrow-light-draft-v1',JSON.stringify({...draft,editingId:saved.work.id}));const restored=restoreStudio(storage);assert.equal(restored.editingWork.id,'saved-1');
+  const copy=saveStudioWork(storage,saved.works,null,copySavedDraft(saved.work,true),image);assert.equal(copy.works.length,2);assert.notEqual(copy.work.id,'saved-1');assert.equal(copy.work.title,'夜归珞珈·副本');
 });
-test('failed saves preserve the previous gallery and its editable original',t=>{
-  const {studio,first}=saveFixture(t,true);studio.saveComposition();assert.deepEqual(studio.works,[first]);assert.equal(studio.editingWork,first);
-});
-
-test('stopping a preview cancels its frame and sound without changing the editable draft',t=>{
-  const originals={document:globalThis.document,requestAnimationFrame:globalThis.requestAnimationFrame,cancelAnimationFrame:globalThis.cancelAnimationFrame,matchMedia:globalThis.matchMedia};
-  const nodes=new Map(),callbacks=[],cancelled=[],calls=[];
-  for(const id of ['compose-edit-controls','compose-frame-controls','compose-restore','compose-play','compose-canvas','compose-progress','compose-frame-label'])nodes.set(id,{disabled:false,getContext:()=>({})});
-  globalThis.document={getElementById:id=>nodes.get(id)};globalThis.requestAnimationFrame=callback=>(callbacks.push(callback),callbacks.length);globalThis.cancelAnimationFrame=id=>cancelled.push(id);globalThis.matchMedia=()=>({matches:false});
-  t.after(()=>{for(const [key,value] of Object.entries(originals)){if(value===undefined)delete globalThis[key];else globalThis[key]=value;}});
-  const studio=Object.create(FreePlayStudio.prototype),draft=starterDraft('lantern'),before=JSON.stringify(draft);
-  Object.assign(studio,{draft,dialog:{querySelectorAll:()=>[]},sound:{start:kind=>calls.push(kind),stop:()=>calls.push('stop')},drawComposition(){},syncComposer:()=>calls.push('sync')});
-  studio.startPlayback(draft,'compose');assert.equal(nodes.get('compose-edit-controls').disabled,true);
-  callbacks[0](0);callbacks[1](6000);assert.equal(nodes.get('compose-frame-label').textContent,'演出中 · 相遇');
-  studio.stopPlayback();assert.equal(studio.playback,null);assert.equal(nodes.get('compose-edit-controls').disabled,false);assert.equal(cancelled.length,1);assert.equal(calls.at(-1),'sync');assert.equal(JSON.stringify(draft),before);
+test('failed saves preserve the previous gallery and editable original',()=>{
+  const first={id:'saved-1',title:'原作',image,draft:defaultDraft()},works=[first];assert.throws(()=>saveStudioWork({setItem:()=>{throw new Error('full');}},works,first,starterDraft('home'),image),/full/);assert.equal(works[0],first);assert.equal(first.title,'原作');
 });

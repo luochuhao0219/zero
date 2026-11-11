@@ -1,17 +1,13 @@
+import {jointPoint,canonicalToPaper} from './puppet-motion.js';
 /** Small original stage props; no external images or audio recordings. */
-export function propPosition(frame,count){
-  const p=frame.prop,a=p.holder>=0&&p.holder<count?frame.actors[p.holder]:null;
+export function propPosition(frame,count,aspect=.7){
+  const p=frame.prop,candidate=p.holder>=0&&p.holder<count?frame.actors[p.holder]:null,a=candidate?.present===false?null:candidate;
   if(!a)return {x:p.x,y:p.y,size:1};
-  const direction=a.flip?-1:1,angle=a.pose*Math.PI/180;
-  // Match the two arm segments in art.js, including the forearm's fixed bend.
-  const handX=Math.sin(.55)*132,handY=137+Math.cos(.55)*132;
-  const localX=64+handX*Math.cos(angle)+handY*Math.sin(angle);
-  const localY=285-handX*Math.sin(angle)+handY*Math.cos(angle);
-  return {x:a.x+direction*.52*.7/820*100*localX*a.size,y:a.y+52*a.size*(-.915+localY/820),size:a.size};
+  return {...canonicalToPaper(a,jointPoint(a,'handFront',{x:0,y:14}),aspect),size:a.size};
 }
 export function drawProp(ctx,w,h,frame,count){
   if(frame.prop.kind==='none')return;
-  const {x,y,size}=propPosition(frame,count);ctx.save();ctx.translate(w*x/100,h*y/100);ctx.scale(w/1200*size,w/1200*size);
+  const {x,y,size}=propPosition(frame,count,h/w);ctx.save();ctx.translate(w*x/100,h*y/100);ctx.scale(w/1200*size,w/1200*size);
   ctx.lineWidth=4;ctx.strokeStyle='#65482d';ctx.fillStyle='#ad4e32';
   if(frame.prop.kind==='lantern'){
     ctx.beginPath();ctx.moveTo(0,-38);ctx.lineTo(0,-10);ctx.stroke();
@@ -28,26 +24,8 @@ export function drawProp(ctx,w,h,frame,count){
   }ctx.restore();
 }
 export function drawDialogue(ctx,w,h,line){
-  if(!line)return;ctx.save();ctx.font=`${Math.round(w*.024)}px "Zhi Mang Xing",serif`;ctx.textAlign='center';
+  if(!line)return;ctx.save();ctx.font=`${Math.round(w*.024)}px "Studio WenKai","Kaiti SC",serif`;ctx.textAlign='center';
   const chars=Array.from(line),lines=[];let row='';for(const char of chars){if(ctx.measureText(row+char).width>w*.78){lines.push(row);row='';}row+=char;}if(row)lines.push(row);
   ctx.fillStyle='#f4e9cfdf';ctx.fillRect(w*.08,h*.13,w*.84,h*.045*lines.length+h*.025);ctx.fillStyle='#63452e';lines.forEach((text,i)=>ctx.fillText(text,w*.5,h*(.17+i*.045)));ctx.restore();
 }
-/** Sound only starts from the play button, and is disposed on stop or close. */
-export class StudioSound {
-  async start(kind){
-    this.stop();if(kind==='none')return;
-    const Audio=globalThis.AudioContext||globalThis.webkitAudioContext;if(!Audio)return;
-    try{
-      const context=new Audio();this.context=context;await context.resume();if(this.context!==context)return;
-      const gain=context.createGain();gain.gain.value=kind==='rain'?.045:.07;gain.connect(context.destination);
-      if(kind==='rain'){
-        const buffer=context.createBuffer(1,context.sampleRate*2,context.sampleRate),samples=buffer.getChannelData(0);
-        for(let i=0;i<samples.length;i++)samples[i]=Math.random()*2-1;
-        const noise=context.createBufferSource(),filter=context.createBiquadFilter();noise.buffer=buffer;noise.loop=true;filter.type='lowpass';filter.frequency.value=1300;noise.connect(filter);filter.connect(gain);noise.start();
-      }else{
-        for(const frequency of [196,319,457]){const oscillator=context.createOscillator(),envelope=context.createGain();oscillator.frequency.value=frequency;envelope.gain.setValueAtTime(.5,context.currentTime);envelope.gain.exponentialRampToValueAtTime(.001,context.currentTime+3);oscillator.connect(envelope);envelope.connect(gain);oscillator.start();oscillator.stop(context.currentTime+3);}
-      }
-    }catch{this.stop();}
-  }
-  stop(){const context=this.context;this.context=null;if(context&&context.state!=='closed')context.close().catch(()=>{});}
-}
+export {StudioSound} from './theater-score.js';

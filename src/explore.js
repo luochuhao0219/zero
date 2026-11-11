@@ -1,7 +1,6 @@
 import {museumStop} from './route-state.js';
 import {ROOMS,SOURCES,museumRoomId} from './museum-content.js';
 import {galleryJourney} from './museum-gallery.js';
-import {FreePlayStudio} from './compose-studio.js';
 const $=id=>document.getElementById(id);
 
 /** One physical cabinet per topic, along the museum's left-hand corridor. */
@@ -9,9 +8,8 @@ export class Exploration {
   constructor({journey,toast,onPause,onResume}){
     Object.assign(this,{journey,toast});this.active='heritage';this.visited=new Set();this.selection=new Map();
     this.originalCanvasLabel=journey.intro.canvas.getAttribute('aria-label');
-    this.mount();this.bind();this.studio=new FreePlayStudio({toast,onPause,onResume});
+    this.mount();this.bind();
   }
-  get works(){return this.studio.works;}
   mount(){
     const entry=document.createElement('button');entry.id='explore-open';entry.className='nav-pill';entry.textContent='皮影馆';
     document.querySelector('.header-actions').insertBefore(entry,$('collection-open'));
