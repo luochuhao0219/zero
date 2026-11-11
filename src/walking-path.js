@@ -21,5 +21,7 @@ export function walkingPose(p){
     }
     previous={at:stop.at,z};
   }
-  return {position:V(0,2.15,cabinetZ(4)),look:V(-4.9,2.15,cabinetZ(4))};
+  const t=smooth(MUSEUM_STOPS.at(-1).at,1,p);
+  return {position:V(0,THREE.MathUtils.lerp(2.15,2.4,t),THREE.MathUtils.lerp(cabinetZ(4),-46.6,t)),
+    look:V(-4.9,2.15,cabinetZ(4)).lerp(V(0,2.4,-54),t)};
 }

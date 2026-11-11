@@ -6,7 +6,7 @@ import {museumEntrancePose,syncGalleryCamera} from '../src/museum-entrance.js';
 
 test('the door-sized render projects the same room pixels as the first live entrance frame',()=>{
   for(const aspect of [.46,.744,1,1.14,1.15,16/9,2.4]){
-    const {rect,entrance}=galleryPreviewFrame(aspect<1.15?1030/1526:1672/941,aspect);
+    const {rect,entrance}=galleryPreviewFrame(aspect<1.15?2/3:1.5,aspect);
     const full=new PerspectiveCamera(aspect<1.15?62:50,aspect,.06,300);
     syncGalleryCamera(full,museumEntrancePose(0),aspect,entrance);
     const cropped=full.clone();cropGalleryCamera(cropped,rect);
@@ -23,7 +23,7 @@ test('the door-sized render projects the same room pixels as the first live entr
 
 test('door bounds use the same photo-to-screen mapping as the live arch mask',()=>{
   for(const aspect of [.46,1,16/9,2.4]){
-    const {bounds,rect,entrance}=galleryPreviewFrame(aspect<1.15?1030/1526:1672/941,aspect);
+    const {bounds,rect,entrance}=galleryPreviewFrame(aspect<1.15?2/3:1.5,aspect);
     const {frame,opening}=entrance;
     assert.equal(bounds[0],opening.outer[0]);assert.equal(bounds[1],opening.outer[2]);
     assert.ok(Math.abs(bounds[0]+bounds[2]-opening.outer[1])<1e-12);
@@ -35,14 +35,14 @@ test('door bounds use the same photo-to-screen mapping as the live arch mask',()
   }
 });
 
-test('the first cabinet remains visible through the open door on wide and narrow screens',()=>{
+test('the closed-door entrance keeps the corridor axis inside the opening on wide and narrow screens',()=>{
   for(const aspect of [.46,.744,1,1.14,1.15,16/9,2.4]){
-    const {entrance}=galleryPreviewFrame(aspect<1.15?1030/1526:1672/941,aspect);
+    const {entrance}=galleryPreviewFrame(aspect<1.15?2/3:1.5,aspect);
     const camera=new PerspectiveCamera(aspect<1.15?62:50,aspect,.06,300);
     syncGalleryCamera(camera,museumEntrancePose(0),aspect,entrance);
-    const point=new Vector3(-4.28,2.4,-8).project(camera),{frame,opening}=entrance;
+    const point=new Vector3(0,2.15,-48).project(camera),{frame,opening}=entrance;
     const x=frame.x+(point.x+1)/2*frame.width,y=frame.y+(1-point.y)/2*frame.height;
-    assert.ok(x>opening.clear[0]&&x<opening.clear[1],`cabinet behind the door leaf at aspect ${aspect}`);
+    assert.ok(x>opening.clear[0]&&x<opening.clear[1],`corridor axis outside the door at aspect ${aspect}`);
     assert.ok(y>opening.outer[3]&&y<opening.clear[2]);
   }
 });

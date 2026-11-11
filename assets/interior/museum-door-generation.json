@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-11",
+  "tool": "built-in image_gen.imagegen",
+  "purpose": "Single closed history museum entrance opening into the existing live gallery. Generated fictional scenery, not an architectural record.",
+  "processing": "Native output copied unchanged; no upscaling. The sign and moving door masks are rendered in code.",
+  "assets": [
+    {
+      "file": "assets/interior/museum-door-wide.png",
+      "reference": "assets/interior/hall-photo.jpg",
+      "original_output": "/Users/luochuhao/.codex/generated_images/01a1b911-138b-7bf2-9f30-659975d36dfa/exec-fdaecb2b-4f2a-4ad0-9a47-3696c6a320fc.png",
+      "prompt": "Use case: precise-object-edit. Asset type: photorealistic website entrance background, landscape 3:2 composition. Edit the reference old Chinese university stone foyer into a single museum entrance. Replace the two side-by-side open doorways with ONE centrally placed broad stone arch and a completely CLOSED pair of dark aged reddish-brown wooden doors. Keep the reference's warm amber lantern illumination, old matte limestone walls, rich worn wood, grey stone paving, dusk-blue side windows, small antique tables and celadon pots. Straight-on symmetrical architectural camera, perfectly vertical jambs and horizontal floor, single centered vanishing point, fine crisp photographic texture. The closed double doors occupy approximately x=0.32 to 0.68 of the image and y=0.25 to 0.83. The leaves are rectangular with a level horizontal top and a clear central vertical seam, brass ring handles, recessed wood panels, NO glass; the semicircular arch above them is a fixed dark timber transom surrounded by stone. Leave a blank stone area above the arch for a sign added in code. No second doorway, no visible theater, no visible gallery beyond the closed doors, no text, no people, no graphics or UI. Preserve the atmosphere and realistic old-building visual style of the input.",
+      "native_pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "48c4078fcc06a89f30d4e1dbb1f2b169636c5b678f68a2aac6165fd7cccb2a41"
+    },
+    {
+      "file": "assets/interior/museum-door-portrait.png",
+      "reference": "assets/interior/museum-door-wide.png",
+      "original_output": "/Users/luochuhao/.codex/generated_images/01a1b911-138b-7bf2-9f30-659975d36dfa/exec-5aacc8ec-67b8-4519-81a0-126c3abe8228.png",
+      "prompt": "Use case: precise-object-edit. Create a PORTRAIT 2:3 responsive version of this exact single closed museum entrance photograph. Keep the same worn red-brown double wooden doors, brass ring handles, fixed semicircular wood transom, pale aged limestone arch and pilasters, amber hanging lantern, side windows and antique tables. Reframe by showing more coffered wood ceiling above and more stone floor below, without changing the door design or making it narrower or taller. Straight-on architecture, vertical door jambs, one single closed doorway, exact central symmetry. Door leaf rectangular bounds approximately x=0.20..0.80 and y=0.44..0.80 of the PORTRAIT image; fixed arch above this. Extra old stone wall above the arch for a small sign added in code. Rich fine photographic material detail, crisp and realistically aged. Absolutely no extra doorway, no visible interior gallery, no theater, no text or sign lettering, no people, no UI. The output must be a tall portrait composition, not landscape.",
+      "native_pixels": [
+        1024,
+        1536
+      ],
+      "sha256": "c31508e5700d5dcb83c5ac7c94c1dcba984cf738dbeaf184fcdfb0330b001774"
+    }
+  ]
+}

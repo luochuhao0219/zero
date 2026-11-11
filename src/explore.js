@@ -13,7 +13,7 @@ export class Exploration {
   }
   get works(){return this.studio.works;}
   mount(){
-    const entry=document.createElement('button');entry.id='explore-open';entry.className='nav-pill';entry.textContent='皮影馆';
+    const entry=document.createElement('button');entry.id='explore-open';entry.className='nav-pill';entry.textContent='历史馆';
     document.querySelector('.header-actions').insertBefore(entry,$('collection-open'));
     const root=document.createElement('section');root.id='museum-ui';root.className='museum-route museum-editorial museum-cabinet-route';root.hidden=true;
     root.setAttribute('aria-label','江汉皮影馆，沿展柜参观');
@@ -39,11 +39,11 @@ export class Exploration {
     $('museum-overview').addEventListener('click',()=>this.open());
     $('ex-prev').addEventListener('click',()=>{
       const i=ROOMS.findIndex(r=>r.id===this.active);
-      if(this.overview)this.journey.returnHall();else if(i===0)this.open();else this.selectRoom(ROOMS[i-1].id);
+      if(this.atExit)this.selectRoom(ROOMS.at(-1).id);else if(this.overview)this.journey.returnHall();else if(i===0)this.open();else this.selectRoom(ROOMS[i-1].id);
     });
     $('ex-next').addEventListener('click',()=>{
       const i=ROOMS.findIndex(r=>r.id===this.active);
-      if(this.overview)this.selectRoom('heritage');else if(i===ROOMS.length-1)this.journey.returnHall();else this.selectRoom(ROOMS[i+1].id);
+      if(this.atExit)this.journey.enterStage();else if(this.overview)this.selectRoom('heritage');else if(i===ROOMS.length-1)this.journey.goPosition(1);else this.selectRoom(ROOMS[i+1].id);
     });
     $('museum-expand').addEventListener('click',()=>this.expandReading(false));
     $('museum-sign').addEventListener('click',()=>this.expandReading(true));
@@ -72,19 +72,20 @@ export class Exploration {
     this.dialog.hidden=!visible;document.body.classList.toggle('in-museum',visible);
     if(!visible){if(this.wasVisible)this.journey.intro.canvas.setAttribute('aria-label',this.originalCanvasLabel);this.wasVisible=false;return;}
     const entering=!this.wasVisible;this.wasVisible=true;
-    const view=galleryJourney(progress),overview=view.overview>.5;
+    const view=galleryJourney(progress),overview=view.overview>.5,atExit=progress>.99;
+    view.reading*=1-smooth(.935,.965,progress);
     const arrival=entrance?smooth(.09,.12,progress):smooth(.085,.10,progress);
     this.dialog.style.opacity=String(arrival);this.dialog.style.visibility=arrival>.002?'visible':'hidden';
     this.dialog.inert=entrance||arrival<.9;
     this.dialog.setAttribute('aria-busy',String(!!entrance));
     if(view.reading<.5&&this.dialog.classList.contains('paper-open'))this.expandReading(false);
     const room=ROOMS.find(r=>r.id===museumStop(progress).id);
-    const changed=!this.contentReady||this.active!==room.id||this.overview!==overview;
-    this.active=room.id;this.overview=overview;
+    const changed=!this.contentReady||this.active!==room.id||this.overview!==overview||this.atExit!==atExit;
+    this.active=room.id;this.overview=overview;this.atExit=atExit;
     $('museum-motion').hidden=overview||view.reading<.9||this.dialog.classList.contains('paper-open');
     this.syncMotionControl();
     const signPoint=this.journey.intro.world.backdrop.signPositions?.[ROOMS.indexOf(room)];
-    const sign=$('museum-sign');sign.hidden=!signPoint||!signPoint[2]||overview||signPoint[0]<.02||signPoint[0]>.98||signPoint[1]<.06||signPoint[1]>.90||this.dialog.classList.contains('paper-open');
+    const sign=$('museum-sign');sign.hidden=atExit||!signPoint||!signPoint[2]||overview||signPoint[0]<.02||signPoint[0]>.98||signPoint[1]<.06||signPoint[1]>.90||this.dialog.classList.contains('paper-open');
     if(signPoint){
       sign.style.left=`${Math.max(.08,Math.min(.88,signPoint[0]))*100}%`;
       sign.style.top=`${Math.max(.12,Math.min(.84,signPoint[1]))*100}%`;
@@ -96,7 +97,7 @@ export class Exploration {
     this.dialog.querySelector('.museum-gallery-intro').inert=view.overview<.5;
     {
       const points=this.journey.intro.world.backdrop.cabinetPositions;
-      this.pins.forEach((pin,i)=>{const point=points[i];pin.hidden=point[0]<.045||point[0]>.955||point[2]===false;pin.style.left=`${point[0]*100}%`;pin.style.top=`${point[1]*100}%`;pin.setAttribute('aria-pressed',String(!overview&&pin.dataset.cabinet===room.id));});
+      this.pins.forEach((pin,i)=>{const point=points[i];pin.hidden=atExit||point[0]<.045||point[0]>.955||point[2]===false;pin.style.left=`${point[0]*100}%`;pin.style.top=`${point[1]*100}%`;pin.setAttribute('aria-pressed',String(!overview&&pin.dataset.cabinet===room.id));});
     }
     if(view.reading>.9&&Math.abs(progress-(this.previousProgress??progress))<.001&&!this.visited.has(room.id)){
       this.visited.add(room.id);$('ex-visited').textContent=`已看 ${this.visited.size} / 5 柜`;
@@ -108,10 +109,10 @@ export class Exploration {
     $('ex-title').textContent=room.name;$('ex-intro').textContent=room.title;
     $('ex-room-caption').textContent=`第 ${room.no} 柜 / 05`;
     $('ex-visited').textContent=`已看 ${this.visited.size} / 5 柜`;
-    this.dialog.querySelectorAll('[data-room]').forEach(b=>b.setAttribute('aria-pressed',String(!overview&&b.dataset.room===room.id)));
+    this.dialog.querySelectorAll('[data-room]').forEach(b=>b.setAttribute('aria-pressed',String(!overview&&!atExit&&b.dataset.room===room.id)));
     const i=ROOMS.indexOf(room);
-    $('ex-prev').textContent=overview?'↶ 返回内厅':i===0?'← 长廊全览':`← 第 ${ROOMS[i-1].no} 柜`;
-    $('ex-next').textContent=overview?'从第一柜开始 →':i===ROOMS.length-1?'参观完毕 · 返回内厅 ↗':`走向第 ${ROOMS[i+1].no} 柜 →`;
+    $('ex-prev').textContent=atExit?'← 回看第五柜':overview?'↶ 返回内厅':i===0?'← 长廊全览':`← 第 ${ROOMS[i-1].no} 柜`;
+    $('ex-next').textContent=atExit?'拉开帷幕，进入戏台 →':overview?'从第一柜开始 →':i===ROOMS.length-1?'继续向前 · 皮影戏台 →':`走向第 ${ROOMS[i+1].no} 柜 →`;
     this.renderArticle(room);reading.scrollTop=0;
   }
   syncMotionControl(){
@@ -137,6 +138,6 @@ export class Exploration {
   }
   updateCanvasLabel(){
     const room=ROOMS.find(r=>r.id===this.active);
-    this.journey.intro.canvas.setAttribute('aria-label',this.overview?'江汉皮影馆长廊，五个木玻璃展柜沿走道依次排列。点击编号或滚动走近展柜。':`第 ${room.no} 柜，${room.name}。${room.intro}`);
+    this.journey.intro.canvas.setAttribute('aria-label',this.atExit?'历史馆长廊尽头，皮影戏台的绛红帷幕。点击拉开帷幕，继续走入戏台。':this.overview?'江汉皮影馆长廊，五个木玻璃展柜沿走道依次排列。点击编号或滚动走近展柜。':`第 ${room.no} 柜，${room.name}。${room.intro}`);
   }
 }

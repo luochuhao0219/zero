@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {StageEntrance,STAGE_ENTRANCE_MS,STAGE_ARRIVAL,stageEntranceFrame,stageEntrancePose,stageTravelPhase} from '../src/stage-entrance.js';
-import {HALL_ZOOM} from '../src/museum-entrance.js';
-import {photoFrame} from '../src/interior-framing.js';
+import {StageEntrance,STAGE_ENTRANCE_MS,STAGE_ARRIVAL,stageEntrancePose,stageTravelPhase,theaterPhotoFrame} from '../src/stage-entrance.js';
+import {PerspectiveCamera,Vector3} from '../vendor/three.module.js';
+import {STAGE_PORTAL,syncCurtainCamera,stagePortalRect,curtainPhotoFrame} from '../src/museum-stage-portal.js';
 
 test('one click plays every original scene, including the paper crossing and lantern market',()=>{
   const clock=new StageEntrance(0),durations=new Map();let previous=0;
@@ -10,7 +10,7 @@ test('one click plays every original scene, including the paper crossing and lan
     const step=clock.advance(now);assert.ok(step.progress>=previous);assert.ok(step.progress-previous<.004);
     const phase=stageTravelPhase(step.progress);durations.set(phase,(durations.get(phase)||0)+16);previous=step.progress;
   }
-  assert.deepEqual([...durations.keys()],['door','screen','crossing','market','arrival','backstage']);
+  assert.deepEqual([...durations.keys()],['curtain','screen','crossing','market','arrival','backstage']);
   for(const phase of ['screen','crossing','market'])assert.ok(durations.get(phase)>1000,phase+' must remain a visible scene');
   assert.deepEqual(clock.advance(STAGE_ENTRANCE_MS+16),{fraction:1,progress:STAGE_ARRIVAL,done:true});
 });
@@ -24,15 +24,25 @@ test('loading and tab suspension cannot skip the paper crossing; reduced motion 
   assert.equal(clock.advance(5228,true,true).done,true);
 });
 
-test('the right door starts on the hall crop and clears before the indoor screen approach',()=>{
+test('the curtain starts on the actual gallery camera and clears before the original screen approach',()=>{
   for(const aspect of [.36,.46,.744,1.14,1.15,16/9,2.4]){
-    const imageAspect=aspect<1.15?1030/1526:1672/941;
-    const first=stageEntranceFrame(imageAspect,aspect,0);
-    assert.deepEqual(first.frame,photoFrame(imageAspect,aspect,HALL_ZOOM));assert.equal(first.reveal,0);
-    const {frame,opening,reveal}=stageEntranceFrame(imageAspect,aspect,.12);
-    assert.ok(frame.x>opening.clear[0]);assert.ok(frame.x+frame.width<opening.clear[1]);
-    assert.ok(frame.y>Math.max(opening.outer[3],opening.leaf[1]));assert.ok(frame.y+frame.height<opening.clear[2]);
-    assert.equal(reveal,1);
+    const source=new PerspectiveCamera(aspect<1.15?85:50,aspect,.06,300);
+    source.position.set(0,2.4,-46.6);source.lookAt(new Vector3(0,2.4,-54));
+    if(aspect<1.15)source.setViewOffset(aspect,1,0,.16,aspect,1);
+    source.updateMatrixWorld();
+    const camera=source.clone();syncCurtainCamera(camera,source,aspect,0);
+    assert.deepEqual(camera.position.toArray(),source.position.toArray());
+    assert.deepEqual(camera.quaternion.toArray(),source.quaternion.toArray());
+    assert.deepEqual(camera.projectionMatrix.elements,source.projectionMatrix.elements);
+    for(let i=0;i<=120;i++){
+      const p=STAGE_PORTAL.clearAt*i/120;syncCurtainCamera(camera,source,aspect,p);
+      assert.ok(Object.values(curtainPhotoFrame(1672/941,aspect,camera,p)).every(Number.isFinite));
+    }
+    const rect=stagePortalRect(camera);
+    assert.ok(rect.x<0&&rect.y<0&&rect.x+rect.width>1&&rect.y+rect.height>1);
+    const final=curtainPhotoFrame(1672/941,aspect,camera,STAGE_PORTAL.clearAt);
+    const expected=theaterPhotoFrame(1672/941,aspect,STAGE_PORTAL.clearAt);
+    for(const k of Object.keys(expected))assert.ok(Math.abs(final[k]-expected[k])<1e-10);
   }
 });
 

@@ -38,17 +38,16 @@ export class Journey {
   }
   mountHall() {
     const hall = document.createElement('section'); hall.id = 'hall-ui'; hall.hidden = true;
-    hall.setAttribute('aria-label','教学楼内厅 · 请选择去向');
-    hall.innerHTML = `<h2 class="hall-title-only">教学楼内厅 · 选择去向</h2>
-      <button id="choose-museum" class="hall-floor-button" data-branch="museum" aria-label="进入历史馆"><span class="hall-entry-surface"><span>进入历史馆</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg></span></button>
-      <button id="choose-game" class="hall-floor-button" data-branch="game" aria-label="进入皮影戏台"><span class="hall-entry-surface"><span>进入戏台</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg></span></button>
-      <p class="hall-instruction">点击地面按钮进入 · 向上滚动返回校园</p>`;
+    hall.setAttribute('aria-label','历史馆入口');
+    hall.innerHTML = `<h2 class="hall-title-only">历史馆 · 开门入馆</h2>
+      <button id="choose-museum" class="hall-floor-button" data-branch="museum" aria-label="进入历史馆"><span class="hall-entry-surface"><span>开门入馆</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg></span></button>
+      <p class="hall-instruction">沿着五柜慢慢看 · 皮影戏台在长廊尽头</p>`;
     document.body.append(hall); this.hall = hall;
     const back = document.createElement('button'); back.id = 'return-hall'; back.className = 'route-return';
     back.textContent = '↶ 返回内厅'; back.hidden = true; back.addEventListener('click',()=>this.returnHall()); document.body.append(back);
     const status = document.createElement('span'); status.id = 'route-status'; status.className = 'sr-only'; status.setAttribute('role','status'); document.body.append(status);
     for (const button of hall.querySelectorAll('[data-branch]')) {
-      button.addEventListener('click',()=>button.dataset.branch==='game'?this.enterStage():this.choose(button.dataset.branch));
+      button.addEventListener('click',()=>this.choose('museum'));
       for (const event of ['pointerenter','focus']) button.addEventListener(event,()=>{if(this.intro.world)this.intro.world.hover=button.dataset.branch==='museum'?-1:1;this.intro.interactionDirty=true;});
       for (const event of ['pointerleave','blur']) button.addEventListener(event,()=>{if(this.intro.world)this.intro.world.hover=0;this.intro.interactionDirty=true;});
     }
@@ -98,7 +97,7 @@ export class Journey {
     this.pendingFoyer=false;this.foyerEntrance=new FoyerEntrance(performance.now(),this.progress);
     this.goPosition(this.progress,true);this.dirty=false;
     document.body.classList.add('is-entering-foyer');document.querySelector('.site-header').inert=true;
-    $('route-status').textContent='正在走过长廊，抵达内厅后可选择参观方向。';
+    $('route-status').textContent='正在走过长廊，前方是历史馆的大门。';
     return true;
   }
   stopFoyer(){
@@ -192,14 +191,15 @@ export class Journey {
     }
     const room=MUSEUM_STOPS.find(stop=>stop.id===id);
     if(id==='museum'||room){this.openMuseum(room?.id);return;}
-    const legacy={gate:.29,market:.47,play:.84,memories:.97}[id];
+    const legacy={gate:.29,market:.47,theater:.84,play:.84,memories:.97}[id];
     if(legacy===undefined)return;
     const p=(legacy-.21)/.79;
-    if(this.state.route!=='game')this.choose('game',{destination:p});else this.goPosition(p,instant);
+    if(this.state.route!=='game')this.requestPlay();else this.goPosition(p,instant);
   }
   openMuseum(room) {
     // A museum shortcut never plays the campus entrance on the visitor's behalf.
     if(this.state.route==='public'&&this.progress<.94){
+      this.startFoyer();
       return;
     }
     room=museumRoomId(room);
@@ -211,13 +211,20 @@ export class Journey {
   }
   requestPlay(index) {
     if(this.gameActive||this.stageEntrance)return;
-    if(this.state.route==='public'&&this.progress>=.94){this.enterStage(index);return;}
+    if(this.state.route==='public'){
+      if(this.progress<.94)this.startFoyer();else $('choose-museum').focus({preventScroll:true});
+      $('route-status').textContent='请先开门参观历史馆，皮影戏台在长廊尽头。';return;
+    }
+    if(this.state.route==='museum'){
+      if(this.progress>=.98)this.enterStage(index);else this.goPosition(1);
+      return;
+    }
     if(this.state.route==='game'&&!this.state.transition&&this.progress>=.77&&this.progress<=.92){this.onEnter(index);return;}
     this.pendingPlay=index??-1;
     if(this.state.route==='game')this.goPosition(.82);
-    else if(!this.choose('game',{destination:.82}))this.pendingPlay=undefined;
   }
   enterStage(level){
+    if(this.state.route!=='museum')return false;
     if(this.stageEntrance||this.state.transition||this.gameActive||this.returning)return false;
     if(this.stage.fallback||!this.stage.assetsReady){
       $('route-status').className='route-notice';$('route-status').textContent=this.stage.fallback?'当前浏览器无法创建三维戏台。':'戏台正在准备，请稍候再选择入口。';return false;
@@ -282,7 +289,7 @@ export class Journey {
     this.layer(this.homeUI,entry);this.layer(this.chapters,entry);this.layer(this.credits,route==='game'?smooth(.965,.99,p):0);
     this.seam.style.opacity='0';this.play.style.setProperty('--stage-end-shade',this.directStage?'0':smooth(.89,1,p).toFixed(3));
     const atHall=route==='public'&&this.progress>.94&&!this.state.transition;
-    const hallOpacity=atHall?entranceEase(.94,.995,this.progress):this.museumEntrance?1-smooth(0,.18,this.entranceFraction):this.stageEntrance?1-entranceEase(0,.018,this.progress):0;
+    const hallOpacity=atHall?entranceEase(.94,.995,this.progress):this.museumEntrance?1-smooth(0,.18,this.entranceFraction):0;
     this.hall.dataset.entering=String(!!(this.museumEntrance||this.stageEntrance));
     this.hall.hidden=hallOpacity<=.002;this.layer(this.hall,hallOpacity);
     this.hall.inert=!!(this.foyerEntrance||this.museumEntrance||this.stageEntrance)||hallOpacity<.55;
@@ -291,17 +298,17 @@ export class Journey {
     $('return-hall').hidden=returnOpacity<=.002;this.layer($('return-hall'),returnOpacity);
     $('return-hall').inert=!!this.museumEntrance||returnOpacity<.55;
     this.active=route==='museum'?museumStop(this.progress).id:atHall?'hall':current.nav;
-    $('journey-place').textContent=this.directStage?'皮影戏台 · 循光入戏':route==='museum'?`江汉皮影馆 · ${museumStop(this.progress).label}`:atHall?'教学楼内厅 · 选择去向':route==='public'&&this.progress>.43?'穿过长廊 · 内厅在前方':route==='public'&&this.progress>.20?'廊下有光 · 走入门廊':current.label;
+    $('journey-place').textContent=this.directStage?'皮影戏台 · 循光入戏':route==='museum'?(this.progress>.965?'长廊尽头 · 戏在前方':`江汉皮影馆 · ${museumStop(this.progress).label}`):atHall?'历史馆 · 开门入馆':route==='public'&&this.progress>.43?'穿过长廊 · 历史馆在前方':route==='public'&&this.progress>.20?'廊下有光 · 走入门廊':current.label;
     $('journey-percent').textContent=String(Math.round(this.progress*100)).padStart(2,'0');
     $('journey-track').style.transform=`scaleX(${this.progress})`;
-    $('reading-chapter').textContent=route==='museum'?String(MUSEUM_STOPS.findIndex(s=>s.id===this.active)+1).padStart(2,'0'):atHall?'岔':'序';
+    $('reading-chapter').textContent=route==='museum'?String(MUSEUM_STOPS.findIndex(s=>s.id===this.active)+1).padStart(2,'0'):atHall?'馆':'序';
     $('reading-fill').style.transform=`scaleY(${this.progress})`;
     document.querySelectorAll('.story-nav a').forEach(link=>{if(link.hash===`#${this.active}`)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');});
     this.onProgress(route==='public'?this.progress*.23:route==='museum'?.25:p);
   }
   positionDoors() {
     if(this.intro.fallback||!this.intro.world?.backdrop?.doorPositions)return;
-    for(const [i,id] of ['choose-museum','choose-game'].entries()) {
+    for(const [i,id] of ['choose-museum'].entries()) {
       const point=this.intro.world.backdrop.doorPositions[i];
       const half=$(id).offsetWidth/2+12;
       $(id).style.left=`${clamp(point[0]*innerWidth,half,innerWidth-half)}px`;
@@ -321,7 +328,7 @@ export class Journey {
       const top=this.opening.getBoundingClientRect().top+scrollY;
       scrollTo({top:top+this.progress*(this.opening.offsetHeight-innerHeight),behavior:'instant'});
       this.dirty=false;this.resizeProgress=undefined;
-      if(entryStep.done){this.stopFoyer();history.replaceState(null,'','#hall');$('route-status').textContent='已抵达内厅，请选择历史馆或皮影戏台。';}
+      if(entryStep.done){this.stopFoyer();history.replaceState(null,'','#hall');$('route-status').textContent='已抵达历史馆，点击地面按钮开门入馆。';}
     }else if(this.stageEntrance){
       entryStep=this.stageEntrance.advance(now,this.media.matches,this.stage.entryReady);fraction=entryStep.fraction;this.stageEntryFraction=fraction;
       this.progress=this.target=entryStep.progress;

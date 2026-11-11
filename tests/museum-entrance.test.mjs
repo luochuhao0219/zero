@@ -28,18 +28,32 @@ test('hidden-tab gaps do not skip the doorway and reduced motion arrives immedia
   assert.deepEqual(clock.advance(2048,true),{fraction:1,progress:MUSEUM_ARRIVAL,done:true});
 });
 
-test('the first entrance frame preserves the hall framing and immediately shows the same real room',()=>{
+test('the first entrance frame preserves the closed door and opens before moving forward',()=>{
   for(const aspect of [.46,.744,1,1.14,1.15,16/9,2.4]){
-    const imageAspect=aspect<1.15?1030/1526:1672/941;
+    const imageAspect=aspect<1.15?2/3:1.5;
     const entrance=museumEntranceFrame(imageAspect,aspect,0);
     assert.deepEqual(entrance.frame,photoFrame(imageAspect,aspect,HALL_ZOOM));
     assert.equal(entrance.reveal,1);
+    assert.equal(entrance.swing,0);
+    const opening=museumEntranceFrame(imageAspect,aspect,.24*MUSEUM_ARRIVAL);
+    assert.ok(opening.swing>.89);
+    assert.equal(opening.frame.width,entrance.frame.width);
   }
+});
+
+test('after the fifth cabinet, the corridor continues smoothly toward the stage curtain',()=>{
+  const last=walkingPose(.92),before=walkingPose(.92-1e-7),after=walkingPose(.92+1e-7),end=walkingPose(1);
+  assert.ok(before.position.distanceTo(last.position)<1e-8);
+  assert.ok(after.position.distanceTo(last.position)<1e-8);
+  assert.ok(after.look.distanceTo(last.look)<1e-8);
+  assert.ok(end.position.z<last.position.z);
+  assert.equal(end.position.x,0);assert.equal(end.look.x,0);
+  assert.ok(end.look.z<end.position.z);
 });
 
 test('the photographed door is fully offscreen before the live room takes over',()=>{
   for(const aspect of [.46,.744,1,1.14,1.15,16/9,2.4]){
-    const imageAspect=aspect<1.15?1030/1526:1672/941;
+    const imageAspect=aspect<1.15?2/3:1.5;
     const {frame,opening,reveal,alignment}=museumEntranceFrame(imageAspect,aspect,MUSEUM_ARRIVAL);
     assert.ok(frame.x>opening.clear[0]+.002);
     assert.ok(frame.x+frame.width<opening.clear[1]-.002);
@@ -68,7 +82,7 @@ test('arrival joins the normal camera path in both position and speed',()=>{
 test('doorway alignment preserves the real lens aspect through arrival and quality resizes',()=>{
   for(const aspect of [.46,.744,1.14,1.15,16/9,2.4]){
     const camera=new PerspectiveCamera(aspect<1.15?62:50,aspect,.06,300);
-    const imageAspect=aspect<1.15?1030/1526:1672/941;
+    const imageAspect=aspect<1.15?2/3:1.5;
     for(let i=0;i<=120;i++){
       const p=MUSEUM_ARRIVAL*i/120,entrance=museumEntranceFrame(imageAspect,aspect,p);
       syncGalleryCamera(camera,museumEntrancePose(p),aspect,entrance);

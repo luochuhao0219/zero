@@ -77,7 +77,7 @@ export function galleryArchitecture(parent,m){
     }
   }
   // The cool end window anchors the same sightline as the entrance photograph.
-  window(3.4,4.35,cx+.65,2.78,back+.18,0);
+  // A curtained theatre entrance now occupies this end wall.
 
   for(const z of GALLERY_LANTERNS){
     const x=-.25;

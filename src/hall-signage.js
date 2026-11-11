@@ -4,8 +4,8 @@ import * as THREE from '../vendor/three.module.js';
 // The signs are composited inside that photograph, so the entrance masks and
 // camera crop carry them through the entire walk, including distant views.
 export const HALL_SIGN_LAYOUT={
-  wide:{signs:[[.205,.09,.18,.082],[.605,.09,.18,.082]],floor:[[.295,.89],[.695,.89]]},
-  narrow:{signs:[[.1675,.345,.255,.057],[.5675,.345,.255,.057]],floor:[[.295,.83],[.695,.83]]},
+  wide:{signs:[[.409,.292,.182,.083]],floor:[[.5,.92]]},
+  narrow:{signs:[[.367,.372,.263,.060]],floor:[[.4985,.80]]},
 };
 
 export function createHallSignage(renderer,errors){

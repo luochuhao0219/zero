@@ -5,6 +5,7 @@ import {MuseumBackdrop} from './museum-backdrop.js';
 import {sampleCameraPath,MUSEUM_CAMERA} from './camera-path.js';
 import {MUSEUM_ARRIVAL,museumEntrancePose,syncGalleryCamera} from './museum-entrance.js';
 import {GalleryPreview} from './gallery-preview.js';
+import {MuseumStagePortal,STAGE_PORTAL,syncCurtainCamera} from './museum-stage-portal.js';
 export {MUSEUM_CAMERA} from './camera-path.js';
 const mix=THREE.MathUtils.lerp;
 const V=(x,y,z)=>new THREE.Vector3(x,y,z);
@@ -18,6 +19,7 @@ export class MuseumWorld {
     this.ready=this.backdrop.ready;this.errors=this.backdrop.errors;
     this.walk=new WalkingGallery(this.scene,renderer);this.ready=Promise.all([this.backdrop.ready,this.walk.ready]);this.errors=this.backdrop.errors;this.walk.ready.then(()=>this.errors.push(...this.walk.errors));this.currentPose=this.hallPose(1);this.prepared=true;
     this.preview=new GalleryPreview(renderer,this.scene,this.walk,this.backdrop);
+    this.stagePortal=new MuseumStagePortal(this.walk.group,this.walk.materials,this.backdrop.plates.theater);
   }
   hallPose(progress){
     const z=mix(41,12,smooth(.30,1,progress))+(this.hallDistanceOffset||0);
@@ -30,22 +32,41 @@ export class MuseumWorld {
   }
   update(route,progress,time,reduced,transition){
     if(transition&&!transition.autoplay&&this.transitionFrom==='public'&&route==='game')progress*=smooth(0,1,transition.fraction);
-    const inGallery=route==='museum';this.walk.group.visible=inGallery;this.backdrop.mesh.visible=route!=='museum'||progress<MUSEUM_ARRIVAL;
+    const autoProgress=transition?.autoplay?transition.routeProgress:null;
+    this.exitProgress=route==='game'&&this.gameOrigin==='museum'&&autoProgress!==null&&autoProgress<STAGE_PORTAL.clearAt?autoProgress:null;
+    const inGallery=route==='museum'||this.exitProgress!==null;
+    this.walk.group.visible=inGallery;this.backdrop.mesh.visible=this.exitProgress===null&&(route!=='museum'||progress<MUSEUM_ARRIVAL);
     this.backdrop.uniforms.opacity.value=1;
     this.backdrop.mesh.renderOrder=route==='museum'?1000:-1000;
     const pose=route==='museum'?museumEntrancePose(progress):route==='game'?this.gamePose(progress,this.gameOrigin):this.hallPose(progress);
-    this.walk.update(time,progress,reduced,pose.position.z);
-    this.currentPose=pose;this.backdrop.update(route,progress,this.gameOrigin,transition?.autoplay?transition.routeProgress:null);return pose;
+    this.animationTime=time;this.reduced=reduced;
+    if(this.exitProgress===null)this.walk.update(time,progress,reduced,pose.position.z);
+    this.museumProgress=route==='museum'?progress:this.museumProgress;
+    this.stagePortal.setOpen(this.exitProgress===null?0:smooth(.025,.095,this.exitProgress));
+    this.currentPose=pose;this.backdrop.update(route,progress,this.gameOrigin,autoProgress);return pose;
   }
   // Full-screen plates already use camera-independent image coordinates.
   syncCamera(camera){if(this.walk.group.visible){
-    syncGalleryCamera(camera,this.currentPose,this.backdrop.aspect,this.backdrop.entrance);
+    if(this.exitProgress!==null&&this.departureCamera){
+      syncCurtainCamera(camera,this.departureCamera,this.backdrop.aspect,this.exitProgress);
+      this.walk.update(this.animationTime,this.museumProgress,this.reduced,camera.position.z);
+    }else{
+      syncGalleryCamera(camera,this.currentPose,this.backdrop.aspect,this.backdrop.entrance);
+      if(this.museumProgress>.92){
+        const remaining=1-smooth(.92,1,this.museumProgress);
+        camera.position.x*=remaining;
+        if(camera.view?.enabled)camera.setViewOffset(camera.aspect,1,0,.16*remaining,camera.aspect,1);
+        camera.lookAt(this.currentPose.look);camera.updateMatrixWorld();
+      }
+    }
+    this.stagePortal.sync(camera,this.backdrop.aspect,this.exitProgress??0);
+    this.galleryCamera=camera;
     this.backdrop.cabinetPositions=this.walk.sync(camera);
     this.backdrop.signPositions=this.walk.syncSigns(camera);
   }else camera.clearViewOffset();}
   startTransition(from){
     this.transitionFrom=from;
-    if(from==='museum')this.backdrop.leaveMuseum();
+    if(from==='museum'){this.backdrop.leaveMuseum();this.departureCamera=this.galleryCamera?.clone();}
     this.transitionPose={position:this.currentPose.position.clone(),look:this.currentPose.look.clone()};
   }
 }
