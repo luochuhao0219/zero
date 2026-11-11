@@ -34,7 +34,7 @@
 | assets/passage/campus-entrance.png | 建筑入口立面与道路 | /Users/luochuhao/.codex/generated_images/01a1aef3-5aed-7ec0-acf3-b60064a4f5a7/exec-cdacee82-0e3d-4019-99a3-6c29871467c0.png |
 | assets/passage/interior-gallery.png | 室内展演间与背墙影幕 | /Users/luochuhao/.codex/generated_images/01a1aef3-5aed-7ec0-acf3-b60064a4f5a7/exec-db659f7e-73b5-4243-ae5e-bbc3c4c7a921.png |
 
-旧 campus-theatre.png 与 luojia-dusk.png 留作版本素材，当前开场不加载；shadow-gate.png 只在另一侧夜市使用。
+旧 campus-theatre.png 与 luojia-dusk.png 已从工作区清理；shadow-gate.png 只在另一侧夜市使用。
 
 ## 实际提示词
 

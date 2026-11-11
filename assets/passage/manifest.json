@@ -12,17 +12,6 @@
     "active": true
   },
   {
-    "file": "luojia-dusk.png",
-    "width": 1536,
-    "height": 1024,
-    "mode": "RGB",
-    "bytes": 3268466,
-    "sha256": "d4e4cee6f90b5ad3a0d2c49f3d87e2fc8c3e9b678bcf2dbc314de50ea626835f",
-    "source": "Built-in imagegen",
-    "prompts": "../../docs/PASSAGE-DESIGN.md",
-    "active": false
-  },
-  {
     "file": "shadow-gate.png",
     "width": 1536,
     "height": 1024,
@@ -33,18 +22,6 @@
     "prompts": "../../docs/PASSAGE-DESIGN.md",
     "fullyTransparentPixels": 969863,
     "active": true
-  },
-  {
-    "file": "campus-theatre.png",
-    "width": 1536,
-    "height": 1024,
-    "mode": "RGBA",
-    "bytes": 2572973,
-    "sha256": "d6080ade4fa673f8d1e3674ae3c30f45c937216fa65ec71c295178736f490593",
-    "source": "Built-in imagegen",
-    "prompts": "../../docs/CAMPUS-THEATRE-ASSET.md",
-    "fullyTransparentPixels": 458937,
-    "active": false
   },
   {
     "file": "campus-entrance.png",
